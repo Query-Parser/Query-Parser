@@ -13,6 +13,11 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
+    <!-- CodeMirror instance -->
+    <link rel="stylesheet" href="src/css/codemirror.css">
+
+    <link rel="stylesheet" href="src/css/main.css">
+
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
         integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
         crossorigin="anonymous"></script>
@@ -22,54 +27,71 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
         integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
         crossorigin="anonymous"></script>
+    <script src="src/js/codemirror.js"></script>
 </head>
 
 <body>
     <div class="container">
         <h1 class="mb-3 mt-3 text-center">Query Parser</h1>
+
+        <!-- Navigation -->
         <nav>
             <div class="nav nav-tabs" id="nav-tab" role="tablist">
                 <a class="nav-item nav-link active" id="nav-parser-tab" data-toggle="tab" href="#nav-parser" role="tab"
                     aria-controls="nav-parser" aria-selected="true">Parser / Result</a>
                 <a class="nav-item nav-link" id="nav-schema-tab" data-toggle="tab" href="#nav-schema" role="tab"
                     aria-controls="nav-profile" aria-selected="false">mySQL Schema</a>
-                <a class="nav-item nav-link" href="login.html" role="tab" aria-controls="nav-login" aria-selected="false">Login</a>
+                <a class="nav-item nav-link" href="login.html" role="tab" aria-controls="nav-login"
+                    aria-selected="false">Login</a>
             </div>
         </nav>
+
+        <!-- Content -->
         <div class="tab-content" id="nav-tabContent">
             <div class="tab-pane fade show active" id="nav-parser" role="tabpanel" aria-labelledby="nav-parser-tab">
                 <div class="row">
                     <div class="col-md-6 mt-3">
+                        <!-- Coding area -->
                         <div class="card h-100">
                             <div class="card-header">
                                 Query Parser
                             </div>
                             <div class="card-body">
-                                <p>Write MySQL query here.</p>
-                                <div class="input-group">
-                                    <textarea class="form-control" aria-label="With textarea" rows="10"></textarea>
+                                <p>Write query here.</p>
+                                <div class="input-group border">
+                                    <textarea id="code" class="form-control" aria-label="With textarea" rows="10">
+                                    </textarea>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6 mt-3">
-                            <div class="card h-100">
-                                <div class="card-header">
-                                    Result
-                                </div>
-                                <div class="card-body">
-                                    <p>Coming soon.</p>
-                                </div>
+                        <!-- Result Area -->
+                        <div class="card h-100">
+                            <div class="card-header">
+                                Result
+                            </div>
+                            <div class="card-body">
+                                <p>Coming soon.</p>
                             </div>
                         </div>
+                    </div>
                 </div>
             </div>
             <div class="tab-pane fade" id="nav-schema" role="tabpanel" aria-labelledby="nav-schema-tab">
+                <!-- Schema Area -->
                 <p class="mb-3 mt-3">Schema TBD</p>
             </div>
         </div>
     </div>
 
 </body>
+
+<!-- Add line numbers to textbox -->
+<script>
+    var editor = CodeMirror.fromTextArea(code, {
+        lineNumbers: true
+    });
+</script>
 
 </html>
