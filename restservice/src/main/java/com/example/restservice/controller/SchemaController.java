@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import com.example.restservice.service.SchemaService;
+import com.example.restservice.service.MongoDBService;
 
 @RestController
 public class SchemaController {
@@ -24,12 +25,13 @@ public class SchemaController {
     @Autowired
     SchemaService schemaService;
 
+    @Autowired
+    MongoDBService mongoDBService;
+
     @GetMapping("/schema")
     public Map<String, HashSet<String>> getSchema() {
         // Connecting to database and getting database instance
-        MongoClientURI uri = new MongoClientURI("mongodb://root:example@timbess.net:9200/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=false");
-        MongoClient mongo = new MongoClient(uri);
-        MongoDatabase db = mongo.getDatabase("test");
+        MongoDatabase db = mongoDBService.getDB();
 
         // Getting collections in database
         MongoIterable<String> collectionNames = db.listCollectionNames();
