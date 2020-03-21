@@ -4,8 +4,7 @@ grammar MySQLQuery;
  * Parser Rules
  */
 query:
-    EOF
-    | (simpleStatement | beginWork) (SEMICOLON_SYMBOL EOF? | EOF)
+    simpleStatement SEMICOLON_SYMBOL?
 ;
 
 simpleStatement:
@@ -235,6 +234,7 @@ AS_SYMBOL:                       A S;
 ANY_SYMBOL:                      A N Y;
 BETWEEN_SYMBOL:                  B E T W E E N;
 BY_SYMBOL:                       B Y;
+DELETE_SYMBOL:                   D E L E T E;
 CREATE_SYMBOL:                   C R E A T E;
 EXISTS_SYMBOL:                   E X I S T S;
 FROM_SYMBOL:                     F R O M;
@@ -247,7 +247,10 @@ ORDER_SYMBOL:                    O R D E R;
 NOT_SYMBOL:                      N O T;
 OR_SYMBOL:                       O R;
 SELECT_SYMBOL:                   S E L E C T;
+SET_SYMBOL:                      S E T;
 TABLE_SYMBOL:                    T A B L E;
+UPDATE_SYMBOL:                   U P D A T E;
+VALUES_SYMBOL:                   V A L U E S;
 WHERE_SYMBOL:                    W H E R E;
 
 EQUAL_OPERATOR:            '=';
@@ -265,7 +268,7 @@ MULT_OPERATOR: '*';
 MINUS_OPERATOR: '-';
 DIV_OPERATOR:   '/';
 MOD_OPERATOR: '%';
-fragment ARITHMETIC: ('+' | '*' | '-' | '/' | '%');
+ARITHMETIC: ('+' | '*' | '-' | '/' | '%');
 
 LOGICAL_NOT_OPERATOR: '!';
 BITWISE_NOT_OPERATOR: '~';
@@ -326,8 +329,8 @@ fragment X: [xX];
 fragment Y: [yY];
 fragment Z: [zZ];
 
-fragment SINGLE_QUOTE: '\'';
-fragment DOUBLE_QUOTE: '"';
+SINGLE_QUOTE: '\'';
+DOUBLE_QUOTE: '"';
 fragment BACK_TICK:    '`';
 
 fragment LETTER_WHEN_UNQUOTED: DIGIT | LETTER_WHEN_UNQUOTED_NO_DIGIT;
