@@ -60,6 +60,7 @@
                                     <textarea id="code" class="form-control" aria-label="With textarea" rows="10">
                                     </textarea>
                                 </div>
+                                <button type="button" class="btn btn-primary" onclick="loadDoc()">Go</button>
                             </div>
                         </div>
                     </div>
@@ -100,17 +101,31 @@
       if (this.readyState == 4 && this.status == 200) {
         myObj = JSON.parse(this.responseText);
         for (key in myObj) {
-          txt += "<p>" + key + "</p><table><tr>"
-          for (col in myObj[x]) {
-            txt += "<th>" + col + "</th>";
+          txt += "<h2>" + key + "</h2><div class='table-responsive'><table class='table table-bordered'><tr>"
+          for (col in myObj[key]) {
+            txt += "<th>" + myObj[key][col] + "</th>";
           } 
-          txt += "</tr></table>";   
+          txt += "</tr></table></div><div style='clear:both'></div>";   
         } 
         document.getElementById("schma").innerHTML = txt;
       }
     };
     xmlhttp.open("GET", "http://localhost:8080/schema", true);
     xmlhttp.send();
+</script>
+
+<script>
+function loadDoc() {
+  var query = "";
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      query = getElementById("code").value;
+    }
+  };
+  xhttp.open("POST", "http://localhost:8080/query", true);
+  xhttp.send(query);
+}
 </script>
 
 </html>

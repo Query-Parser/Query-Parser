@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ArrayList;
 
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin(origins = "*")
 @RestController
 public class SchemaController {
 
