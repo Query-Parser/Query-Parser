@@ -17,8 +17,8 @@ simpleStatement:
 
 //SELECT
 selectStatement:
-    SELECT_SYMBOL selectItemList intoClause? fromClause? whereClause?
-        groupByClause? havingClause? orderClause?
+    OPEN_PAR_SYMBOL? SELECT_SYMBOL selectItemList intoClause? fromClause? joinClause? unionClause? whereClause?
+        groupByClause? havingClause? orderClause? CLOSE_PAR_SYMBOL?
 ;
 
 selectItemList:
@@ -210,21 +210,16 @@ math:
 ;
 
 
-//joins
-//naturalJoinType:
-//    NATURAL_SYMBOL INNER_SYMBOL? JOIN_SYMBOL
-//    | NATURAL_SYMBOL (LEFT_SYMBOL | RIGHT_SYMBOL) OUTER_SYMBOL? JOIN_SYMBOL
-//;
-//
-//innerJoinType:
-//    type = (INNER_SYMBOL | CROSS_SYMBOL)? JOIN_SYMBOL
-//    | type = STRAIGHT_JOIN_SYMBOL
-//;
-//
-//outerJoinType:
-//    type = (LEFT_SYMBOL | RIGHT_SYMBOL) OUTER_SYMBOL? JOIN_SYMBOL
-//;
+//JOIN
+joinClause:
+    (INNER_SYMBOL | LEFT_SYMBOL | RIGHT_SYMBOL ) JOIN_SYMBOL tableName
+    (ON_SYMBOL expr | USING_SYMBOL OPEN_PAR_SYMBOL columnName CLOSE_PAR_SYMBOL)
+;
 
+//UNION
+unionClause:
+    UNION_SYMBOL (selectStatement | TABLE_SYMBOL tableName )
+;
 
 /*
  * Lexer Rules
@@ -237,19 +232,25 @@ BY_SYMBOL:                       B Y;
 DELETE_SYMBOL:                   D E L E T E;
 CREATE_SYMBOL:                   C R E A T E;
 EXISTS_SYMBOL:                   E X I S T S;
+LEFT_SYMBOL:                     L E F T;
 FROM_SYMBOL:                     F R O M;
 GROUP_SYMBOL:                    G R O U P;
 IN_SYMBOL:                       I N;
+INNER_SYMBOL:                    I N N E R;
 INSERT_SYMBOL:                   I N S E R T;
 JOIN_SYMBOL:                     J O I N;
 LIKE_SYMBOL:                     L I K E;
 ORDER_SYMBOL:                    O R D E R;
 NOT_SYMBOL:                      N O T;
 OR_SYMBOL:                       O R;
+RIGHT_SYMBOL:                    R I G H T;
 SELECT_SYMBOL:                   S E L E C T;
 SET_SYMBOL:                      S E T;
 TABLE_SYMBOL:                    T A B L E;
 UPDATE_SYMBOL:                   U P D A T E;
+UNION_SYMBOL:                    U N I O N;
+USING_SYMBOL:                    U S I N G;
+ON_SYMBOL:                       O N;
 VALUES_SYMBOL:                   V A L U E S;
 WHERE_SYMBOL:                    W H E R E;
 
