@@ -157,7 +157,7 @@ limitClause:
 createStatement:
     CREATE_SYMBOL TABLE_SYMBOL newTable (
     LIKE_SYMBOL existingTable
-    | SELECT_SYMBOL existingTable
+    | selectStatement
     )
 ;
 
