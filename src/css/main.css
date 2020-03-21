@@ -1,3 +1,20 @@
 .div .CodeMirror {
     width: 100%;
 }
+
+table {
+    width: auto !important;
+}
+
+h2 {
+    font-size: 1.1rem;
+}
+
+th {
+    font-weight: normal;
+}
+
+.btn {
+    width: 100%;
+    margin-top: 20px;
+ }
