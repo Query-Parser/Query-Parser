@@ -1,9 +1,6 @@
 package com.example.restservice.service;
 
 import org.springframework.stereotype.Service;
-
-import com.mongodb.MongoClientURI;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
@@ -15,34 +12,38 @@ import org.springframework.data.mongodb.core.query.Update;
 import java.util.List;
 import java.util.Map;
 
-import com.example.restservice.service.MongoDBService;
-
 @Service
 public class QueryServiceImpl implements QueryService {
 
     @Autowired
     MongoTemplate mongoTemplate;
 
-    @Autowired
-    MongoDBService mongoDBService;
-
-    private void setup() {
-        String dbName = "test";
-        MongoDbFactory mongo = new SimpleMongoDbFactory(mongoDBService.getMongoClient(), dbName);
-        mongoTemplate = new MongoTemplate(mongo);
-    }
-
-    public List<Map> find(Query query) {
-        setup();
-//        Query query = new Query();
-//        query.addCriteria(Criteria.where("CustomerID").is("10"));
-        return mongoTemplate.find(query, Map.class, "Customers");
+    public List<Map> find(Query query, String collectionName) {
+        return mongoTemplate.find(query, Map.class, collectionName);
     }
 
     public List<Map> findAll(String collectionName) {
-        setup();
-        return mongoTemplate.findAll(Map.class, "testingSchema");
+        return mongoTemplate.findAll(Map.class, collectionName);
     }
 
+    public void createCollection(String collectionName) {
+        mongoTemplate.createCollection(collectionName);
+    }
+
+    public void dropCollection(String collectionName) {
+        mongoTemplate.dropCollection(collectionName);
+    }
+
+    public <T> void insert(T object, String collectionName) {
+        mongoTemplate.insert(object, collectionName);
+    }
+
+    public void findAndModify(Query query, Update update, String collectionName) {
+        mongoTemplate.findAndModify(query, update, Map.class, collectionName);
+    }
+
+    public void findAndRemove(Query query, String collectionName) {
+        mongoTemplate.findAndRemove(query, Map.class, collectionName);
+    }
 }
 
