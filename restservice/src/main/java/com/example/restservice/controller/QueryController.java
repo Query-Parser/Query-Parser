@@ -1,4 +1,4 @@
-package com.example.restservice;
+package com.example.restservice.controller;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
