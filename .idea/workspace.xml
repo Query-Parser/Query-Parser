@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="73db6d17-7f38-43be-9505-2c7b75fc2f2b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/antlr4runtime/src/main/antlr4/MySQLQuery.g4" beforeDir="false" afterPath="$PROJECT_DIR$/antlr4runtime/src/main/antlr4/MySQLQuery.g4" afterDir="false" />
-    </list>
+    <list default="true" id="73db6d17-7f38-43be-9505-2c7b75fc2f2b" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,8 +17,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/antlr4runtime/src/main/antlr4/MySQLQuery.g4">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="420">
-              <caret line="355" column="40" lean-forward="true" selection-start-column="1" selection-end-line="355" selection-end-column="40" />
+            <state relative-caret-position="8328">
+              <caret line="347" column="29" lean-forward="true" selection-start-line="347" selection-start-column="29" selection-end-line="347" selection-end-column="29" />
             </state>
           </provider>
         </entry>
@@ -128,15 +126,16 @@
       <workItem from="1583523563546" duration="378000" />
       <workItem from="1584208122798" duration="1402000" />
       <workItem from="1584221467622" duration="603000" />
-      <workItem from="1584466531055" duration="6067000" />
+      <workItem from="1584466531055" duration="6667000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="9067000" />
+    <option name="totallyTimeSpent" value="9667000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-6" y="-6" width="1293" height="693" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.13036437" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -186,8 +185,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/antlr4runtime/src/main/antlr4/MySQLQuery.g4">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="355" column="40" lean-forward="true" selection-start-column="1" selection-end-line="355" selection-end-column="40" />
+        <state relative-caret-position="8328">
+          <caret line="347" column="29" lean-forward="true" selection-start-line="347" selection-start-column="29" selection-end-line="347" selection-end-column="29" />
         </state>
       </provider>
     </entry>
