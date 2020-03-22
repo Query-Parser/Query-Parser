@@ -83,15 +83,7 @@
             </div>
         </div>
     </div>
-
 </body>
-
-<!-- Add line numbers to textbox -->
-<script>
-    var editor = CodeMirror.fromTextArea(code, {
-        lineNumbers: true
-    });
-</script>
 
 <!-- Add Schema -->
 <script>
@@ -114,16 +106,26 @@
     xmlhttp.send();
 </script>
 
+<!-- Configure textbox and send data to query endpoint -->
 <script>
+var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+    lineNumbers: true,
+    matchBrackets: true,
+    mode: "text/x-csrc"
+  });
+
 function loadDoc() {
   var query = "";
   var xhttp = new XMLHttpRequest();
+  xhttp.open("POST", "http://localhost:8080/query", true);
+  xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-      query = getElementById("code").value;
+      query = editor.getDoc().getValue("\n");
     }
   };
-  xhttp.open("POST", "http://localhost:8080/query", true);
+  
   xhttp.send(query);
 }
 </script>
