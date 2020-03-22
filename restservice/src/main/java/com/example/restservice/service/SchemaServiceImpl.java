@@ -1,7 +1,5 @@
 package com.example.restservice.service;
 
-import org.springframework.stereotype.Service;
-
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 
