@@ -1,13 +1,5 @@
-package com.example.restservice;
+package com.example.restservice.service;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.CrossOrigin;
-
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
-import com.mongodb.client.MongoIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 
@@ -17,34 +9,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ArrayList;
 
-@CrossOrigin(origins = "*")
-@RestController
-public class SchemaController {
-
-    @GetMapping("/schema")
-    public Map<String, HashSet<String>> getSchema() {
-        // Connecting to database and getting database instance
-        MongoClientURI uri = new MongoClientURI("mongodb://root:example@timbess.net:9200/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=false");
-        MongoClient mongo = new MongoClient(uri);
-        MongoDatabase db = mongo.getDatabase("test");
-
-        // Getting collections in database
-        MongoIterable<String> collectionNames = db.listCollectionNames();
-
-        // Iterate through all collections in database and generate necessary tables for schema
-        Map<String, HashSet<String>> tables = new HashMap<String, HashSet<String>>();
-        for (String name: collectionNames) {
-            MongoCollection<Document> collection = db.getCollection(name);
-            FindIterable<Document> documents = collection.find();
-
-            tables.put(name, new HashSet<String>());
-            getTables(documents, tables, name);
-        }
-
-        return tables;
-    }
-
-    private void getTables(FindIterable<Document> documents,  Map<String, HashSet<String>> tables, String collectionName) {
+@Service
+public class SchemaServiceImpl implements SchemaService {
+    public void getTables(FindIterable<Document> documents,  Map<String, HashSet<String>> tables, String collectionName) {
         for (Document doc: documents) {
             for (String key: doc.keySet()) {
                 getColumns(key, doc, tables, collectionName, null);
@@ -52,7 +19,7 @@ public class SchemaController {
         }
     }
 
-    private void getColumns(String key, Document doc, Map<String, HashSet<String>> tables, String currentTable, String parentName) {
+    public void getColumns(String key, Document doc, Map<String, HashSet<String>> tables, String currentTable, String parentName) {
         if (doc == null) {
             return;
         }
@@ -77,7 +44,7 @@ public class SchemaController {
         }
     }
 
-    private void handleObjectFields(String key, Document doc, Map<String, HashSet<String>> tables, String currentTable, String parentName) {
+    public void handleObjectFields(String key, Document doc, Map<String, HashSet<String>> tables, String currentTable, String parentName) {
         String newParentName = key;
         if (parentName != null) {
             newParentName = parentName + "." + key;
@@ -88,7 +55,7 @@ public class SchemaController {
         }
     }
 
-    private void handleArrayFields(int index, ArrayList<Object> array, Map<String, HashSet<String>> tables, String currentTable, String parentName) {
+    public void handleArrayFields(int index, ArrayList<Object> array, Map<String, HashSet<String>> tables, String currentTable, String parentName) {
         if (index >= array.size()) {
             return;
         }
@@ -116,5 +83,5 @@ public class SchemaController {
         // Iterate through every element of array
         handleArrayFields(index + 1, array, tables, currentTable, parentName);
     }
-
 }
+
