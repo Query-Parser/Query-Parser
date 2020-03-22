@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="73db6d17-7f38-43be-9505-2c7b75fc2f2b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/antlr4runtime/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/antlr4runtime/pom.xml" afterDir="false" />
-    </list>
+    <list default="true" id="73db6d17-7f38-43be-9505-2c7b75fc2f2b" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="DefaultGradleProjectSettings">
+    <option name="testRunner" value="GRADLE" />
+    <option name="delegatedBuild" value="true" />
+  </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/antlr4runtime/pom.xml">
+        <entry file="file://$PROJECT_DIR$/antlr4runtime/src/main/antlr4/MySQLQuery.g4">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="168">
-              <caret line="7" column="28" selection-start-line="7" selection-start-column="28" selection-end-line="7" selection-end-column="28" />
+            <state relative-caret-position="8328">
+              <caret line="347" column="29" lean-forward="true" selection-start-line="347" selection-start-column="29" selection-end-line="347" selection-end-column="29" />
             </state>
           </provider>
         </entry>
@@ -31,6 +32,7 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/antlr4runtime/pom.xml" />
+        <option value="$PROJECT_DIR$/antlr4runtime/src/main/antlr4/MySQLQuery.g4" />
       </list>
     </option>
   </component>
@@ -44,7 +46,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
       <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
@@ -62,18 +63,32 @@
               <item name="Query-Parser" type="b2602c69:ProjectViewProjectNode" />
               <item name="Query-Parser" type="462c0819:PsiDirectoryNode" />
               <item name="antlr4runtime" type="462c0819:PsiDirectoryNode" />
-              <item name=".idea" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="Query-Parser" type="b2602c69:ProjectViewProjectNode" />
               <item name="Query-Parser" type="462c0819:PsiDirectoryNode" />
               <item name="antlr4runtime" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Query-Parser" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Query-Parser" type="462c0819:PsiDirectoryNode" />
+              <item name="antlr4runtime" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Query-Parser" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Query-Parser" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -108,18 +123,21 @@
       <option name="presentableId" value="Default" />
       <updated>1583438808089</updated>
       <workItem from="1583438816617" duration="617000" />
-      <workItem from="1583523563546" duration="134000" />
+      <workItem from="1583523563546" duration="378000" />
+      <workItem from="1584208122798" duration="1402000" />
+      <workItem from="1584221467622" duration="603000" />
+      <workItem from="1584466531055" duration="6667000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="751000" />
+    <option name="totallyTimeSpent" value="9667000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-6" y="-6" width="1293" height="693" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2534413" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.13036437" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -134,14 +152,14 @@
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Terminal" order="7" />
+      <window_info anchor="bottom" id="Terminal" order="7" weight="0.32960895" />
       <window_info anchor="bottom" id="Docker" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="CheckStyle" order="9" />
       <window_info anchor="bottom" id="Tool Output" order="10" />
       <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
       <window_info anchor="bottom" id="Database Changes" order="12" />
       <window_info anchor="bottom" id="Version Control" order="13" />
-      <window_info anchor="bottom" id="ANTLR Preview" order="14" />
+      <window_info anchor="bottom" id="ANTLR Preview" order="14" weight="0.32960895" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -160,8 +178,15 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/antlr4runtime/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="7" column="28" selection-start-line="7" selection-start-column="28" selection-end-line="7" selection-end-column="28" />
+        <state relative-caret-position="432">
+          <caret line="18" column="40" selection-start-line="18" selection-start-column="40" selection-end-line="18" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/antlr4runtime/src/main/antlr4/MySQLQuery.g4">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="8328">
+          <caret line="347" column="29" lean-forward="true" selection-start-line="347" selection-start-column="29" selection-end-line="347" selection-end-column="29" />
         </state>
       </provider>
     </entry>
