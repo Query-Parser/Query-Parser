@@ -1,49 +1,72 @@
 package com.example.restservice.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.MongoDbFactory;
-import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+
 
 @Service
 public class QueryServiceImpl implements QueryService {
 
-    @Autowired
-    MongoTemplate mongoTemplate;
+    public List<Map> innerJoin(List<Map> leftData, List<Map> rightData, String joinProperty) {
+        List<Map> returnData = new ArrayList<Map>();
+        for (Map leftObj: leftData) {
+            Map returnObj = new HashMap(leftObj);
+            for (Map rightObj: rightData)  {
+                if (leftObj.get(joinProperty).equals(rightObj.get(joinProperty))) {
+                    returnObj.put("join", rightObj);
+                    returnData.add(returnObj);
+                    break;
+                }
+            }
+        }
 
-    public List<Map> find(Query query, String collectionName) {
-        return mongoTemplate.find(query, Map.class, collectionName);
+        return returnData;
     }
 
-    public List<Map> findAll(String collectionName) {
-        return mongoTemplate.findAll(Map.class, collectionName);
+    public List<Map> leftJoin(List<Map> leftData, List<Map> rightData, String joinProperty) {
+        List<Map> returnData = new ArrayList<Map>();
+        for (Map leftObj: leftData) {
+            Map returnObj = new HashMap(leftObj);
+            ArrayList<Map> results = new ArrayList<Map>();
+            for (Map rightObj: rightData)  {
+                if (leftObj.get(joinProperty).equals(rightObj.get(joinProperty))) {
+                    results.add(rightObj);
+                }
+            }
+            if (results.size() == 0) {
+                returnObj.put("leftJoin", null);
+            } else {
+                returnObj.put("leftJoin", results);
+            }
+            returnData.add(returnObj);
+        }
+
+        return returnData;
     }
 
-    public void createCollection(String collectionName) {
-        mongoTemplate.createCollection(collectionName);
-    }
+    public List<Map> rightJoin(List<Map> leftData, List<Map> rightData, String joinProperty) {
+        List<Map> returnData = new ArrayList<Map>();
+        for (Map rightObj: rightData) {
+            Map returnObj = new HashMap(rightObj);
+            ArrayList<Map> results = new ArrayList<Map>();
+            for (Map leftObj: leftData)  {
+                if (rightObj.get(joinProperty).equals(leftObj.get(joinProperty))) {
+                    results.add(leftObj);
+                }
+            }
+            if (results.size() == 0) {
+                returnObj.put("rightJoin", null);
+            } else {
+                returnObj.put("rightJoin", results);
+            }
+            returnData.add(returnObj);
+        }
 
-    public void dropCollection(String collectionName) {
-        mongoTemplate.dropCollection(collectionName);
-    }
-
-    public <T> void insert(T object, String collectionName) {
-        mongoTemplate.insert(object, collectionName);
-    }
-
-    public void findAndModify(Query query, Update update, String collectionName) {
-        mongoTemplate.findAndModify(query, update, Map.class, collectionName);
-    }
-
-    public void findAndRemove(Query query, String collectionName) {
-        mongoTemplate.findAndRemove(query, Map.class, collectionName);
+        return returnData;
     }
 }
 
