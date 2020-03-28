@@ -57,10 +57,9 @@
                             <div class="card-body">
                                 <p>Write query here.</p>
                                 <div class="input-group border">
-                                    <textarea id="code" class="form-control" aria-label="With textarea" rows="10">
-                                    </textarea>
+                                    <textarea id="code" class="form-control" aria-label="With textarea" rows="10"></textarea>
                                 </div>
-                                <button type="button" class="btn btn-primary" onclick="loadDoc()">Go</button>
+                                <button type="button" class="btn btn-go btn-primary" onclick="loadDoc()">Go</button>
                             </div>
                         </div>
                     </div>
@@ -71,7 +70,7 @@
                                 Result
                             </div>
                             <div class="card-body">
-                                <p>Coming soon.</p>
+                                <p id="result-box"></p>
                             </div>
                         </div>
                     </div>
@@ -79,6 +78,7 @@
             </div>
             <div class="tab-pane fade" id="nav-schema" role="tabpanel" aria-labelledby="nav-schema-tab">
                 <!-- Schema Area -->
+                <div class="mb-3 mt-3" id="bar"></div>
                 <p class="mb-3 mt-3" id="schma"></p>
             </div>
         </div>
@@ -87,47 +87,75 @@
 
 <!-- Add Schema -->
 <script>
-    var xmlhttp, myObj, key, col, txt = "";
+    function loadResponse() {
+        var http = "";
+        http = new XMLHttpRequest();
+        http.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("result-box").innerHTML = this.responseText;
+            }
+        };
+        http.open("GET", "http://localhost:8080/query", true);
+        http.send();
+    }
+</script>
+
+<!-- Add Schema -->
+<script>
+    var xmlhttp, myObj, key, col, txt, inx, bar = "";
     xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) {
-        myObj = JSON.parse(this.responseText);
-        for (key in myObj) {
-          txt += "<h2>" + key + "</h2><div class='table-responsive'><table class='table table-bordered'><tr>"
-          for (col in myObj[key]) {
-            txt += "<th>" + myObj[key][col] + "</th>";
-          } 
-          txt += "</tr></table></div><div style='clear:both'></div>";   
-        } 
-        document.getElementById("schma").innerHTML = txt;
-      }
+    xmlhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            myObj = JSON.parse(this.responseText);
+            for (key in myObj) {
+                bar += "<button type='button' class='btn btn-nav btn-outline-primary' data-toggle='collapse' href='#" + key + "' onclick='setActive(event)'>" + key + "</button>"
+                txt += "<div id='" + key + "' class='collapse'><h2>" + key + "</h2>"
+                for (col in myObj[key]) {
+                    txt += "<h3>" + col + "</h3><div class='table-responsive'><table class='table table-bordered'><tr>"
+                    for (inx in myObj[key][col]) {
+                        txt += "<th>" + myObj[key][col][inx] + "</th>";
+                    }
+                    txt += "</tr></table></div>";
+                }
+                txt += "</div><div style='clear:both'></div>"
+            }
+            document.getElementById("schma").innerHTML = txt;
+            document.getElementById("bar").innerHTML = bar;
+        }
     };
     xmlhttp.open("GET", "http://localhost:8080/schema", true);
     xmlhttp.send();
 </script>
 
+<!-- Add color to show which databases are active -->
+<script>
+    function setActive(e) {
+        var target = e.target;
+        if (target.classList.contains("btn-back")) {
+            target.classList.remove("btn-back");
+        } else {
+            target.classList.add("btn-back");
+        }
+    }
+</script>
+
 <!-- Configure textbox and send data to query endpoint -->
 <script>
-var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
-    lineNumbers: true,
-    matchBrackets: true,
-    mode: "text/x-csrc"
-  });
+    var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+        lineNumbers: true,
+        matchBrackets: true,
+        mode: "text/x-mysql"
+    });
 
-function loadDoc() {
-  var query = "";
-  var xhttp = new XMLHttpRequest();
-  xhttp.open("POST", "http://localhost:8080/query", true);
-  xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-
-  xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      query = editor.getDoc().getValue("\n");
+    function loadDoc() {
+        var query = "";
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("POST", "http://localhost:8080/query", true);
+        xhttp.setRequestHeader('Content-type', 'text/plain');
+        query = editor.getDoc().getValue("\n");
+        xhttp.send(query);
+        loadResponse();
     }
-  };
-  
-  xhttp.send(query);
-}
 </script>
 
 </html>
