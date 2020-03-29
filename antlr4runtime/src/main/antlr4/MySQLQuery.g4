@@ -4,7 +4,11 @@ grammar MySQLQuery;
  * Parser Rules
  */
 query:
-    simpleStatement SEMICOLON_SYMBOL?
+    useClause? simpleStatement SEMICOLON_SYMBOL?
+;
+
+useClause:
+    USE_SYMBOL WORD
 ;
 
 simpleStatement:
@@ -34,27 +38,16 @@ columnName:
     WORD | tableName
 ;
 selectAlias:
-    AS_SYMBOL (SINGLE_QUOTE alias SINGLE_QUOTE | DOUBLE_QUOTE alias DOUBLE_QUOTE)
-;
-
-alias:
-    WORD
+    AS_SYMBOL (SQ_TEXT | DQ_TEXT | WORD)
 ;
 
 intoClause:
     INTO_SYMBOL (
-        OUTFILE_SYMBOL (SINGLE_QUOTE fileName SINGLE_QUOTE | DOUBLE_QUOTE fileName DOUBLE_QUOTE)
-        | DUMPFILE_SYMBOL (SINGLE_QUOTE fileName SINGLE_QUOTE | DOUBLE_QUOTE fileName DOUBLE_QUOTE)
-        | varName (COMMA_SYMBOL varName)*
+        OUTFILE_SYMBOL (SQ_TEXT | DQ_TEXT)
+        | DUMPFILE_SYMBOL (SQ_TEXT | DQ_TEXT)
+        | WORD (COMMA_SYMBOL WORD)*
     )
-;
 
-fileName:
-    WORD
-;
-
-varName:
-    WORD
 ;
 
 fromClause:
@@ -71,8 +64,8 @@ tableItem:
 ;
 
 tableName:
-    WORD DOT_SYMBOL WORD
-    | WORD
+    WORD
+    | WORD DOT_SYMBOL WORD
 ;
 
 whereClause:
@@ -99,13 +92,13 @@ valuesList:
 valueName:
     WORD
     | NUMBER
-    | SINGLE_QUOTED_TEXT
+    | SQ_TEXT
 ;
 
 expr:
     columnName
     | (columnName compOp NUMBER) (AND_SYMBOL expr)*
-    | (columnName EQUAL_OPERATOR SINGLE_QUOTE WORD SINGLE_QUOTE) (AND_SYMBOL expr)*
+    | (columnName EQUAL_OPERATOR SQ_TEXT) (AND_SYMBOL expr)*
 ;
 
 groupByClause:
@@ -194,11 +187,7 @@ updateStatement:
 ;
 
 tableRefList:
-    tableReference (COMMA_SYMBOL tableReference)*
-;
-
-tableReference:
-    WORD
+    WORD (COMMA_SYMBOL WORD)*
 ;
 
 assignmentList :
@@ -250,6 +239,7 @@ TABLE_SYMBOL:                    T A B L E;
 UPDATE_SYMBOL:                   U P D A T E;
 UNION_SYMBOL:                    U N I O N;
 USING_SYMBOL:                    U S I N G;
+USE_SYMBOL:                      U S E;
 ON_SYMBOL:                       O N;
 VALUES_SYMBOL:                   V A L U E S;
 WHERE_SYMBOL:                    W H E R E;
@@ -330,20 +320,15 @@ fragment X: [xX];
 fragment Y: [yY];
 fragment Z: [zZ];
 
+SQ_TEXT: '\'' WORD '\'';
+DQ_TEXT: '"' WORD '"';
 SINGLE_QUOTE: '\'';
 DOUBLE_QUOTE: '"';
-fragment BACK_TICK:    '`';
 
 fragment LETTER_WHEN_UNQUOTED: DIGIT | LETTER_WHEN_UNQUOTED_NO_DIGIT;
 fragment LETTER_WHEN_UNQUOTED_NO_DIGIT: [a-zA-Z_$\u0080-\uffff];
 fragment LETTER_WITHOUT_FLOAT_PART: [a-df-zA-DF-Z_$\u0080-\uffff];
 
-SINGLE_QUOTED_TEXT: (
-        SINGLE_QUOTE ( ('\\')? .)*? SINGLE_QUOTE
-    )+
-;
-
-BACK_TICK_QUOTED_ID: BACK_TICK (( '\\')? .)*? BACK_TICK;
 
 fragment LOWERCASE  : [a-z] ;
 fragment UPPERCASE  : [A-Z];
