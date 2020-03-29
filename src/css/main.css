@@ -1,3 +1,31 @@
-.div .CodeMirror {
+table {
+    width: auto !important;
+}
+
+h2 {
+    font-size: 1.2rem;
+}
+
+h3 {
+    font-style: italic;
+    color: dimgrey;
+    font-size: 1rem;
+}
+
+th {
+    font-weight: normal;
+}
+
+.btn-go {
     width: 100%;
+    margin-top: 20px;
+ }
+
+ .btn-nav {
+    margin: 0 5px;
+ }
+
+.btn-back {
+    background-color: #007bff;
+    color: white;
 }
