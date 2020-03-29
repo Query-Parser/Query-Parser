@@ -4,7 +4,7 @@ grammar MySQLQuery;
  * Parser Rules
  */
 query:
-    useClause? simpleStatement SEMICOLON_SYMBOL?
+    useClause | (simpleStatement SEMICOLON_SYMBOL?)
 ;
 
 useClause:
