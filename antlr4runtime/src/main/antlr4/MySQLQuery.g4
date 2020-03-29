@@ -38,7 +38,7 @@ columnName:
     WORD | tableName
 ;
 selectAlias:
-    AS_SYMBOL (SQ_TEXT | DQ_TEXT | WORD)
+    AS_SYMBOL WORD
 ;
 
 intoClause:
