@@ -1,10 +1,10 @@
 grammar MySQLQuery;
 
 /*
- * Parser Rules
+ * Parser Rulesf
  */
 query:
-    useClause | (simpleStatement SEMICOLON_SYMBOL?)
+    useClause | (simpleStatement SEMICOLON_SYMBOL)
 ;
 
 useClause:
@@ -36,8 +36,8 @@ selectItemList:
 
 selectItem:
     columnName
-    | (columnName selectAlias?)
-    | ((sumClause | countClause | avgClause | minClause | maxClause) selectAlias)?
+    | (columnName (selectAlias | alias)?)
+    | ((sumClause | countClause | avgClause | minClause | maxClause) (selectAlias | alias)?)?
 ;
 
 sumClause:
@@ -64,7 +64,11 @@ columnName:
     WORD | tableName
 ;
 selectAlias:
-    AS_SYMBOL (SQ_TEXT | DQ_TEXT | WORD)
+    AS_SYMBOL alias
+;
+
+alias:
+    (SQ_TEXT | DQ_TEXT | WORD )
 ;
 
 intoClause:
@@ -86,13 +90,13 @@ tableList:
 
 tableItem:
     tableName
-    | (tableName selectAlias?)
+    | (tableName alias)
+    | (tableName selectAlias)
 ;
 
 tableName:
     WORD
-    | (WORD DOT_SYMBOL WORD)
-    | (WORD WORD)
+    | (TABLE_NAME columnName)
 
 ;
 
@@ -111,7 +115,7 @@ likeClause:
 ;
 
 inClause:
-    IN_SYMBOL OPEN_PAR_SYMBOL valuesList CLOSE_PAR_SYMBOL
+    NOT_SYMBOL? IN_SYMBOL OPEN_PAR_SYMBOL (valuesList | selectStatement) CLOSE_PAR_SYMBOL
 ;
 
 valuesList:
@@ -127,15 +131,15 @@ valueName:
 ;
 
 expr:
-    (((tableName | columnName) compOp (NUMBER | tableName | columnName| (ANY_SYMBOL query))) (AND_SYMBOL expr)?)
-    | ((tableName | columnName) EQUAL_OPERATOR NAME)
-    | ((tableName | columnName) EQUAL_OPERATOR tableName)
-    | (((tableName | columnName) EQUAL_OPERATOR (SQ_TEXT | DQ_TEXT)) (AND_SYMBOL expr)*)
-    | (tableName | columnName)
+    (((tableItem | columnName) compOp (NUMBER | tableItem | columnName| (ANY_SYMBOL query))) (AND_SYMBOL expr)?)
+    | ((tableItem | columnName) EQUAL_OPERATOR NAME)
+    | ((tableItem | columnName) EQUAL_OPERATOR tableItem)
+    | (((tableItem | columnName) EQUAL_OPERATOR (SQ_TEXT | DQ_TEXT)) (AND_SYMBOL expr)*)
+    | (tableItem | columnName)
 ;
 
 groupByClause:
-    GROUP_SYMBOL BY_SYMBOL orderList
+    GROUP_SYMBOL BY_SYMBOL columnName
 ;
 
 orderList:
@@ -229,9 +233,21 @@ assignmentList :
 
 //JOIN
 joinClause:
-    (INNER_SYMBOL | LEFT_SYMBOL | RIGHT_SYMBOL ) JOIN_SYMBOL tableName
+    (innerJoin | rightJoin | leftJoin) tableItem
     (ON_SYMBOL expr | USING_SYMBOL OPEN_PAR_SYMBOL columnName CLOSE_PAR_SYMBOL)
     (joinClause)*
+;
+
+innerJoin:
+    INNER_SYMBOL JOIN_SYMBOL
+;
+
+leftJoin:
+    LEFT_SYMBOL JOIN_SYMBOL
+;
+
+rightJoin:
+    RIGHT_SYMBOL JOIN_SYMBOL
 ;
 
 //UNION
@@ -369,6 +385,7 @@ fragment LETTER_WITHOUT_FLOAT_PART: [a-df-zA-DF-Z_$\u0080-\uffff];
 
 fragment LOWERCASE  : [a-z] ;
 fragment UPPERCASE  : [A-Z];
+TABLE_NAME          : (WORD DOT_SYMBOL);
 WORD                : (LOWERCASE | UPPERCASE | DIGIT | '_' | '.' | '@')+ ;
 WHITESPACE          : (' ' | '\t') -> skip;
 NEWLINE             : ('\r'? '\n' | '\r')+ -> skip;
