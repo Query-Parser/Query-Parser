@@ -21,7 +21,8 @@ simpleStatement:
 
 //SELECT
 selectStatement:
-    OPEN_PAR_SYMBOL? SELECT_SYMBOL distinctClause? selectItemList intoClause? fromClause? joinClause? unionClause? whereClause?
+    OPEN_PAR_SYMBOL? SELECT_SYMBOL distinctClause? selectItemList intoClause?
+        fromClause joinClause? unionClause? whereClause?
         groupByClause? havingClause? orderClause? CLOSE_PAR_SYMBOL?
 ;
 
@@ -36,6 +37,27 @@ selectItemList:
 selectItem:
     columnName
     | (columnName selectAlias?)
+    | ((sumClause | countClause | avgClause | minClause | maxClause) selectAlias)?
+;
+
+sumClause:
+    SUM_SYMBOL OPEN_PAR_SYMBOL columnName CLOSE_PAR_SYMBOL
+;
+
+countClause:
+     COUNT_SYMBOL OPEN_PAR_SYMBOL columnName CLOSE_PAR_SYMBOL
+;
+
+avgClause:
+    AVERAGE_SYMBOL OPEN_PAR_SYMBOL columnName CLOSE_PAR_SYMBOL
+;
+
+minClause:
+    MIN_SYMBOL OPEN_PAR_SYMBOL columnName CLOSE_PAR_SYMBOL
+;
+
+maxClause:
+    MAX_SYMBOL OPEN_PAR_SYMBOL columnName CLOSE_PAR_SYMBOL
 ;
 
 columnName:
@@ -55,7 +77,7 @@ intoClause:
 ;
 
 fromClause:
-    FROM_SYMBOL  tableList
+    FROM_SYMBOL tableList
 ;
 
 tableList:
@@ -75,9 +97,11 @@ tableName:
 ;
 
 whereClause:
-    WHERE_SYMBOL expr likeClause? inClause?
+    WHERE_SYMBOL
+    expr?
+    likeClause? inClause?
     (((NOT_SYMBOL? EXISTS_SYMBOL selectStatement)
-    | (ANY_SYMBOL OPEN_PAR_SYMBOL selectStatement CLOSE_PAR_SYMBOL)
+    | (ANY_SYMBOL selectStatement)
     | (BETWEEN_SYMBOL valueName AND_SYMBOL valueName))
     | (OR_SYMBOL expr))?
 ;
@@ -103,7 +127,7 @@ valueName:
 ;
 
 expr:
-    (((tableName | columnName) compOp (NUMBER | tableName | columnName)) (AND_SYMBOL expr)?)
+    (((tableName | columnName) compOp (NUMBER | tableName | columnName| (ANY_SYMBOL query))) (AND_SYMBOL expr)?)
     | ((tableName | columnName) EQUAL_OPERATOR NAME)
     | ((tableName | columnName) EQUAL_OPERATOR tableName)
     | (((tableName | columnName) EQUAL_OPERATOR (SQ_TEXT | DQ_TEXT)) (AND_SYMBOL expr)*)
@@ -220,10 +244,12 @@ unionClause:
  */
 ALL_SYMBOL:                      A L L;
 AND_SYMBOL:                      A N D;
+AVERAGE_SYMBOL:                  A V E R A G E;
 AS_SYMBOL:                       A S;
 ANY_SYMBOL:                      A N Y;
 BETWEEN_SYMBOL:                  B E T W E E N;
 BY_SYMBOL:                       B Y;
+COUNT_SYMBOL:                    C O U N T;
 DELETE_SYMBOL:                   D E L E T E;
 DISTINCT_SYMBOL:                 D I S T I N C T;
 CREATE_SYMBOL:                   C R E A T E;
@@ -236,12 +262,15 @@ INNER_SYMBOL:                    I N N E R;
 INSERT_SYMBOL:                   I N S E R T;
 JOIN_SYMBOL:                     J O I N;
 LIKE_SYMBOL:                     L I K E;
+MIN_SYMBOL:                      M I N;
+MAX_SYMBOL:                      M A X;
 ORDER_SYMBOL:                    O R D E R;
 NOT_SYMBOL:                      N O T;
 OR_SYMBOL:                       O R;
 RIGHT_SYMBOL:                    R I G H T;
 SELECT_SYMBOL:                   S E L E C T;
 SET_SYMBOL:                      S E T;
+SUM_SYMBOL:                      S U M;
 TABLE_SYMBOL:                    T A B L E;
 UPDATE_SYMBOL:                   U P D A T E;
 UNION_SYMBOL:                    U N I O N;
