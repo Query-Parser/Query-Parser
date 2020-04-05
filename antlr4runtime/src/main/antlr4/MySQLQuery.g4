@@ -1,10 +1,10 @@
 grammar MySQLQuery;
 
 /*
- * Parser Rules
+ * Parser Rulesf
  */
 query:
-    useClause | (simpleStatement SEMICOLON_SYMBOL?)
+    useClause | (simpleStatement SEMICOLON_SYMBOL)
 ;
 
 useClause:
@@ -21,8 +21,13 @@ simpleStatement:
 
 //SELECT
 selectStatement:
-    OPEN_PAR_SYMBOL? SELECT_SYMBOL selectItemList intoClause? fromClause? joinClause? unionClause? whereClause?
+    OPEN_PAR_SYMBOL? SELECT_SYMBOL distinctClause? selectItemList intoClause?
+        fromClause joinClause? unionClause? whereClause?
         groupByClause? havingClause? orderClause? CLOSE_PAR_SYMBOL?
+;
+
+distinctClause:
+    DISTINCT_SYMBOL
 ;
 
 selectItemList:
@@ -31,14 +36,39 @@ selectItemList:
 
 selectItem:
     columnName
-    | (columnName selectAlias?)
+    | (columnName (selectAlias | alias)?)
+    | ((sumClause | countClause | avgClause | minClause | maxClause) (selectAlias | alias)?)?
+;
+
+sumClause:
+    SUM_SYMBOL OPEN_PAR_SYMBOL columnName CLOSE_PAR_SYMBOL
+;
+
+countClause:
+     COUNT_SYMBOL OPEN_PAR_SYMBOL columnName CLOSE_PAR_SYMBOL
+;
+
+avgClause:
+    AVERAGE_SYMBOL OPEN_PAR_SYMBOL columnName CLOSE_PAR_SYMBOL
+;
+
+minClause:
+    MIN_SYMBOL OPEN_PAR_SYMBOL columnName CLOSE_PAR_SYMBOL
+;
+
+maxClause:
+    MAX_SYMBOL OPEN_PAR_SYMBOL columnName CLOSE_PAR_SYMBOL
 ;
 
 columnName:
     WORD | tableName
 ;
 selectAlias:
-    AS_SYMBOL WORD
+    AS_SYMBOL alias
+;
+
+alias:
+    (SQ_TEXT | DQ_TEXT | WORD )
 ;
 
 intoClause:
@@ -51,7 +81,7 @@ intoClause:
 ;
 
 fromClause:
-    FROM_SYMBOL  tableList
+    FROM_SYMBOL tableList
 ;
 
 tableList:
@@ -60,21 +90,24 @@ tableList:
 
 tableItem:
     tableName
-    | (tableName selectAlias?)
+    | (tableName alias)
+    | (tableName selectAlias)
 ;
 
 tableName:
     WORD
-    | WORD DOT_SYMBOL WORD
+    | (TABLE_NAME columnName)
+
 ;
 
 whereClause:
     WHERE_SYMBOL
-        expr (likeClause? inClause?
-        | NOT_SYMBOL? EXISTS_SYMBOL selectStatement
-        | ANY_SYMBOL OPEN_PAR_SYMBOL selectStatement CLOSE_PAR_SYMBOL
-        | BETWEEN_SYMBOL valueName AND_SYMBOL valueName)
-        | OR_SYMBOL expr
+    expr?
+    likeClause? inClause?
+    (((NOT_SYMBOL? EXISTS_SYMBOL selectStatement)
+    | (ANY_SYMBOL selectStatement)
+    | (BETWEEN_SYMBOL valueName AND_SYMBOL valueName))
+    | (OR_SYMBOL expr))?
 ;
 
 likeClause:
@@ -82,7 +115,7 @@ likeClause:
 ;
 
 inClause:
-    IN_SYMBOL OPEN_PAR_SYMBOL valuesList CLOSE_PAR_SYMBOL
+    NOT_SYMBOL? IN_SYMBOL OPEN_PAR_SYMBOL (valuesList | selectStatement) CLOSE_PAR_SYMBOL
 ;
 
 valuesList:
@@ -91,18 +124,22 @@ valuesList:
 
 valueName:
     WORD
+    | (ARITHMETIC NUMBER)
     | NUMBER
     | SQ_TEXT
+    | DQ_TEXT
 ;
 
 expr:
-    columnName
-    | (columnName compOp NUMBER) (AND_SYMBOL expr)*
-    | (columnName EQUAL_OPERATOR SQ_TEXT) (AND_SYMBOL expr)*
+    (((tableItem | columnName) compOp (NUMBER | tableItem | columnName| (ANY_SYMBOL query))) (AND_SYMBOL expr)?)
+    | ((tableItem | columnName) EQUAL_OPERATOR NAME)
+    | ((tableItem | columnName) EQUAL_OPERATOR tableItem)
+    | (((tableItem | columnName) EQUAL_OPERATOR (SQ_TEXT | DQ_TEXT)) (AND_SYMBOL expr)*)
+    | (tableItem | columnName)
 ;
 
 groupByClause:
-    GROUP_SYMBOL BY_SYMBOL orderList
+    GROUP_SYMBOL BY_SYMBOL columnName
 ;
 
 orderList:
@@ -150,7 +187,7 @@ limitClause:
 createStatement:
     CREATE_SYMBOL TABLE_SYMBOL newTable (
     LIKE_SYMBOL existingTable
-    | selectStatement
+    | (AS_SYMBOL selectStatement)
     )
 ;
 
@@ -165,7 +202,7 @@ existingTable:
 
 //INSERT
  insertStatement:
-     INSERT_SYMBOL INTO_SYMBOL tableName columnItem
+     INSERT_SYMBOL INTO_SYMBOL tableName columnItem*
      (VALUES_SYMBOL valueItem | selectStatement)
  ;
 
@@ -191,34 +228,46 @@ tableRefList:
 ;
 
 assignmentList :
-    columnName EQUAL_OPERATOR columnName math?
+    columnName EQUAL_OPERATOR valueName (COMMA_SYMBOL columnName EQUAL_OPERATOR valueName)*
 ;
-
-math:
-    ARITHMETIC NUMBER
-;
-
 
 //JOIN
 joinClause:
-    (INNER_SYMBOL | LEFT_SYMBOL | RIGHT_SYMBOL ) JOIN_SYMBOL tableName
+    (innerJoin | rightJoin | leftJoin) tableItem
     (ON_SYMBOL expr | USING_SYMBOL OPEN_PAR_SYMBOL columnName CLOSE_PAR_SYMBOL)
+    (joinClause)*
+;
+
+innerJoin:
+    INNER_SYMBOL JOIN_SYMBOL
+;
+
+leftJoin:
+    LEFT_SYMBOL JOIN_SYMBOL
+;
+
+rightJoin:
+    RIGHT_SYMBOL JOIN_SYMBOL
 ;
 
 //UNION
 unionClause:
-    UNION_SYMBOL (selectStatement | TABLE_SYMBOL tableName )
+    UNION_SYMBOL ((ALL_SYMBOL selectStatement)| selectStatement | TABLE_SYMBOL tableName )
 ;
 
 /*
  * Lexer Rules
  */
+ALL_SYMBOL:                      A L L;
 AND_SYMBOL:                      A N D;
+AVERAGE_SYMBOL:                  A V E R A G E;
 AS_SYMBOL:                       A S;
 ANY_SYMBOL:                      A N Y;
 BETWEEN_SYMBOL:                  B E T W E E N;
 BY_SYMBOL:                       B Y;
+COUNT_SYMBOL:                    C O U N T;
 DELETE_SYMBOL:                   D E L E T E;
+DISTINCT_SYMBOL:                 D I S T I N C T;
 CREATE_SYMBOL:                   C R E A T E;
 EXISTS_SYMBOL:                   E X I S T S;
 LEFT_SYMBOL:                     L E F T;
@@ -229,12 +278,15 @@ INNER_SYMBOL:                    I N N E R;
 INSERT_SYMBOL:                   I N S E R T;
 JOIN_SYMBOL:                     J O I N;
 LIKE_SYMBOL:                     L I K E;
+MIN_SYMBOL:                      M I N;
+MAX_SYMBOL:                      M A X;
 ORDER_SYMBOL:                    O R D E R;
 NOT_SYMBOL:                      N O T;
 OR_SYMBOL:                       O R;
 RIGHT_SYMBOL:                    R I G H T;
 SELECT_SYMBOL:                   S E L E C T;
 SET_SYMBOL:                      S E T;
+SUM_SYMBOL:                      S U M;
 TABLE_SYMBOL:                    T A B L E;
 UPDATE_SYMBOL:                   U P D A T E;
 UNION_SYMBOL:                    U N I O N;
@@ -322,8 +374,9 @@ fragment Z: [zZ];
 
 SQ_TEXT: '\'' WORD '\'';
 DQ_TEXT: '"' WORD '"';
-SINGLE_QUOTE: '\'';
-DOUBLE_QUOTE: '"';
+NAME: '\'' WORD WHITESPACE WORD '\'';
+SINGLE_QUOTE: '\'' -> skip;
+DOUBLE_QUOTE: '"' -> skip;
 
 fragment LETTER_WHEN_UNQUOTED: DIGIT | LETTER_WHEN_UNQUOTED_NO_DIGIT;
 fragment LETTER_WHEN_UNQUOTED_NO_DIGIT: [a-zA-Z_$\u0080-\uffff];
@@ -332,7 +385,8 @@ fragment LETTER_WITHOUT_FLOAT_PART: [a-df-zA-DF-Z_$\u0080-\uffff];
 
 fragment LOWERCASE  : [a-z] ;
 fragment UPPERCASE  : [A-Z];
-WORD                : (LOWERCASE | UPPERCASE | '_')+ ;
+TABLE_NAME          : (WORD DOT_SYMBOL);
+WORD                : (LOWERCASE | UPPERCASE | DIGIT | '_' | '.' | '@')+ ;
 WHITESPACE          : (' ' | '\t') -> skip;
 NEWLINE             : ('\r'? '\n' | '\r')+ -> skip;
 

@@ -18,8 +18,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/antlr4runtime/src/main/antlr4/MySQLQuery.g4">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="40" column="18" selection-start-line="40" selection-start-column="18" selection-end-line="40" selection-end-column="18" />
+            <state relative-caret-position="9060">
+              <caret line="394" column="40" selection-start-line="394" selection-start-column="40" selection-end-line="394" selection-end-column="40" />
             </state>
           </provider>
         </entry>
@@ -37,7 +37,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds" extendedState="7">
     <option name="x" value="-15" />
     <option name="width" value="1630" />
     <option name="height" value="1715" />
@@ -47,8 +47,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -90,13 +88,15 @@
           <select />
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$USER_HOME$/cs/queryParser" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="experimental" />
@@ -128,18 +128,22 @@
       <workItem from="1584208122798" duration="1402000" />
       <workItem from="1584221467622" duration="603000" />
       <workItem from="1584466531055" duration="7793000" />
-      <workItem from="1585437030357" duration="1423000" />
+      <workItem from="1585437030357" duration="2017000" />
+      <workItem from="1586034854379" duration="94000" />
+      <workItem from="1586035840522" duration="1354000" />
+      <workItem from="1586047430270" duration="635000" />
+      <workItem from="1586055037511" duration="1274000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="12216000" />
+    <option name="totallyTimeSpent" value="16167000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-6" y="-6" width="1293" height="693" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1319838" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1417004" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -187,8 +191,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/antlr4runtime/src/main/antlr4/MySQLQuery.g4">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="40" column="18" selection-start-line="40" selection-start-column="18" selection-end-line="40" selection-end-column="18" />
+        <state relative-caret-position="9060">
+          <caret line="394" column="40" selection-start-line="394" selection-start-column="40" selection-end-line="394" selection-end-column="40" />
         </state>
       </provider>
     </entry>
