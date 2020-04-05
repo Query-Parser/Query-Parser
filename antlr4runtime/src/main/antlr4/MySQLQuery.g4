@@ -69,7 +69,9 @@ tableItem:
 
 tableName:
     WORD
-    | WORD DOT_SYMBOL WORD
+    | (WORD DOT_SYMBOL WORD)
+    | (WORD WORD)
+
 ;
 
 whereClause:
@@ -101,7 +103,7 @@ valueName:
 ;
 
 expr:
-    (((tableName | columnName) compOp NUMBER) (AND_SYMBOL expr)*)
+    (((tableName | columnName) compOp (NUMBER | tableName | columnName)) (AND_SYMBOL expr)?)
     | ((tableName | columnName) EQUAL_OPERATOR NAME)
     | ((tableName | columnName) EQUAL_OPERATOR tableName)
     | (((tableName | columnName) EQUAL_OPERATOR (SQ_TEXT | DQ_TEXT)) (AND_SYMBOL expr)*)
@@ -157,7 +159,7 @@ limitClause:
 createStatement:
     CREATE_SYMBOL TABLE_SYMBOL newTable (
     LIKE_SYMBOL existingTable
-    | selectStatement
+    | (AS_SYMBOL selectStatement)
     )
 ;
 
@@ -210,12 +212,13 @@ joinClause:
 
 //UNION
 unionClause:
-    UNION_SYMBOL (selectStatement | TABLE_SYMBOL tableName )
+    UNION_SYMBOL ((ALL_SYMBOL selectStatement)| selectStatement | TABLE_SYMBOL tableName )
 ;
 
 /*
  * Lexer Rules
  */
+ALL_SYMBOL:                      A L L;
 AND_SYMBOL:                      A N D;
 AS_SYMBOL:                       A S;
 ANY_SYMBOL:                      A N Y;
