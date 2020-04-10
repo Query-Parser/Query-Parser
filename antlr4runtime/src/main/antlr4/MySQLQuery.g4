@@ -1,7 +1,7 @@
 grammar MySQLQuery;
 
 /*
- * Parser Rulesf
+ * Parser Rules
  */
 query:
     useClause | (simpleStatement SEMICOLON_SYMBOL)
@@ -35,33 +35,33 @@ selectItemList:
 ;
 
 selectItem:
-    columnName
-    | (columnName (selectAlias | alias)?)
+    columnItem
     | ((sumClause | countClause | avgClause | minClause | maxClause) (selectAlias | alias)?)?
 ;
 
 sumClause:
-    SUM_SYMBOL OPEN_PAR_SYMBOL columnName CLOSE_PAR_SYMBOL
+    SUM_SYMBOL OPEN_PAR_SYMBOL columnItem CLOSE_PAR_SYMBOL
 ;
 
 countClause:
-     COUNT_SYMBOL OPEN_PAR_SYMBOL columnName CLOSE_PAR_SYMBOL
+     COUNT_SYMBOL OPEN_PAR_SYMBOL columnItem CLOSE_PAR_SYMBOL
 ;
 
 avgClause:
-    AVERAGE_SYMBOL OPEN_PAR_SYMBOL columnName CLOSE_PAR_SYMBOL
+    AVERAGE_SYMBOL OPEN_PAR_SYMBOL columnItem CLOSE_PAR_SYMBOL
 ;
 
 minClause:
-    MIN_SYMBOL OPEN_PAR_SYMBOL columnName CLOSE_PAR_SYMBOL
+    MIN_SYMBOL OPEN_PAR_SYMBOL columnItem CLOSE_PAR_SYMBOL
 ;
 
 maxClause:
-    MAX_SYMBOL OPEN_PAR_SYMBOL columnName CLOSE_PAR_SYMBOL
+    MAX_SYMBOL OPEN_PAR_SYMBOL columnItem CLOSE_PAR_SYMBOL
 ;
 
+
 columnName:
-    WORD | tableName
+    WORD
 ;
 selectAlias:
     AS_SYMBOL alias
@@ -96,8 +96,6 @@ tableItem:
 
 tableName:
     WORD
-    | (TABLE_NAME columnName)
-
 ;
 
 whereClause:
@@ -131,15 +129,15 @@ valueName:
 ;
 
 expr:
-    (((tableItem | columnName) compOp (NUMBER | tableItem | columnName| (ANY_SYMBOL query))) (AND_SYMBOL expr)?)
-    | ((tableItem | columnName) EQUAL_OPERATOR NAME)
-    | ((tableItem | columnName) EQUAL_OPERATOR tableItem)
-    | (((tableItem | columnName) EQUAL_OPERATOR (SQ_TEXT | DQ_TEXT)) (AND_SYMBOL expr)*)
-    | (tableItem | columnName)
+    (((tableItem | columnItem) compOp (NUMBER | tableItem | columnItem| (ANY_SYMBOL query))) (AND_SYMBOL expr)?)
+    | ((tableItem | columnItem) EQUAL_OPERATOR NAME)
+    | ((tableItem | columnItem) EQUAL_OPERATOR tableItem)
+    | (((tableItem | columnItem) EQUAL_OPERATOR (SQ_TEXT | DQ_TEXT)) (AND_SYMBOL expr)*)
+    | (tableItem | columnItem)
 ;
 
 groupByClause:
-    GROUP_SYMBOL BY_SYMBOL columnName
+    GROUP_SYMBOL BY_SYMBOL columnItem
 ;
 
 orderList:
@@ -147,7 +145,7 @@ orderList:
 ;
 
 orderExpression:
-    expr direction?
+    columnItem direction?
 ;
 
 direction:
@@ -202,16 +200,22 @@ existingTable:
 
 //INSERT
  insertStatement:
-     INSERT_SYMBOL INTO_SYMBOL tableName columnItem*
+     INSERT_SYMBOL INTO_SYMBOL tableName columnPar*
      (VALUES_SYMBOL valueItem | selectStatement)
  ;
 
- columnItem:
+ columnPar:
   OPEN_PAR_SYMBOL columnList CLOSE_PAR_SYMBOL
  ;
 
  columnList:
-     columnName (COMMA_SYMBOL columnName)*
+     columnItem (COMMA_SYMBOL columnItem)*
+ ;
+
+ columnItem:
+    columnName
+    | (columnName alias)
+    | (columnName selectAlias)
  ;
 
  valueItem:
@@ -228,13 +232,13 @@ tableRefList:
 ;
 
 assignmentList :
-    columnName EQUAL_OPERATOR valueName (COMMA_SYMBOL columnName EQUAL_OPERATOR valueName)*
+    columnItem EQUAL_OPERATOR valueName (COMMA_SYMBOL columnItem EQUAL_OPERATOR valueName)*
 ;
 
 //JOIN
 joinClause:
     (innerJoin | rightJoin | leftJoin) tableItem
-    (ON_SYMBOL expr | USING_SYMBOL OPEN_PAR_SYMBOL columnName CLOSE_PAR_SYMBOL)
+    (onClause | USING_SYMBOL OPEN_PAR_SYMBOL columnItem CLOSE_PAR_SYMBOL)
     (joinClause)*
 ;
 
@@ -248,6 +252,14 @@ leftJoin:
 
 rightJoin:
     RIGHT_SYMBOL JOIN_SYMBOL
+;
+
+onClause:
+    ON_SYMBOL onList (AND_SYMBOL onList)*
+;
+
+onList:
+    columnItem compOp columnItem
 ;
 
 //UNION
