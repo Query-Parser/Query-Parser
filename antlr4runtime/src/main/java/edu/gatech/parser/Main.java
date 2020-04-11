@@ -184,7 +184,7 @@ public class Main {
 
             @Override
             public void exitEveryRule(ParserRuleContext ctx) {
-                System.out.println("|  ".repeat(level--) + "Exiting " + ctx.getClass().getSimpleName());
+                System.out.println("|  ".repeat(--level) + "Exiting " + ctx.getClass().getSimpleName());
             }
         };
         ParseTreeWalker.DEFAULT.walk(listener, parser.query());
