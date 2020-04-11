@@ -18,7 +18,7 @@
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
-            <version>1.0</version>
+            <version>4.7</version>
         </dependency>
     </dependencies>
 
@@ -30,7 +30,7 @@
                 <version>4.7</version>
                 <executions>
                     <execution>
-                        <goals>
+                         <goals>
                             <goal>antlr4</goal>
                         </goals>
                     </execution>

@@ -415,7 +415,7 @@ fragment LOWERCASE  : [a-z] ;
 fragment UPPERCASE  : [A-Z];
 WORD                : (LOWERCASE | UPPERCASE | '_' | DIGITS)+ ;
 VARIABLE            : (LOWERCASE| UPPERCASE| '@')+ ;
-TC_NAME             : (LOWERCASE| UPPERCASE | '.' | DIGITS )+ ;
+TC_NAME             : (LOWERCASE| UPPERCASE| DIGIT)+ [.] (LOWERCASE| UPPERCASE| DIGIT)+ ;
 EMAIL               : (LOWERCASE | UPPERCASE | DIGIT | '_' | '.' | '@')+ ;
 WHITESPACE          : (' ' | '\t') -> skip;
 NEWLINE             : ('\r'? '\n' | '\r')+ -> skip;
