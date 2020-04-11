@@ -28,6 +28,7 @@ public class Main {
         MySQLQueryLexer lexer = new MySQLQueryLexer(CharStreams.fromString(query));
         MySQLQueryParser parser = new MySQLQueryParser(new BufferedTokenStream(lexer));
         MySQLQueryBaseListener listener = new MySQLQueryBaseListener() {
+            private int level;
             boolean isAll = false;
             boolean isSelect = false;
             Map<String, List<String>> selectedColumns = new HashMap<>(); // table, column
@@ -178,12 +179,12 @@ public class Main {
 
             @Override
             public void enterEveryRule(ParserRuleContext ctx) {
-                System.out.println(">Entering " + ctx.getClass().getSimpleName());
+                System.out.println("|  ".repeat(level++) + "Entering " + ctx.getClass().getSimpleName());
             }
 
             @Override
             public void exitEveryRule(ParserRuleContext ctx) {
-                System.out.println("<Exiting " + ctx.getClass().getSimpleName());
+                System.out.println("|  ".repeat(level--) + "Exiting " + ctx.getClass().getSimpleName());
             }
         };
         ParseTreeWalker.DEFAULT.walk(listener, parser.query());
