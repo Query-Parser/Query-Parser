@@ -154,6 +154,7 @@ public class Main {
                             predicate = (doc -> doc.get(column).equals(operand) && (finalAnd == null || finalAnd.test(doc)));
                             break;
                         case "<>":
+                        case "!=":
                             predicate = (doc -> !doc.get(column).equals(operand) && (finalAnd == null || finalAnd.test(doc)));
                             break;
                         case "<":
