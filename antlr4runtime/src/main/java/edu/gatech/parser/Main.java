@@ -11,21 +11,26 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.bson.Document;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static edu.gatech.parser.MySQLQueryParser.*;
 
 public class Main {
-    private static MongoDatabase db;
+    private static MongoDatabase db = dbConfig();
+    private static JSONObject result = new JSONObject();
 
     public static void main(String[] args) {
-        System.out.println("hello world");
-        db = dbConfig();
-        String query = "select hi from foo, bar, baz"; // TODO: replace by args later
+        String query = "select * from Categories;"; // TODO: replace by args later
         MySQLQueryLexer lexer = new MySQLQueryLexer(CharStreams.fromString(query));
         MySQLQueryParser parser = new MySQLQueryParser(new BufferedTokenStream(lexer));
         MySQLQueryBaseListener listener = new MySQLQueryBaseListener() {
@@ -34,6 +39,8 @@ public class Main {
             Map<String, List<String>> selectedColumns = new HashMap<>(); // table, column
             Map<String, MongoCollection<Document>> tableToCollection = new HashMap<>(); // hashmap of tableName and collection of the same name in mongo
             List<String> tableNames = new ArrayList<>(); // list of table names
+            ObjectMapper mapper = new ObjectMapper();
+
             @Override
             public void enterQuery(QueryContext ctx) {
                 System.out.println("enter query");
@@ -42,9 +49,24 @@ public class Main {
             @Override
             public void exitQuery(QueryContext ctx) {
                 System.out.println("exit query");
-                for (Map.Entry<String, MongoCollection<Document>> entry: tableToCollection.entrySet()) {
-                    System.out.println("Table: " + entry.getKey());
-                    System.out.println("First Document: " + entry.getValue().find().first().toJson());
+                if (isAll) {
+                    Map<String, Document> documents = new HashMap<>();
+                    for (Map.Entry<String, MongoCollection<Document>> entry: tableToCollection.entrySet()) {
+                        for (Document document : entry.getValue().find()) {
+                            documents.put(entry.getKey(), document);
+                        }
+                        // TODO: Map collection to json object
+
+                        System.out.println("Table: " + entry.getKey());
+                        System.out.println("First Document: " + entry.getValue().find().first().toJson());
+                    }
+                    String jsonOutput = null;
+                    try {
+                        jsonOutput = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(documents);
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println(jsonOutput);
                 }
             }
 
@@ -100,7 +122,6 @@ public class Main {
             @Override
             public void exitSelectItemList(SelectItemListContext ctx) {
                 System.out.println("exit select item list");
-
             }
 
             @Override // list selected columns

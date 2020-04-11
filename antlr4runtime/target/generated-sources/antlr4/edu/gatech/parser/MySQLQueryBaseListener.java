@@ -184,6 +184,18 @@ public class MySQLQueryBaseListener implements MySQLQueryListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterAlias(MySQLQueryParser.AliasContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAlias(MySQLQueryParser.AliasContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterIntoClause(MySQLQueryParser.IntoClauseContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -551,6 +563,42 @@ public class MySQLQueryBaseListener implements MySQLQueryListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitJoinClause(MySQLQueryParser.JoinClauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInnerJoin(MySQLQueryParser.InnerJoinContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInnerJoin(MySQLQueryParser.InnerJoinContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLeftJoin(MySQLQueryParser.LeftJoinContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLeftJoin(MySQLQueryParser.LeftJoinContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterRightJoin(MySQLQueryParser.RightJoinContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRightJoin(MySQLQueryParser.RightJoinContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

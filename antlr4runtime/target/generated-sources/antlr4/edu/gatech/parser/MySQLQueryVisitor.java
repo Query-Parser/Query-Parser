@@ -95,6 +95,12 @@ public interface MySQLQueryVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSelectAlias(MySQLQueryParser.SelectAliasContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MySQLQueryParser#alias}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAlias(MySQLQueryParser.AliasContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MySQLQueryParser#intoClause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -280,6 +286,24 @@ public interface MySQLQueryVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitJoinClause(MySQLQueryParser.JoinClauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MySQLQueryParser#innerJoin}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInnerJoin(MySQLQueryParser.InnerJoinContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MySQLQueryParser#leftJoin}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLeftJoin(MySQLQueryParser.LeftJoinContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MySQLQueryParser#rightJoin}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRightJoin(MySQLQueryParser.RightJoinContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MySQLQueryParser#unionClause}.
 	 * @param ctx the parse tree

@@ -121,15 +121,15 @@ valuesList:
 ;
 
 valueName:
-    WORD
-    | (ARITHMETIC NUMBER)
+    (ARITHMETIC NUMBER)
     | NUMBER
+    | WORD
     | SQ_TEXT
     | DQ_TEXT
 ;
 
 expr:
-    (((tableItem | columnItem) compOp (NUMBER | tableItem | columnItem| (ANY_SYMBOL query))) (AND_SYMBOL expr)?)
+    (((tableItem | columnItem) compOp (NUMBER | tableItem | columnItem | (ANY_SYMBOL query))) (AND_SYMBOL expr)?)
     | ((tableItem | columnItem) EQUAL_OPERATOR NAME)
     | ((tableItem | columnItem) EQUAL_OPERATOR tableItem)
     | (((tableItem | columnItem) EQUAL_OPERATOR (SQ_TEXT | DQ_TEXT)) (AND_SYMBOL expr)*)
@@ -394,6 +394,9 @@ fragment LETTER_WHEN_UNQUOTED: DIGIT | LETTER_WHEN_UNQUOTED_NO_DIGIT;
 fragment LETTER_WHEN_UNQUOTED_NO_DIGIT: [a-zA-Z_$\u0080-\uffff];
 fragment LETTER_WITHOUT_FLOAT_PART: [a-df-zA-DF-Z_$\u0080-\uffff];
 
+fragment DIGIT:    [0-9];
+fragment DIGITS:   DIGIT+;
+NUMBER         : DIGIT+ ([.,] DIGIT+)? ;
 
 fragment LOWERCASE  : [a-z] ;
 fragment UPPERCASE  : [A-Z];
@@ -401,7 +404,3 @@ TABLE_NAME          : (WORD DOT_SYMBOL);
 WORD                : (LOWERCASE | UPPERCASE | DIGIT | '_' | '.' | '@')+ ;
 WHITESPACE          : (' ' | '\t') -> skip;
 NEWLINE             : ('\r'? '\n' | '\r')+ -> skip;
-
-fragment DIGIT:    [0-9];
-fragment DIGITS:   DIGIT+;
-NUMBER         : DIGIT+ ([.,] DIGIT+)? ;

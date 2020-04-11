@@ -148,6 +148,16 @@ public interface MySQLQueryListener extends ParseTreeListener {
 	 */
 	void exitSelectAlias(MySQLQueryParser.SelectAliasContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MySQLQueryParser#alias}.
+	 * @param ctx the parse tree
+	 */
+	void enterAlias(MySQLQueryParser.AliasContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MySQLQueryParser#alias}.
+	 * @param ctx the parse tree
+	 */
+	void exitAlias(MySQLQueryParser.AliasContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MySQLQueryParser#intoClause}.
 	 * @param ctx the parse tree
 	 */
@@ -457,6 +467,36 @@ public interface MySQLQueryListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitJoinClause(MySQLQueryParser.JoinClauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MySQLQueryParser#innerJoin}.
+	 * @param ctx the parse tree
+	 */
+	void enterInnerJoin(MySQLQueryParser.InnerJoinContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MySQLQueryParser#innerJoin}.
+	 * @param ctx the parse tree
+	 */
+	void exitInnerJoin(MySQLQueryParser.InnerJoinContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MySQLQueryParser#leftJoin}.
+	 * @param ctx the parse tree
+	 */
+	void enterLeftJoin(MySQLQueryParser.LeftJoinContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MySQLQueryParser#leftJoin}.
+	 * @param ctx the parse tree
+	 */
+	void exitLeftJoin(MySQLQueryParser.LeftJoinContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MySQLQueryParser#rightJoin}.
+	 * @param ctx the parse tree
+	 */
+	void enterRightJoin(MySQLQueryParser.RightJoinContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MySQLQueryParser#rightJoin}.
+	 * @param ctx the parse tree
+	 */
+	void exitRightJoin(MySQLQueryParser.RightJoinContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MySQLQueryParser#unionClause}.
 	 * @param ctx the parse tree
