@@ -100,12 +100,12 @@ tableName:
 
 whereClause:
     WHERE_SYMBOL
-    expr?
+    condition?
     likeClause? inClause?
     (((NOT_SYMBOL? EXISTS_SYMBOL selectStatement)
     | (ANY_SYMBOL selectStatement)
     | (BETWEEN_SYMBOL valueName AND_SYMBOL valueName))
-    | (OR_SYMBOL expr))?
+    | (OR_SYMBOL condition))?
 ;
 
 likeClause:
@@ -123,17 +123,12 @@ valuesList:
 valueName:
     (ARITHMETIC NUMBER)
     | NUMBER
-    | WORD
     | SQ_TEXT
     | DQ_TEXT
 ;
 
-expr:
-    (((tableItem | columnItem) compOp (NUMBER | tableItem | columnItem | (ANY_SYMBOL query))) (AND_SYMBOL expr)?)
-    | ((tableItem | columnItem) EQUAL_OPERATOR NAME)
-    | ((tableItem | columnItem) EQUAL_OPERATOR tableItem)
-    | (((tableItem | columnItem) EQUAL_OPERATOR (SQ_TEXT | DQ_TEXT)) (AND_SYMBOL expr)*)
-    | (tableItem | columnItem)
+condition:
+    columnItem (compOp (valueName | columnItem | (ANY_SYMBOL query)))? (AND_SYMBOL condition)?
 ;
 
 groupByClause:
@@ -154,7 +149,7 @@ direction:
 ;
 
 havingClause:
-    HAVING_SYMBOL expr
+    HAVING_SYMBOL condition
 ;
 
 compOp:
@@ -401,6 +396,6 @@ NUMBER         : DIGIT+ ([.,] DIGIT+)? ;
 fragment LOWERCASE  : [a-z] ;
 fragment UPPERCASE  : [A-Z];
 TABLE_NAME          : (WORD DOT_SYMBOL);
-WORD                : (LOWERCASE | UPPERCASE | DIGIT | '_' | '.' | '@')+ ;
+WORD                : (LOWERCASE | UPPERCASE | DIGIT | '_' | '.' | '@' | '/')+ ;
 WHITESPACE          : (' ' | '\t') -> skip;
 NEWLINE             : ('\r'? '\n' | '\r')+ -> skip;

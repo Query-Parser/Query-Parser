@@ -316,13 +316,13 @@ public class MySQLQueryBaseListener implements MySQLQueryListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterExpr(MySQLQueryParser.ExprContext ctx) { }
+	@Override public void enterCondition(MySQLQueryParser.ConditionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitExpr(MySQLQueryParser.ExprContext ctx) { }
+	@Override public void exitCondition(MySQLQueryParser.ConditionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -484,13 +484,13 @@ public class MySQLQueryBaseListener implements MySQLQueryListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterColumnItem(MySQLQueryParser.ColumnItemContext ctx) { }
+	@Override public void enterColumnPar(MySQLQueryParser.ColumnParContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitColumnItem(MySQLQueryParser.ColumnItemContext ctx) { }
+	@Override public void exitColumnPar(MySQLQueryParser.ColumnParContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -503,6 +503,18 @@ public class MySQLQueryBaseListener implements MySQLQueryListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitColumnList(MySQLQueryParser.ColumnListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterColumnItem(MySQLQueryParser.ColumnItemContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitColumnItem(MySQLQueryParser.ColumnItemContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -599,6 +611,30 @@ public class MySQLQueryBaseListener implements MySQLQueryListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitRightJoin(MySQLQueryParser.RightJoinContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterOnClause(MySQLQueryParser.OnClauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitOnClause(MySQLQueryParser.OnClauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterOnList(MySQLQueryParser.OnListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitOnList(MySQLQueryParser.OnListContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

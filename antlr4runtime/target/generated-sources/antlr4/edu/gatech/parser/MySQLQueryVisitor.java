@@ -161,11 +161,11 @@ public interface MySQLQueryVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitValueName(MySQLQueryParser.ValueNameContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MySQLQueryParser#expr}.
+	 * Visit a parse tree produced by {@link MySQLQueryParser#condition}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExpr(MySQLQueryParser.ExprContext ctx);
+	T visitCondition(MySQLQueryParser.ConditionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MySQLQueryParser#groupByClause}.
 	 * @param ctx the parse tree
@@ -245,17 +245,23 @@ public interface MySQLQueryVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInsertStatement(MySQLQueryParser.InsertStatementContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MySQLQueryParser#columnItem}.
+	 * Visit a parse tree produced by {@link MySQLQueryParser#columnPar}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitColumnItem(MySQLQueryParser.ColumnItemContext ctx);
+	T visitColumnPar(MySQLQueryParser.ColumnParContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MySQLQueryParser#columnList}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitColumnList(MySQLQueryParser.ColumnListContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MySQLQueryParser#columnItem}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitColumnItem(MySQLQueryParser.ColumnItemContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MySQLQueryParser#valueItem}.
 	 * @param ctx the parse tree
@@ -304,6 +310,18 @@ public interface MySQLQueryVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitRightJoin(MySQLQueryParser.RightJoinContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MySQLQueryParser#onClause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOnClause(MySQLQueryParser.OnClauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MySQLQueryParser#onList}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOnList(MySQLQueryParser.OnListContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MySQLQueryParser#unionClause}.
 	 * @param ctx the parse tree

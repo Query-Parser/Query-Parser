@@ -258,15 +258,15 @@ public interface MySQLQueryListener extends ParseTreeListener {
 	 */
 	void exitValueName(MySQLQueryParser.ValueNameContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MySQLQueryParser#expr}.
+	 * Enter a parse tree produced by {@link MySQLQueryParser#condition}.
 	 * @param ctx the parse tree
 	 */
-	void enterExpr(MySQLQueryParser.ExprContext ctx);
+	void enterCondition(MySQLQueryParser.ConditionContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MySQLQueryParser#expr}.
+	 * Exit a parse tree produced by {@link MySQLQueryParser#condition}.
 	 * @param ctx the parse tree
 	 */
-	void exitExpr(MySQLQueryParser.ExprContext ctx);
+	void exitCondition(MySQLQueryParser.ConditionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MySQLQueryParser#groupByClause}.
 	 * @param ctx the parse tree
@@ -398,15 +398,15 @@ public interface MySQLQueryListener extends ParseTreeListener {
 	 */
 	void exitInsertStatement(MySQLQueryParser.InsertStatementContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MySQLQueryParser#columnItem}.
+	 * Enter a parse tree produced by {@link MySQLQueryParser#columnPar}.
 	 * @param ctx the parse tree
 	 */
-	void enterColumnItem(MySQLQueryParser.ColumnItemContext ctx);
+	void enterColumnPar(MySQLQueryParser.ColumnParContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MySQLQueryParser#columnItem}.
+	 * Exit a parse tree produced by {@link MySQLQueryParser#columnPar}.
 	 * @param ctx the parse tree
 	 */
-	void exitColumnItem(MySQLQueryParser.ColumnItemContext ctx);
+	void exitColumnPar(MySQLQueryParser.ColumnParContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MySQLQueryParser#columnList}.
 	 * @param ctx the parse tree
@@ -417,6 +417,16 @@ public interface MySQLQueryListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitColumnList(MySQLQueryParser.ColumnListContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MySQLQueryParser#columnItem}.
+	 * @param ctx the parse tree
+	 */
+	void enterColumnItem(MySQLQueryParser.ColumnItemContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MySQLQueryParser#columnItem}.
+	 * @param ctx the parse tree
+	 */
+	void exitColumnItem(MySQLQueryParser.ColumnItemContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MySQLQueryParser#valueItem}.
 	 * @param ctx the parse tree
@@ -497,6 +507,26 @@ public interface MySQLQueryListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitRightJoin(MySQLQueryParser.RightJoinContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MySQLQueryParser#onClause}.
+	 * @param ctx the parse tree
+	 */
+	void enterOnClause(MySQLQueryParser.OnClauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MySQLQueryParser#onClause}.
+	 * @param ctx the parse tree
+	 */
+	void exitOnClause(MySQLQueryParser.OnClauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MySQLQueryParser#onList}.
+	 * @param ctx the parse tree
+	 */
+	void enterOnList(MySQLQueryParser.OnListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MySQLQueryParser#onList}.
+	 * @param ctx the parse tree
+	 */
+	void exitOnList(MySQLQueryParser.OnListContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MySQLQueryParser#unionClause}.
 	 * @param ctx the parse tree
