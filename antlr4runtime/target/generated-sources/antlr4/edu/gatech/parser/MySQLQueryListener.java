@@ -268,6 +268,26 @@ public interface MySQLQueryListener extends ParseTreeListener {
 	 */
 	void exitCondition(MySQLQueryParser.ConditionContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MySQLQueryParser#conditionInner}.
+	 * @param ctx the parse tree
+	 */
+	void enterConditionInner(MySQLQueryParser.ConditionInnerContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MySQLQueryParser#conditionInner}.
+	 * @param ctx the parse tree
+	 */
+	void exitConditionInner(MySQLQueryParser.ConditionInnerContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MySQLQueryParser#conditionParens}.
+	 * @param ctx the parse tree
+	 */
+	void enterConditionParens(MySQLQueryParser.ConditionParensContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MySQLQueryParser#conditionParens}.
+	 * @param ctx the parse tree
+	 */
+	void exitConditionParens(MySQLQueryParser.ConditionParensContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MySQLQueryParser#groupByClause}.
 	 * @param ctx the parse tree
 	 */

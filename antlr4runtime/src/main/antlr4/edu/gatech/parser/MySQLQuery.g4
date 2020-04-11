@@ -102,10 +102,9 @@ whereClause:
     WHERE_SYMBOL
     condition?
     likeClause? inClause?
-    (((NOT_SYMBOL? EXISTS_SYMBOL selectStatement)
+    ((NOT_SYMBOL? EXISTS_SYMBOL selectStatement)
     | (ANY_SYMBOL selectStatement)
-    | (BETWEEN_SYMBOL valueName AND_SYMBOL valueName))
-    | (OR_SYMBOL condition))?
+    | (BETWEEN_SYMBOL valueName AND_SYMBOL valueName))?
 ;
 
 likeClause:
@@ -128,7 +127,12 @@ valueName:
 ;
 
 condition:
-    columnItem (compOp (valueName | columnItem | (ANY_SYMBOL query)))? (AND_SYMBOL condition)?
+    conditionInner (OR_SYMBOL condition)?
+;
+
+conditionInner:
+    OPEN_PAR_SYMBOL condition CLOSE_PAR_SYMBOL ( (OR_SYMBOL condition)? | (AND_SYMBOL condition)? )
+    | columnItem (compOp (valueName | columnItem | (ANY_SYMBOL query)))? (AND_SYMBOL condition)?
 ;
 
 groupByClause:

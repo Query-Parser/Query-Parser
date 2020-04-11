@@ -24,7 +24,7 @@ public class Main {
     private static MongoDatabase db = dbConfig();
 
     public static void main(String[] args) {
-        String query = "select * from Categories where CategoryName = 'Meat/Poultry' or CategoryName = 'Beverages';"; // TODO: replace by args later
+        String query = "select * from Categories, Employees where (CategoryName = 'Meat/Poultry' or CategoryName = 'Beverages') and CategoryID = '6';"; // TODO: replace by args later
         MySQLQueryLexer lexer = new MySQLQueryLexer(CharStreams.fromString(query));
         MySQLQueryParser parser = new MySQLQueryParser(new BufferedTokenStream(lexer));
         MySQLQueryBaseListener listener = new MySQLQueryBaseListener() {
@@ -50,7 +50,6 @@ public class Main {
                                 documents.put(entry.getKey(), docs);
                             }
                         }
-                        // TODO: Map collection to json object
                     }
                     String jsonOutput = null;
                     try {
@@ -104,13 +103,8 @@ public class Main {
 
             @Override
             public void exitWhereClause(WhereClauseContext ctx) {
-                Predicate<Map<String, Object>> orFilter = null;
-                if (ctx.OR_SYMBOL() != null) {
-                    orFilter = (Predicate<Map<String, Object>>) stack.pop();
-                }
-                Predicate<Map<String, Object>> andFilter = (Predicate<Map<String, Object>>) stack.pop();
-
-                queryFilter = orFilter != null ? orFilter.or(andFilter) : andFilter;
+                Predicate<Map<String, Object>> filters = (Predicate<Map<String, Object>>) stack.pop();
+                queryFilter = filters;
             }
 
             private Object toJavaObject(ValueNameContext ctx) {
@@ -139,6 +133,17 @@ public class Main {
 
             @Override
             public void exitCondition(ConditionContext ctx) {
+                Predicate<Map<String, Object>> combined = (Predicate<Map<String, Object>>) stack.pop();
+                if (ctx.OR_SYMBOL() != null) {
+                    combined = combined.or((Predicate<Map<String, Object>>) stack.pop());
+                }
+
+                stack.push(combined);
+            }
+
+            @Override
+            public void exitConditionInner(ConditionInnerContext ctx) {
+                if (ctx.columnItem().isEmpty()) return;
                 final String column = ctx.columnItem().get(0).columnName().WORD().getSymbol().getText();
                 Predicate<Map<String, Object>> andPredicate = null;
                 if (ctx.AND_SYMBOL() != null) {
@@ -152,23 +157,23 @@ public class Main {
                     Predicate<Map<String, Object>> predicate;
                     switch (ctx.compOp().getText()) {
                         case "=":
-                            predicate = (doc -> doc.get(column).equals(operand) && (finalAnd == null || finalAnd.test(doc)));
+                            predicate = (doc -> doc.get(column) != null && doc.get(column).equals(operand) && (finalAnd == null || finalAnd.test(doc)));
                             break;
                         case "<>":
                         case "!=":
-                            predicate = (doc -> !doc.get(column).equals(operand) && (finalAnd == null || finalAnd.test(doc)));
+                            predicate = (doc -> doc.get(column) != null && !doc.get(column).equals(operand) && (finalAnd == null || finalAnd.test(doc)));
                             break;
                         case "<":
-                            predicate = (doc -> ((BigDecimal)doc.get(column)).compareTo((BigDecimal)operand) < 0);
+                            predicate = (doc -> doc.get(column) != null && ((BigDecimal)doc.get(column)).compareTo((BigDecimal)operand) < 0);
                             break;
                         case "<=":
-                            predicate = (doc -> ((BigDecimal)doc.get(column)).compareTo((BigDecimal)operand) <= 0);
+                            predicate = (doc -> doc.get(column) != null && ((BigDecimal)doc.get(column)).compareTo((BigDecimal)operand) <= 0);
                             break;
                         case ">":
-                            predicate = (doc -> ((BigDecimal)doc.get(column)).compareTo((BigDecimal)operand) > 0);
+                            predicate = (doc -> doc.get(column) != null && ((BigDecimal)doc.get(column)).compareTo((BigDecimal)operand) > 0);
                             break;
                         case ">=":
-                            predicate = (doc -> ((BigDecimal)doc.get(column)).compareTo((BigDecimal)operand) >= 0);
+                            predicate = (doc -> doc.get(column) != null && ((BigDecimal)doc.get(column)).compareTo((BigDecimal)operand) >= 0);
                             break;
                         default:
                             throw new RuntimeException("Unexpected operator " + ctx.compOp());
