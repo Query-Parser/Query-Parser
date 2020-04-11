@@ -21,7 +21,7 @@ simpleStatement:
 
 //SELECT
 selectStatement:
-    SELECT_SYMBOL distinctClause? selectItemList intoClause?
+     SELECT_SYMBOL distinctClause? selectItemList intoClause?
         fromClause joinClause? unionClause? whereClause?
         groupByClause? havingClause? orderClause?
 ;
@@ -107,8 +107,8 @@ tableName:
 
 whereClause:
     WHERE_SYMBOL (likeClause | inClause| expr)?
-    (((NOT_SYMBOL? EXISTS_SYMBOL selectStatementParens)
-    | (ANY_SYMBOL selectStatementParens)
+    (((NOT_SYMBOL? EXISTS_SYMBOL (selectStatementParens | selectStatement))
+    | (ANY_SYMBOL (selectStatementParens | selectStatement | insertStatement | deleteStatement | updateStatement | createStatement))
     | (BETWEEN_SYMBOL valueName AND_SYMBOL valueName))
     | (OR_SYMBOL expr))?
 ;
@@ -118,7 +118,7 @@ likeClause:
 ;
 
 inClause:
-    columnName NOT_SYMBOL? IN_SYMBOL OPEN_PAR_SYMBOL (valuesList | selectStatementParens) CLOSE_PAR_SYMBOL
+    columnName NOT_SYMBOL? IN_SYMBOL OPEN_PAR_SYMBOL (valuesList | (selectStatementParens | selectStatement)) CLOSE_PAR_SYMBOL
 ;
 
 valuesList:
@@ -138,7 +138,7 @@ expr:
     columnItem compOp?
         (NUMBER
         | columnItem
-        | (ANY_SYMBOL selectStatementParens)
+        | (ANY_SYMBOL (selectStatementParens | selectStatement))
         | NAME
         | SQ_TEXT
         | DQ_TEXT)
@@ -198,7 +198,7 @@ limitClause:
 createStatement:
     CREATE_SYMBOL TABLE_SYMBOL newTable (
     LIKE_SYMBOL existingTable
-    | (AS_SYMBOL selectStatementParens)
+    | (AS_SYMBOL (selectStatementParens | selectStatement))
     )
 ;
 
@@ -214,7 +214,7 @@ existingTable:
 //INSERT
  insertStatement:
      INSERT_SYMBOL INTO_SYMBOL tableName columnPar*
-     (VALUES_SYMBOL valueItem | selectStatementParens)
+     (VALUES_SYMBOL valueItem | (selectStatementParens | selectStatement))
  ;
 
  columnPar:
@@ -277,7 +277,7 @@ onList:
 
 //UNION
 unionClause:
-    UNION_SYMBOL ((ALL_SYMBOL selectStatementParens)| selectStatementParens | TABLE_SYMBOL tableName )
+    UNION_SYMBOL ((ALL_SYMBOL (selectStatement| selectStatementParens))|(selectStatement| selectStatementParens) | TABLE_SYMBOL tableName )
 ;
 
 /*
