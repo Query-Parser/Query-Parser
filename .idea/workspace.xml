@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="73db6d17-7f38-43be-9505-2c7b75fc2f2b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/antlr4runtime/src/main/antlr4/MySQLQuery.g4" beforeDir="false" afterPath="$PROJECT_DIR$/antlr4runtime/src/main/antlr4/MySQLQuery.g4" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -19,8 +18,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/antlr4runtime/src/main/antlr4/MySQLQuery.g4">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="24">
-              <caret line="414" column="28" selection-start-line="414" selection-start-column="28" selection-end-line="414" selection-end-column="28" />
+            <state relative-caret-position="48">
+              <caret line="110" column="130" selection-start-line="110" selection-start-column="130" selection-end-line="110" selection-end-column="130" />
             </state>
           </provider>
         </entry>
@@ -43,6 +42,8 @@
       <find>inclause</find>
       <find>selectStatement</find>
       <find>selectstat</find>
+      <find>union</find>
+      <find>selectStatementP</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -154,12 +155,12 @@
       <workItem from="1586055037511" duration="2575000" />
       <workItem from="1586200879267" duration="9000" />
       <workItem from="1586493768246" duration="2067000" />
-      <workItem from="1586620291330" duration="4036000" />
+      <workItem from="1586620291330" duration="5068000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="23580000" />
+    <option name="totallyTimeSpent" value="24612000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-6" y="-6" width="1293" height="693" extended-state="6" />
@@ -213,8 +214,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/antlr4runtime/src/main/antlr4/MySQLQuery.g4">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="24">
-          <caret line="414" column="28" selection-start-line="414" selection-start-column="28" selection-end-line="414" selection-end-column="28" />
+        <state relative-caret-position="48">
+          <caret line="110" column="130" selection-start-line="110" selection-start-column="130" selection-end-line="110" selection-end-column="130" />
         </state>
       </provider>
     </entry>
