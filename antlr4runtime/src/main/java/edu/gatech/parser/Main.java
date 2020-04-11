@@ -280,7 +280,7 @@ public class Main {
                 }
                 Predicate<Map<String, Object>> andFilter = (Predicate<Map<String, Object>>) stack.pop();
 
-                queryFilter = andFilter != null ? orFilter.or(andFilter) : andFilter;
+                queryFilter = orFilter != null ? orFilter.or(andFilter) : andFilter;
 
                 System.out.println("exit where clause");
             }
