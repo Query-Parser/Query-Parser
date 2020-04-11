@@ -27,7 +27,7 @@ public class Main {
     private static JSONObject result = new JSONObject();
 
     public static void main(String[] args) {
-        String query = "select * from Categories where CategoryName = 'Meat/Poultry';"; // TODO: replace by args later
+        String query = "select * from Categories where CategoryName = 'Meat/Poultry' or CategoryName = 'Beverages';"; // TODO: replace by args later
         MySQLQueryLexer lexer = new MySQLQueryLexer(CharStreams.fromString(query));
         MySQLQueryParser parser = new MySQLQueryParser(new BufferedTokenStream(lexer));
         MySQLQueryBaseListener listener = new MySQLQueryBaseListener() {
@@ -277,7 +277,14 @@ public class Main {
 
             @Override
             public void exitWhereClause(WhereClauseContext ctx) {
-                queryFilter = (Predicate<Map<String, Object>>) stack.pop();
+                Predicate<Map<String, Object>> orFilter = null;
+                if (ctx.OR_SYMBOL() != null) {
+                    orFilter = (Predicate<Map<String, Object>>) stack.pop();
+                }
+                Predicate<Map<String, Object>> andFilter = (Predicate<Map<String, Object>>) stack.pop();
+
+                queryFilter = andFilter != null ? orFilter.or(andFilter) : andFilter;
+
                 System.out.println("exit where clause");
             }
 
