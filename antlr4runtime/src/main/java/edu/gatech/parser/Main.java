@@ -9,12 +9,10 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.*;
 import org.bson.Document;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.locks.Condition;
 import java.util.function.Predicate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,7 +22,6 @@ import static edu.gatech.parser.MySQLQueryParser.*;
 
 public class Main {
     private static MongoDatabase db = dbConfig();
-    private static JSONObject result = new JSONObject();
 
     public static void main(String[] args) {
         String query = "select * from Categories where CategoryName = 'Meat/Poultry' or CategoryName = 'Beverages';"; // TODO: replace by args later
