@@ -24,41 +24,58 @@ public class Main {
     private static MongoDatabase db = dbConfig();
 
     public static void main(String[] args) {
-        String query = "select * from Categories, Employees where (CategoryName = 'Meat/Poultry' or CategoryName = 'Beverages') and CategoryID = '6';"; // TODO: replace by args later
+        String query = "select CategoryID from Categories, Employees;"; // TODO: replace by args later
+        if (args != null && args.length != 0) {
+            query = args[0];
+        }
         MySQLQueryLexer lexer = new MySQLQueryLexer(CharStreams.fromString(query));
         MySQLQueryParser parser = new MySQLQueryParser(new BufferedTokenStream(lexer));
         MySQLQueryBaseListener listener = new MySQLQueryBaseListener() {
             private int level;
-            boolean isAll = false;
+            boolean isAll = false; // might be wrong when there's nested query
             boolean isSelect = false;
-            Map<String, List<String>> selectedColumns = new HashMap<>(); // table, column
+            List<String> selectedColumns = new ArrayList<>(); // table, column
+            Map<String, List<String>> aliasToColumn = new HashMap<>();
             Map<String, MongoCollection<Document>> tableToCollection = new HashMap<>(); // hashmap of tableName and collection of the same name in mongo
             List<String> tableNames = new ArrayList<>(); // list of table names
             ObjectMapper mapper = new ObjectMapper();
             Stack<Object> stack = new Stack<>();
             Predicate<Map<String, Object>> queryFilter = null;
 
+
             @Override
             public void exitQuery(QueryContext ctx) {
-                if (isAll) {
-                    Map<String, List<Document>> documents = new HashMap<>();
-                    for (Map.Entry<String, MongoCollection<Document>> entry: tableToCollection.entrySet()) {
-                        for (Document document : entry.getValue().find()) {
-                            if (queryFilter == null || queryFilter.test(document)) {
-                                List<Document> docs = documents.getOrDefault(entry.getKey(), new ArrayList<>());
+                Map<String, List<Document>> documents = new HashMap<>();
+                for (Map.Entry<String, MongoCollection<Document>> entry: tableToCollection.entrySet()) {
+                    for (Document document : entry.getValue().find()) {
+                        if (queryFilter == null || queryFilter.test(document)) {
+                            List<Document> docs = documents.getOrDefault(entry.getKey(), new ArrayList<>());
+                            if (isAll) {
                                 docs.add(document);
                                 documents.put(entry.getKey(), docs);
+                            } else {
+                                List<String> removedKeys = new ArrayList<>();
+                                for (String property : document.keySet()) {
+                                    if (!selectedColumns.contains(property)) {
+                                        removedKeys.add(property);
+                                    }
+                                }
+                                removedKeys.forEach(document::remove);
+                                if (!document.keySet().isEmpty()) {
+                                    docs.add(document);
+                                    documents.put(entry.getKey(), docs);
+                                }
                             }
                         }
                     }
-                    String jsonOutput = null;
-                    try {
-                        jsonOutput = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(documents);
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
-                    }
-                    System.out.println(jsonOutput);
                 }
+                String jsonOutput = null;
+                try {
+                    jsonOutput = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(documents);
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(jsonOutput);
             }
 
             @Override
@@ -74,30 +91,33 @@ public class Main {
             }
 
             @Override
-            public void enterColumnName(ColumnNameContext ctx) {
-                String tableName = "default";
-                String selected = ctx.getText();
-                List<String> columns = new ArrayList<>();
-                if (selected.contains(".")) {
-                    int dot = selected.indexOf('.');
-                    tableName = selected.substring(0, dot);
-                    selected = selected.substring(dot+1);
+            public void enterSelectItem(SelectItemContext ctx) {
+                // table.column alias
+                String selectedItem = ctx.columnItem().columnName().WORD().getText();
+                List<String> tableColumn = new ArrayList<>();
+                String alias = null;
+                if (ctx.columnItem().selectAlias() != null) {
+                    alias = ctx.columnItem().selectAlias().alias().getText();
                 }
-                columns = selectedColumns.getOrDefault(tableName, columns);
-                columns.add(selected);
-                selectedColumns.put(tableName, columns);
+                if (selectedItem.contains(".")) {
+                    int dot = selectedItem.indexOf('.');
+                    tableColumn.add(selectedItem.substring(0, dot));
+                    tableColumn.add(selectedItem.substring(dot+1));
+                    aliasToColumn.put(alias, tableColumn);
+                } else {
+                    selectedColumns.add(selectedItem);
+                }
             }
 
             @Override // get table Name
             public void enterTableName(TableNameContext ctx) {
                 tableNames.add(ctx.getText()); // may change this into a stack
-                //TODO: check when it has an alias
             }
 
             @Override // check if the table exist in mongo
             public void exitTableName(TableNameContext ctx) {
                 String tableName = ctx.getText();
-                MongoCollection collection = db.getCollection(tableName);
+                MongoCollection<Document> collection = db.getCollection(tableName);
                 tableToCollection.put(tableName, collection);
             }
 
