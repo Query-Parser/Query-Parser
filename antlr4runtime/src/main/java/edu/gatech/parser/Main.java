@@ -24,7 +24,7 @@ public class Main {
     private static MongoDatabase db = dbConfig();
 
     public static void main(String[] args) {
-        String query = "select CategoryID from Categories, Employees;"; // TODO: replace by args later
+        String query = "select Categories.CategoryID as id from Categories;"; // TODO: replace by args later
         if (args != null && args.length != 0) {
             query = args[0];
         }
@@ -35,7 +35,7 @@ public class Main {
             boolean isAll = false; // might be wrong when there's nested query
             boolean isSelect = false;
             List<String> selectedColumns = new ArrayList<>(); // table, column
-            Map<String, List<String>> aliasToColumn = new HashMap<>();
+            Map<String, List<String>> columnToAlias = new HashMap<>();
             Map<String, MongoCollection<Document>> tableToCollection = new HashMap<>(); // hashmap of tableName and collection of the same name in mongo
             List<String> tableNames = new ArrayList<>(); // list of table names
             ObjectMapper mapper = new ObjectMapper();
@@ -54,13 +54,40 @@ public class Main {
                                 docs.add(document);
                                 documents.put(entry.getKey(), docs);
                             } else {
+//                                String tableName = entry.getKey();
+                                // case: column as alias
+                                // case: table.column as alias
+
                                 List<String> removedKeys = new ArrayList<>();
+                                List<String> updatedKeys = new ArrayList<>();
                                 for (String property : document.keySet()) {
-                                    if (!selectedColumns.contains(property)) {
+                                    if (!columnToAlias.containsKey(property)) {
                                         removedKeys.add(property);
+                                    }
+
+                                    if (columnToAlias.containsKey(property)) {
+                                        if (!columnToAlias.get(property).isEmpty()) {
+                                            String tableName = columnToAlias.get(property).get(0);
+                                            String columnAlias = columnToAlias.get(property).get(1);
+                                            if (tableName != null && !tableName.equals(entry.getKey())) {
+                                                removedKeys.add(property);
+                                            } else if (columnAlias != null) {
+                                                if (document.containsKey(columnAlias)) {
+                                                    System.out.println("ALIAS IS THE SAME AS ONE OF THE COLUMNS");
+                                                } else {
+                                                    updatedKeys.add(property);
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                                 removedKeys.forEach(document::remove);
+                                for (String key: updatedKeys) {
+                                    String newColumnName = columnToAlias.get(key).get(1);
+                                    document.put(newColumnName, document.get(key));
+                                    document.remove(key);
+                                }
+
                                 if (!document.keySet().isEmpty()) {
                                     docs.add(document);
                                     documents.put(entry.getKey(), docs);
@@ -94,19 +121,23 @@ public class Main {
             public void enterSelectItem(SelectItemContext ctx) {
                 // table.column alias
                 String selectedItem = ctx.columnItem().columnName().WORD().getText();
-                List<String> tableColumn = new ArrayList<>();
+                List<String> tableAndAlias = new ArrayList<>();
                 String alias = null;
-                if (ctx.columnItem().selectAlias() != null) {
-                    alias = ctx.columnItem().selectAlias().alias().getText();
-                }
                 if (selectedItem.contains(".")) {
                     int dot = selectedItem.indexOf('.');
-                    tableColumn.add(selectedItem.substring(0, dot));
-                    tableColumn.add(selectedItem.substring(dot+1));
-                    aliasToColumn.put(alias, tableColumn);
+                    tableAndAlias.add(selectedItem.substring(0, dot));
+                    selectedItem = selectedItem.substring(dot+1);
                 } else {
-                    selectedColumns.add(selectedItem);
+                    tableAndAlias.add(null);
                 }
+
+                if (ctx.columnItem().selectAlias() != null) {
+                    alias = ctx.columnItem().selectAlias().alias().getText();
+                    tableAndAlias.add(alias);
+                } else {
+                    tableAndAlias.add(null);
+                }
+                columnToAlias.put(selectedItem, tableAndAlias);
             }
 
             @Override // get table Name
