@@ -24,7 +24,7 @@ public class Main {
     private static MongoDatabase db = dbConfig();
 
     public static void main(String[] args) {
-        String query = "select Categories.CategoryID as id from Categories;"; // TODO: replace by args later
+        String query = "select Categories.CategoryID as id from Categories where id = '6';"; // TODO: replace by args later
         if (args != null && args.length != 0) {
             query = args[0];
         }
@@ -34,7 +34,6 @@ public class Main {
             private int level;
             boolean isAll = false; // might be wrong when there's nested query
             boolean isSelect = false;
-            List<String> selectedColumns = new ArrayList<>(); // table, column
             Map<String, List<String>> columnToAlias = new HashMap<>();
             Map<String, MongoCollection<Document>> tableToCollection = new HashMap<>(); // hashmap of tableName and collection of the same name in mongo
             List<String> tableNames = new ArrayList<>(); // list of table names
@@ -48,46 +47,45 @@ public class Main {
                 Map<String, List<Document>> documents = new HashMap<>();
                 for (Map.Entry<String, MongoCollection<Document>> entry: tableToCollection.entrySet()) {
                     for (Document document : entry.getValue().find()) {
+                        // update the current key to alias before applying query filter
+                        List<String> updatedKeys = new ArrayList<>();
+                        List<String> aliases = new ArrayList<>();
+                        for (String property: document.keySet()) {
+                            if (columnToAlias.get(property) != null) {
+                                String tableName = columnToAlias.get(property).get(0);
+                                String columnAlias = columnToAlias.get(property).get(1);
+                                if (tableName != null && tableName.equals(entry.getKey()) && columnAlias != null && !document.containsKey(columnAlias)) {
+                                    updatedKeys.add(property);
+                                    aliases.add(columnAlias);
+                                }
+                            }
+                        }
+                        updatedKeys.forEach(key -> document.put(columnToAlias.get(key).get(1), document.get(key)));
+                        updatedKeys.forEach(document::remove);
+
+                        // apply query filter
                         if (queryFilter == null || queryFilter.test(document)) {
                             List<Document> docs = documents.getOrDefault(entry.getKey(), new ArrayList<>());
                             if (isAll) {
                                 docs.add(document);
                                 documents.put(entry.getKey(), docs);
                             } else {
-//                                String tableName = entry.getKey();
-                                // case: column as alias
-                                // case: table.column as alias
-
                                 List<String> removedKeys = new ArrayList<>();
-                                List<String> updatedKeys = new ArrayList<>();
                                 for (String property : document.keySet()) {
-                                    if (!columnToAlias.containsKey(property)) {
+                                    if (!columnToAlias.containsKey(property) && !aliases.contains(property)) {
                                         removedKeys.add(property);
                                     }
-
                                     if (columnToAlias.containsKey(property)) {
                                         if (!columnToAlias.get(property).isEmpty()) {
                                             String tableName = columnToAlias.get(property).get(0);
                                             String columnAlias = columnToAlias.get(property).get(1);
                                             if (tableName != null && !tableName.equals(entry.getKey())) {
                                                 removedKeys.add(property);
-                                            } else if (columnAlias != null) {
-                                                if (document.containsKey(columnAlias)) {
-                                                    System.out.println("ALIAS IS THE SAME AS ONE OF THE COLUMNS");
-                                                } else {
-                                                    updatedKeys.add(property);
-                                                }
                                             }
                                         }
                                     }
                                 }
                                 removedKeys.forEach(document::remove);
-                                for (String key: updatedKeys) {
-                                    String newColumnName = columnToAlias.get(key).get(1);
-                                    document.put(newColumnName, document.get(key));
-                                    document.remove(key);
-                                }
-
                                 if (!document.keySet().isEmpty()) {
                                     docs.add(document);
                                     documents.put(entry.getKey(), docs);
