@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.2.5.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<groupId>com.parent</groupId>
+		<artifactId>query-parser</artifactId>
+		<version>0.1.0</version>
+		<relativePath>../../Query-Parser</relativePath>
 	</parent>
+
 	<groupId>com.example</groupId>
 	<artifactId>restservice</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
@@ -45,9 +46,16 @@
 			<artifactId>spring-data-mongodb</artifactId>
 		</dependency>
 		<dependency>
-  			<groupId>org.apache.httpcomponents</groupId>
-  			<artifactId>httpclient</artifactId>
-  			<scope>test</scope>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!--	antlr4runtime module	-->
+		<dependency>
+			<groupId>org.databases</groupId>
+			<artifactId>query-parser</artifactId>
+			<version>1.0</version>
 		</dependency>
 	</dependencies>
 
@@ -59,5 +67,6 @@
 			</plugin>
 		</plugins>
 	</build>
+
 
 </project>
