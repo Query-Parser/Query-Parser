@@ -21,15 +21,9 @@ simpleStatement:
 
 //SELECT
 selectStatement:
-     SELECT_SYMBOL distinctClause? selectItemList intoClause?
+    OPEN_PAR_SYMBOL? SELECT_SYMBOL distinctClause? selectItemList intoClause?
         fromClause joinClause? unionClause? whereClause?
-        groupByClause? havingClause? orderClause?
-;
-
-selectStatementParens:
-    OPEN_PAR_SYMBOL SELECT_SYMBOL distinctClause? selectItemList intoClause?
-        fromClause joinClause? unionClause? whereClause?
-        groupByClause? havingClause? orderClause? CLOSE_PAR_SYMBOL
+        groupByClause? havingClause? orderClause? CLOSE_PAR_SYMBOL?
 ;
 
 distinctClause:
@@ -67,7 +61,7 @@ maxClause:
 
 
 columnName:
-    TC_NAME | WORD
+    WORD
 ;
 selectAlias:
     AS_SYMBOL alias
@@ -82,7 +76,6 @@ intoClause:
         OUTFILE_SYMBOL (SQ_TEXT | DQ_TEXT)
         | DUMPFILE_SYMBOL (SQ_TEXT | DQ_TEXT)
         | WORD (COMMA_SYMBOL WORD)*
-        | VARIABLE (COMMA_SYMBOL VARIABLE)*
     )
 
 ;
@@ -106,11 +99,12 @@ tableName:
 ;
 
 whereClause:
-    WHERE_SYMBOL (likeClause | inClause| expr)?
-    (((NOT_SYMBOL? EXISTS_SYMBOL (selectStatementParens | selectStatement))
-    | (ANY_SYMBOL (selectStatementParens | selectStatement | insertStatement | deleteStatement | updateStatement | createStatement))
-    | (BETWEEN_SYMBOL valueName AND_SYMBOL valueName))
-    | (OR_SYMBOL expr))?
+    WHERE_SYMBOL
+    condition?
+    likeClause? inClause?
+    ((NOT_SYMBOL? EXISTS_SYMBOL selectStatement)
+    | (ANY_SYMBOL selectStatement)
+    | (BETWEEN_SYMBOL valueName AND_SYMBOL valueName))?
 ;
 
 likeClause:
@@ -118,7 +112,7 @@ likeClause:
 ;
 
 inClause:
-    columnName NOT_SYMBOL? IN_SYMBOL OPEN_PAR_SYMBOL (valuesList | (selectStatementParens | selectStatement)) CLOSE_PAR_SYMBOL
+    NOT_SYMBOL? IN_SYMBOL OPEN_PAR_SYMBOL (valuesList | selectStatement) CLOSE_PAR_SYMBOL
 ;
 
 valuesList:
@@ -126,27 +120,19 @@ valuesList:
 ;
 
 valueName:
-    WORD
-    | (ARITHMETIC NUMBER)
+    (ARITHMETIC NUMBER)
     | NUMBER
     | SQ_TEXT
     | DQ_TEXT
-    | EMAIL
 ;
 
-expr:
-    columnItem compOp?
-        (NUMBER
-        | columnItem
-        | (ANY_SYMBOL (selectStatementParens | selectStatement))
-        | NAME
-        | SQ_TEXT
-        | DQ_TEXT)
-            (AND_SYMBOL expr)?
-    //| (columnItem EQUAL_OPERATOR NAME)
-    //| (columnItem EQUAL_OPERATOR tableItem)
-    //| ((columnItem EQUAL_OPERATOR (SQ_TEXT | DQ_TEXT)) (AND_SYMBOL expr)*)
-    //| (columnItem)
+condition:
+    conditionInner (OR_SYMBOL condition)?
+;
+
+conditionInner:
+    OPEN_PAR_SYMBOL condition CLOSE_PAR_SYMBOL ( (OR_SYMBOL condition)? | (AND_SYMBOL condition)? )
+    | columnItem (compOp (valueName | columnItem | (ANY_SYMBOL query)))? (AND_SYMBOL condition)?
 ;
 
 groupByClause:
@@ -167,7 +153,7 @@ direction:
 ;
 
 havingClause:
-    HAVING_SYMBOL expr
+    HAVING_SYMBOL condition
 ;
 
 compOp:
@@ -198,7 +184,7 @@ limitClause:
 createStatement:
     CREATE_SYMBOL TABLE_SYMBOL newTable (
     LIKE_SYMBOL existingTable
-    | (AS_SYMBOL (selectStatementParens | selectStatement))
+    | (AS_SYMBOL selectStatement)
     )
 ;
 
@@ -214,7 +200,7 @@ existingTable:
 //INSERT
  insertStatement:
      INSERT_SYMBOL INTO_SYMBOL tableName columnPar*
-     (VALUES_SYMBOL valueItem | (selectStatementParens | selectStatement))
+     (VALUES_SYMBOL valueItem | selectStatement)
  ;
 
  columnPar:
@@ -277,7 +263,7 @@ onList:
 
 //UNION
 unionClause:
-    UNION_SYMBOL ((ALL_SYMBOL (selectStatement| selectStatementParens))|(selectStatement| selectStatementParens) | TABLE_SYMBOL tableName )
+    UNION_SYMBOL ((ALL_SYMBOL selectStatement)| selectStatement | TABLE_SYMBOL tableName )
 ;
 
 /*
@@ -413,9 +399,7 @@ NUMBER         : DIGIT+ ([.,] DIGIT+)? ;
 
 fragment LOWERCASE  : [a-z] ;
 fragment UPPERCASE  : [A-Z];
-WORD                : (LOWERCASE | UPPERCASE | '_' | DIGITS)+ ;
-VARIABLE            : (LOWERCASE| UPPERCASE| '@')+ ;
-TC_NAME             : (LOWERCASE| UPPERCASE | '.' | DIGITS )+ ;
-EMAIL               : (LOWERCASE | UPPERCASE | DIGIT | '_' | '.' | '@')+ ;
+TABLE_NAME          : (WORD DOT_SYMBOL);
+WORD                : (LOWERCASE | UPPERCASE | DIGIT | '_' | '.' | '@' | '/')+ ;
 WHITESPACE          : (' ' | '\t') -> skip;
 NEWLINE             : ('\r'? '\n' | '\r')+ -> skip;
