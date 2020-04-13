@@ -340,18 +340,6 @@ public class MySQLQueryBaseListener implements MySQLQueryListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterConditionParens(MySQLQueryParser.ConditionParensContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitConditionParens(MySQLQueryParser.ConditionParensContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterGroupByClause(MySQLQueryParser.GroupByClauseContext ctx) { }
 	/**
 	 * {@inheritDoc}

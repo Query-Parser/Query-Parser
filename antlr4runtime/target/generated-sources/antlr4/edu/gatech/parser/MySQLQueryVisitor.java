@@ -173,12 +173,6 @@ public interface MySQLQueryVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitConditionInner(MySQLQueryParser.ConditionInnerContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MySQLQueryParser#conditionParens}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitConditionParens(MySQLQueryParser.ConditionParensContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link MySQLQueryParser#groupByClause}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
