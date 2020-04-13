@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="73db6d17-7f38-43be-9505-2c7b75fc2f2b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/antlr4runtime/src/main/antlr4/MySQLQuery.g4" beforeDir="false" afterPath="$PROJECT_DIR$/antlr4runtime/src/main/antlr4/MySQLQuery.g4" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -19,8 +18,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/antlr4runtime/src/main/antlr4/MySQLQuery.g4">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="5" column="2" selection-start-line="5" selection-start-column="2" selection-end-line="5" selection-end-column="2" />
+            <state relative-caret-position="48">
+              <caret line="110" column="130" selection-start-line="110" selection-start-column="130" selection-end-line="110" selection-end-column="130" />
             </state>
           </provider>
         </entry>
@@ -30,7 +29,21 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>ON</find>
+      <find>tableName</find>
+      <find>where</find>
+      <find>NAME</find>
       <find>columnName</find>
+      <find>TC</find>
+      <find>whereCla</find>
+      <find>WORD</find>
+      <find>expr</find>
+      <find>valueName</find>
+      <find>whereClause</find>
+      <find>inclause</find>
+      <find>selectStatement</find>
+      <find>selectstat</find>
+      <find>union</find>
+      <find>selectStatementP</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -54,6 +67,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -95,8 +110,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -141,17 +154,19 @@
       <workItem from="1586047430270" duration="635000" />
       <workItem from="1586055037511" duration="2575000" />
       <workItem from="1586200879267" duration="9000" />
-      <workItem from="1586493768246" duration="1995000" />
+      <workItem from="1586493768246" duration="2067000" />
+      <workItem from="1586620291330" duration="5068000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="19472000" />
+    <option name="totallyTimeSpent" value="24612000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-6" y="-6" width="1293" height="693" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.072874494" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.07368421" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -199,8 +214,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/antlr4runtime/src/main/antlr4/MySQLQuery.g4">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="5" column="2" selection-start-line="5" selection-start-column="2" selection-end-line="5" selection-end-column="2" />
+        <state relative-caret-position="48">
+          <caret line="110" column="130" selection-start-line="110" selection-start-column="130" selection-end-line="110" selection-end-column="130" />
         </state>
       </provider>
     </entry>
