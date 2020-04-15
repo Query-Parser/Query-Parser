@@ -61,7 +61,7 @@ maxClause:
 
 
 columnName:
-    WORD
+    TC_NAME | WORD
 ;
 selectAlias:
     AS_SYMBOL alias
@@ -132,7 +132,7 @@ condition:
 
 conditionInner:
     OPEN_PAR_SYMBOL condition CLOSE_PAR_SYMBOL ( (OR_SYMBOL condition)? | (AND_SYMBOL condition)? )
-    | columnItem (compOp (valueName | columnItem | (ANY_SYMBOL query)))? (AND_SYMBOL condition)?
+    | columnItem (compOp (SQ_TEXT | DQ_TEXT | valueName | columnItem | (ANY_SYMBOL query)))? (AND_SYMBOL condition)?
 ;
 
 groupByClause:
@@ -383,15 +383,11 @@ fragment X: [xX];
 fragment Y: [yY];
 fragment Z: [zZ];
 
-SQ_TEXT: '\'' WORD '\'';
-DQ_TEXT: '"' WORD '"';
+SQ_TEXT: '\'' (WORD | EMAIL | WHITESPACE)+ '\'';
+DQ_TEXT: '"' (WORD | EMAIL | WHITESPACE)+ '"';
 NAME: '\'' WORD WHITESPACE WORD '\'';
 SINGLE_QUOTE: '\'' -> skip;
 DOUBLE_QUOTE: '"' -> skip;
-
-fragment LETTER_WHEN_UNQUOTED: DIGIT | LETTER_WHEN_UNQUOTED_NO_DIGIT;
-fragment LETTER_WHEN_UNQUOTED_NO_DIGIT: [a-zA-Z_$\u0080-\uffff];
-fragment LETTER_WITHOUT_FLOAT_PART: [a-df-zA-DF-Z_$\u0080-\uffff];
 
 fragment DIGIT:    [0-9];
 fragment DIGITS:   DIGIT+;
@@ -399,7 +395,9 @@ NUMBER         : DIGIT+ ([.,] DIGIT+)? ;
 
 fragment LOWERCASE  : [a-z] ;
 fragment UPPERCASE  : [A-Z];
-TABLE_NAME          : (WORD DOT_SYMBOL);
-WORD                : (LOWERCASE | UPPERCASE | DIGIT | '_' | '.' | '@' | '/')+ ;
+WORD                : (LOWERCASE | UPPERCASE | '_' | DIGITS)+ ;
+VARIABLE            : (LOWERCASE| UPPERCASE| '@')+ ;
+TC_NAME             : (LOWERCASE| UPPERCASE| DIGIT)+ [.] (LOWERCASE| UPPERCASE| DIGIT)+ ;
+EMAIL               : (LOWERCASE | UPPERCASE | DIGIT | '_' | '.' | '@')+ ;
 WHITESPACE          : (' ' | '\t') -> skip;
 NEWLINE             : ('\r'? '\n' | '\r')+ -> skip;
