@@ -22,7 +22,7 @@ public class Main {
     private static MongoDatabase db = dbConfig();
 
     public static void main(String[] args) {
-        String query = "select distinct CustomerID, CustomerName from Customers;"; // TODO: replace by args later
+        String query = "select CustomerName as B from Customers as C;"; // TODO: replace by args later
         if (args != null && args.length != 0) {
             query = args[0];
         }
@@ -40,7 +40,6 @@ public class Main {
             Stack<Object> stack = new Stack<>();
             Predicate<Map<String, Object>> queryFilter = null;
 
-
             @Override
             public void exitQuery(QueryContext ctx) {
                 System.out.println(columnToAlias);
@@ -50,7 +49,7 @@ public class Main {
                     for (Document document : entry.getValue().find()) {
                         // update the current key to alias before applying query filter
                         List<String> aliases = new ArrayList<>();
-                        applyAlias(entry, document, aliases);
+                        applyColumnAlias(entry, document, aliases);
 
                         if (queryFilter == null || queryFilter.test(document)) {
                             List<Document> docs = result.getOrDefault(entry.getKey(), new ArrayList<>());
@@ -104,15 +103,22 @@ public class Main {
                 System.out.println(jsonOutput);
             }
 
-            private void applyAlias(Map.Entry<String, MongoCollection<Document>> entry, Document document, List<String> aliases) {
+            private void applyColumnAlias(Map.Entry<String, MongoCollection<Document>> entry, Document document, List<String> aliases) {
                 List<String> updatedKeys = new ArrayList<>();
                 for (String property: document.keySet()) {
                     if (columnToAlias.get(property) != null) {
                         String tableName = columnToAlias.get(property).get(0);
                         String columnAlias = columnToAlias.get(property).get(1);
-                        if (tableName != null && tableName.equals(entry.getKey()) && columnAlias != null && !document.containsKey(columnAlias)) {
-                            updatedKeys.add(property);
-                            aliases.add(columnAlias);
+                        if (columnAlias != null && !document.containsKey(columnAlias)) {
+                            if (tableName != null) {
+                                if (tableName.equals(entry.getKey())) {
+                                    updatedKeys.add(property);
+                                    aliases.add(columnAlias);
+                                }
+                            } else {
+                                updatedKeys.add(property);
+                                aliases.add(columnAlias);
+                            }
                         }
                     }
                 }
