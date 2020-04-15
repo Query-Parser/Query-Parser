@@ -22,7 +22,7 @@ public class Main {
     private static MongoDatabase db = dbConfig();
 
     public static void main(String[] args) {
-        String query = "select CustomerName as B from Customers as C;"; // TODO: replace by args later
+        String query = "select CustomerName as B from Customers as C, Employees as E;"; // TODO: replace by args later
         if (args != null && args.length != 0) {
             query = args[0];
         }
@@ -35,14 +35,14 @@ public class Main {
             boolean isDistinct = false;
             Map<String, List<String>> columnToAlias = new HashMap<>();
             Map<String, MongoCollection<Document>> tableToCollection = new HashMap<>(); // hashmap of tableName and collection of the same name in mongo
-            List<String> tableNames = new ArrayList<>(); // list of table names
+            Map<String, String> tableAlias = new HashMap<>();
             ObjectMapper mapper = new ObjectMapper();
             Stack<Object> stack = new Stack<>();
             Predicate<Map<String, Object>> queryFilter = null;
 
             @Override
             public void exitQuery(QueryContext ctx) {
-                System.out.println(columnToAlias);
+                System.out.println(tableAlias);
                 Map<String, List<Document>> result = new HashMap<>();
                 for (Map.Entry<String, MongoCollection<Document>> entry: tableToCollection.entrySet()) {
                     List<String> distinctDocuments = new ArrayList<>();
@@ -92,8 +92,10 @@ public class Main {
                             }
                         }
                     }
-
                 }
+
+                applyTableAlias(result);
+
                 String jsonOutput = null;
                 try {
                     jsonOutput = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
@@ -101,6 +103,19 @@ public class Main {
                     e.printStackTrace();
                 }
                 System.out.println(jsonOutput);
+            }
+
+            private void applyTableAlias(Map<String, List<Document>> result) {
+                List<String> updatedTableNames = new ArrayList<>();
+                for (String tableName: result.keySet()) {
+                    if (!tableAlias.isEmpty() && tableAlias.containsKey(tableName)) {
+                        updatedTableNames.add(tableName);
+                    }
+                }
+                for (String tableName : updatedTableNames) {
+                    result.put(tableAlias.get(tableName), result.get(tableName));
+                    result.remove(tableName);
+                }
             }
 
             private void applyColumnAlias(Map.Entry<String, MongoCollection<Document>> entry, Document document, List<String> aliases) {
@@ -167,9 +182,11 @@ public class Main {
                 }
             }
 
-            @Override // get table Name
-            public void enterTableName(TableNameContext ctx) {
-                tableNames.add(ctx.getText()); // may change this into a stack
+            @Override
+            public void enterTableItem(TableItemContext ctx) {
+                if (ctx.selectAlias() != null) {
+                    tableAlias.put(ctx.tableName().getText(), ctx.selectAlias().alias().getText());
+                }
             }
 
             @Override // check if the table exist in mongo
