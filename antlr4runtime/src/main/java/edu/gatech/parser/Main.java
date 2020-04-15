@@ -22,7 +22,7 @@ public class Main {
     private static MongoDatabase db = dbConfig();
 
     public static void main(String[] args) {
-        String query = "select CustomerName as B from Customers as C, Employees as E;"; // TODO: replace by args later
+        String query = "select CustomerName, LastName from Customers, Employees limit 5;"; // TODO: replace by args later
         if (args != null && args.length != 0) {
             query = args[0];
         }
@@ -33,6 +33,7 @@ public class Main {
             boolean isAll = false; // might be wrong when there's nested query
             boolean isSelect = false;
             boolean isDistinct = false;
+            int limit = Integer.MAX_VALUE;
             Map<String, List<String>> columnToAlias = new HashMap<>();
             Map<String, MongoCollection<Document>> tableToCollection = new HashMap<>(); // hashmap of tableName and collection of the same name in mongo
             Map<String, String> tableAlias = new HashMap<>();
@@ -46,11 +47,15 @@ public class Main {
                 Map<String, List<Document>> result = new HashMap<>();
                 for (Map.Entry<String, MongoCollection<Document>> entry: tableToCollection.entrySet()) {
                     List<String> distinctDocuments = new ArrayList<>();
+                    int count = 0;
                     for (Document document : entry.getValue().find()) {
+                        if (count >= limit) {
+                            break;
+                        }
+                        count++;
                         // update the current key to alias before applying query filter
                         List<String> aliases = new ArrayList<>();
                         applyColumnAlias(entry, document, aliases);
-
                         if (queryFilter == null || queryFilter.test(document)) {
                             List<Document> docs = result.getOrDefault(entry.getKey(), new ArrayList<>());
 
@@ -95,7 +100,6 @@ public class Main {
                 }
 
                 applyTableAlias(result);
-
                 String jsonOutput = null;
                 try {
                     jsonOutput = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
@@ -274,6 +278,13 @@ public class Main {
                             throw new RuntimeException("Unexpected operator " + ctx.compOp());
                     }
                     stack.push(predicate);
+                }
+            }
+
+            @Override
+            public void enterLimitClause(LimitClauseContext ctx) {
+                if (ctx.LIMIT_SYMBOL() != null) {
+                    limit = Integer.parseInt(ctx.NUMBER().getText());
                 }
             }
 

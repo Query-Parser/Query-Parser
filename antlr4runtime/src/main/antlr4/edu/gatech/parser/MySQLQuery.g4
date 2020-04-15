@@ -23,7 +23,7 @@ simpleStatement:
 selectStatement:
     OPEN_PAR_SYMBOL? SELECT_SYMBOL distinctClause? selectItemList intoClause?
         fromClause joinClause? unionClause? whereClause?
-        groupByClause? havingClause? orderClause? CLOSE_PAR_SYMBOL?
+        groupByClause? havingClause? orderClause? CLOSE_PAR_SYMBOL? limitClause?
 ;
 
 distinctClause:
@@ -176,8 +176,7 @@ deleteStatement:
 ;
 
 limitClause:
-    WORD
-    | NUMBER
+    LIMIT_SYMBOL NUMBER
 ;
 
 //CREATE
