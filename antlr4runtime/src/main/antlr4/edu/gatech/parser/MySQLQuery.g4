@@ -72,10 +72,10 @@ alias:
 ;
 
 intoClause:
-    INTO_SYMBOL (
-        OUTFILE_SYMBOL (SQ_TEXT | DQ_TEXT)
+    INTO_SYMBOL (OUTFILE_SYMBOL (SQ_TEXT | DQ_TEXT)
         | DUMPFILE_SYMBOL (SQ_TEXT | DQ_TEXT)
         | WORD (COMMA_SYMBOL WORD)*
+        | VARIABLE
     )
 
 ;
