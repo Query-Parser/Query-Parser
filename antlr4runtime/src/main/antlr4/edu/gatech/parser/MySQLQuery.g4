@@ -108,7 +108,7 @@ whereClause:
 ;
 
 likeClause:
-    LIKE_SYMBOL SINGLE_QUOTE MOD_OPERATOR? WORD MOD_OPERATOR? SINGLE_QUOTE
+    LIKE_SYMBOL LIKE_TEXT
 ;
 
 inClause:
@@ -153,7 +153,7 @@ direction:
 ;
 
 havingClause:
-    HAVING_SYMBOL condition
+    HAVING_SYMBOL ((sumClause | countClause | avgClause | minClause | maxClause) compOp (columnName | NUMBER)) | condition
 ;
 
 compOp:
@@ -383,6 +383,7 @@ fragment X: [xX];
 fragment Y: [yY];
 fragment Z: [zZ];
 
+LIKE_TEXT: '\'' (MOD_OPERATOR | WORD)+ '\'';
 SQ_TEXT: '\'' (WORD | EMAIL | WHITESPACE)+ '\'';
 DQ_TEXT: '"' (WORD | EMAIL | WHITESPACE)+ '"';
 NAME: '\'' WORD WHITESPACE WORD '\'';
