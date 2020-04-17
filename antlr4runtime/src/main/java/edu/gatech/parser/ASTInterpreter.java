@@ -48,10 +48,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                 count++;
                 if (queryFilter == null || queryFilter.test(document)) {
                     List<Map<String, Object>> docs = result.getOrDefault(entry.getKey(), new ArrayList<>());
-                    if (isAll) {
-                        docs.add(document);
-                        result.put(entry.getKey(), docs);
-                    } else {
+                    if (!isAll) {
                         List<String> removeKeys = new ArrayList<>();
                         for (String property: document.keySet()) {
                             Set<List<String>> selectedColumnTables = columnToAlias.keySet();
