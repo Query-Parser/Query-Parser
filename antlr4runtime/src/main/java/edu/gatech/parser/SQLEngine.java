@@ -1,10 +1,13 @@
 package edu.gatech.parser;
 
 import edu.gatech.db.DatabaseConfiguration;
-import org.bson.Document;
+import org.antlr.v4.runtime.BufferedTokenStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SQLEngine {
     private DatabaseConfiguration db;
@@ -13,7 +16,13 @@ public class SQLEngine {
         this.db = db;
     }
 
-    public Map<String, List<Document>> execute(String query) {
-        return null;
+    public Map<String, List<Map<String, Object>>> execute(String query) {
+        MySQLQueryLexer lexer = new MySQLQueryLexer(CharStreams.fromString(query));
+        MySQLQueryParser parser = new MySQLQueryParser(new BufferedTokenStream(lexer));
+        Map<String, List<Map<String, Object>>> output = new HashMap<>();
+        MySQLQueryBaseListener listener = new ASTWalker(output, db.getDatabase("test"));
+
+        ParseTreeWalker.DEFAULT.walk(listener, parser.query());
+        return output;
     }
 }

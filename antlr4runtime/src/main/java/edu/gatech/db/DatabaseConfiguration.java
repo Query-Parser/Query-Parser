@@ -25,6 +25,6 @@ public class DatabaseConfiguration {
     };
 
     public MongoDatabase getDatabase(String databaseName) {
-        return mongoClient.getDatabase("test");
+        return mongoClient.getDatabase(databaseName);
     }
 }
