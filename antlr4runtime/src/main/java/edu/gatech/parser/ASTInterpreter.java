@@ -57,7 +57,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                             Set<List<String>> selectedColumnTables = columnToAlias.keySet();
                             for (List<String> columnTable : selectedColumnTables) {
                                 if (!property.equals(columnTable.get(0))) {
-                                    if (columnTable.get(1) != null && !entry.getKey().equals(columnTable.get(1))) {
+                                    if (columnTable.get(1) != null && entry.getKey().equals(columnTable.get(1))) {
                                         removeKeys.add(property);
                                     } else if(columnTable.get(1) == null) {
                                         removeKeys.add(property);
