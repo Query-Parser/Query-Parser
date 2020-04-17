@@ -21,7 +21,7 @@ import static edu.gatech.parser.MySQLQueryParser.*;
 public class Main {
     private static MongoDatabase db = dbConfig();
     public static void main(String[] args) {
-        String query = "select C._id, E._id from Customers C, Employees E limit 5;"; // TODO: replace by args later
+        String query = "select C._id as ci, E._id as ei from Customers C, Employees E limit 5;"; // TODO: replace by args later
         if (args != null && args.length != 0) {
             query = args[0];
         }
@@ -34,6 +34,7 @@ public class Main {
             boolean isDistinct = false;
             int limit = Integer.MAX_VALUE;
             Map<List<String>, List<String>> columnToAlias = new HashMap<>();
+            Map<String, List<String>> aliasToColumn = new HashMap<>();
             Map<String, MongoCollection<Document>> tableToCollection = new HashMap<>(); // hashmap of tableName and collection of the same name in mongo
             Map<String, String> tableToAlias = new HashMap<>();
             Map<String, String> aliasToTable = new HashMap<>();
@@ -43,7 +44,6 @@ public class Main {
 
             @Override
             public void exitQuery(QueryContext ctx) {
-                System.out.println(limit);
                 Map<String, List<Document>> result = new HashMap<>();
                 for (Map.Entry<String, MongoCollection<Document>> entry: tableToCollection.entrySet()) {
                     List<String> distinctDocuments = new ArrayList<>();
@@ -66,54 +66,41 @@ public class Main {
                                         if (!property.equals(columnTable.get(0))) {
                                             if (columnTable.get(1) != null && !entry.getKey().equals(columnTable.get(1))) {
                                                 removeKeys.add(property);
+                                            } else if(columnTable.get(1) == null) {
+                                                removeKeys.add(property);
                                             }
                                         }
+
+//                                        if (property.equals(columnTable.get(0))) {
+//                                            if (aliasToTable.get(entry.getKey()).equals(columnTable.get(1))) {
+//                                                System.out.println("SHOULD ENFORCE USING TABLE ALIAS");
+//                                                removeKeys.add(property);
+//                                            }
+//                                        }
                                     }
                                 }
                                 removeKeys.forEach(document::remove);
                             }
-
-//                                for (String property : document.keySet()) {
-//                                    if (!columnToAlias.containsKey(property) && !updatedKeys.containsValue(property)) {
-//                                        removedKeys.add(property);
-//                                    }
-//                                    if (columnToAlias.containsKey(property)) {
-//                                        // entry.getKey is the original name of the table
-//                                        // tableName is the part of the tableName.columnName for selected column
-//                                        if (!columnToAlias.get(property).isEmpty()) {
-//                                            String tableName = columnToAlias.get(property).get(0);
-//                                            if (entry.getKey().equals(tableName)
-//                                                    && !tableToAlias.containsKey(tableName)) {
-//                                                removedKeys.add(property);
-//                                            } else if (tableToAlias.containsKey(entry.getKey())
-//                                                    && !tableToAlias.get(entry.getKey()).equals(tableName)) {
-//                                                if (tableName != null) {
-//                                                    removedKeys.add(property);
-//                                                }
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                                removedKeys.forEach(document::remove);
-                                if (isDistinct) {
-                                    // apply distinct filter
-                                    if (!distinctDocuments.contains(document.toJson())) {
-                                        distinctDocuments.add(document.toJson());
-                                        // update result
-                                        if (!document.keySet().isEmpty()) {
-                                            docs.add(document);
-                                            result.put(entry.getKey(), docs);
-                                        }
-                                    }
-                                } else {
+                            applyColumnAlias(document, entry.getKey());
+                            if (isDistinct) {
+                                // apply distinct filter
+                                if (!distinctDocuments.contains(document.toJson())) {
+                                    distinctDocuments.add(document.toJson());
+                                    // update result
                                     if (!document.keySet().isEmpty()) {
                                         docs.add(document);
                                         result.put(entry.getKey(), docs);
                                     }
                                 }
+                            } else {
+                                if (!document.keySet().isEmpty()) {
+                                    docs.add(document);
+                                    result.put(entry.getKey(), docs);
+                                }
                             }
                         }
                     }
+                }
                 String jsonOutput = null;
                 try {
                     jsonOutput = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
@@ -123,42 +110,25 @@ public class Main {
                 System.out.println(jsonOutput);
             }
 
-            private void applyTableAlias(Map<String, List<Document>> result) {
-                List<String> updatedTableNames = new ArrayList<>();
-                for (String tableName: result.keySet()) {
-                    if (!tableToAlias.isEmpty() && tableToAlias.containsKey(tableName)) {
-                        updatedTableNames.add(tableName);
-                    }
-                }
-                for (String tableName : updatedTableNames) {
-                    result.put(tableToAlias.get(tableName), result.get(tableName));
-                    result.remove(tableName);
-                }
-            }
-
-            private void applyColumnAlias(Map.Entry<String, MongoCollection<Document>> entry, Document document, Map<String, String> updatedKeys) {
-                String tableName = entry.getKey();
-                List<String> columnTable = new ArrayList<>();
+            private void applyColumnAlias(Document document, String tableName) {
+                Map<String, String> updatedKeys = new HashMap<>();
                 for (String property: document.keySet()) {
-                    if (columnToAlias.containsKey(List.of(property, tableName)) || columnToAlias.containsKey(List.of(property, null))) {
+                    List<String> columnTable = new ArrayList<>();
+                    columnTable.add(property);
+                    columnTable.add(null);
+                    if (columnToAlias.containsKey(List.of(property, tableName))) {
                         columnTable = List.of(property, tableName);
-                    } else if (columnToAlias.containsKey(List.of(property, tableToAlias.get(tableName)))) {
-                        columnTable = List.of(property, tableToAlias.get(tableName));
                     }
-                    if (!columnTable.isEmpty()) {
-                        String alias = columnToAlias.get(columnTable).get(0);
-                        String function = columnToAlias.get(columnTable).get(1);
-                        if (function != null) {
-                            continue;
-                        }
-
-                        if (alias != null && !document.containsKey(alias)) {
-                            updatedKeys.put(property, alias);
-                        }
+                    String alias = columnToAlias.get(columnTable).get(0);
+                    String func = columnToAlias.get(columnTable).get(1);
+                    if (func == null && alias != null) {
+                        updatedKeys.put(property, alias);
                     }
                 }
-                updatedKeys.keySet().forEach(key -> document.put(updatedKeys.get(key), document.get(key)));
-                updatedKeys.keySet().forEach(document::remove);
+                updatedKeys.keySet().forEach(key -> {
+                    document.put(updatedKeys.get(key), document.get(key));
+                    document.remove(key);
+                });
             }
 
             @Override
@@ -227,6 +197,16 @@ public class Main {
                     mapTableAliasFunc.add(function);
 
                     columnToAlias.put(columnTable, mapTableAliasFunc);
+
+//                    if (alias != null) {
+//                        List<String> mapColumnTableFunc = new ArrayList<>(columnTable);
+//                        if (func != null) {
+//                            mapColumnTableFunc.add(func.name());
+//                        } else {
+//                            mapColumnTableFunc.add(null);
+//                        }
+//                        aliasToColumn.put(alias, mapColumnTableFunc);
+//                    }
                 }
             }
 
