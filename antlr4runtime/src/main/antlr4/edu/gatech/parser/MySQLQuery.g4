@@ -21,10 +21,10 @@ simpleStatement:
 
 //SELECT
 selectStatement:
-    OPEN_PAR_SYMBOL? SELECT_SYMBOL distinctClause? selectItemList intoClause?
-        fromClause joinClause? unionClause? whereClause?
-        groupByClause? havingClause? orderClause? CLOSE_PAR_SYMBOL?
-;
+     OPEN_PAR_SYMBOL? SELECT_SYMBOL distinctClause? selectItemList intoClause?
+         fromClause joinClause? unionClause? whereClause?
+         groupByClause? havingClause? orderClause? CLOSE_PAR_SYMBOL?
+ ;
 
 distinctClause:
     DISTINCT_SYMBOL
@@ -132,7 +132,7 @@ condition:
 
 conditionInner:
     OPEN_PAR_SYMBOL condition CLOSE_PAR_SYMBOL ( (OR_SYMBOL condition)? | (AND_SYMBOL condition)? )
-    | columnItem (compOp (SQ_TEXT | DQ_TEXT | valueName | columnItem | (ANY_SYMBOL query)))? (AND_SYMBOL condition)?
+    | columnItem (compOp (SQ_TEXT | DQ_TEXT | valueName | columnItem | (ANY_SYMBOL selectStatement)))? (AND_SYMBOL condition)?
 ;
 
 groupByClause:
