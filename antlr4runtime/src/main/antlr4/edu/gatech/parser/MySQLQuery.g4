@@ -139,12 +139,12 @@ groupByClause:
     GROUP_SYMBOL BY_SYMBOL columnItem (COMMA_SYMBOL columnItem)*
 ;
 
-orderList:
-    orderExpression (COMMA_SYMBOL orderExpression)*
+orderClause:
+    ORDER_SYMBOL BY_SYMBOL orderList direction?
 ;
 
-orderExpression:
-    columnItem direction?
+orderList:
+    columnItem (COMMA_SYMBOL columnItem)*
 ;
 
 direction:
@@ -164,10 +164,6 @@ compOp:
     | LESS_OR_EQUAL_OPERATOR
     | LESS_THAN_OPERATOR
     | NOT_EQUAL_OPERATOR
-;
-
-orderClause:
-    ORDER_SYMBOL BY_SYMBOL orderList
 ;
 
 //DELETE

@@ -27,6 +27,8 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     private Stack<Object> stack = new Stack<>();
     private Predicate<Map<String, Object>> queryFilter = null;
     private Function<Map<String, Object>, Map<List<Object>, List<Map<String, Object>>>> groupByFunc = null;
+    private List<String> orderList = null;
+    private Direction direction = null;
 
     public ASTInterpreter(Map<String, List<Map<String, Object>>> output, MongoDatabase db) {
         this.db = db;
@@ -320,10 +322,25 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     }
 
     @Override
-    public void enterLimitClause(MySQLQueryParser.LimitClauseContext ctx) {
+    public void exitLimitClause(MySQLQueryParser.LimitClauseContext ctx) {
         if (ctx.LIMIT_SYMBOL() != null) {
             limit = Integer.parseInt(ctx.NUMBER().getText());
         }
+    }
+
+    @Override
+    public void enterOrderList(MySQLQueryParser.OrderListContext ctx) {
+        orderList = new ArrayList<>();
+    }
+
+    @Override
+    public void exitOrderList(MySQLQueryParser.OrderListContext ctx) {
+        ctx.columnItem().forEach(columnItem -> orderList.add(columnItem.columnName().WORD().getSymbol().getText()));
+    }
+
+    @Override
+    public void enterDirection(MySQLQueryParser.DirectionContext ctx) {
+        direction = ctx.DESC_SYMBOL() != null ? Direction.DESC : Direction.ASC;
     }
 
     @Override
