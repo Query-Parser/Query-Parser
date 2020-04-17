@@ -11,7 +11,9 @@ import org.bson.Document;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,12 +43,13 @@ public class Main {
             ObjectMapper mapper = new ObjectMapper();
             Stack<Object> stack = new Stack<>();
             Predicate<Map<String, Object>> queryFilter = null;
+            Function<Map<String, Object>, Map<List<Object>, List<Map<String, Object>>>> groupByFunc = null;
 
             @Override
             public void exitQuery(QueryContext ctx) {
                 Map<String, List<Document>> result = new HashMap<>();
                 for (Map.Entry<String, MongoCollection<Document>> entry: tableToCollection.entrySet()) {
-                    List<String> distinctDocuments = new ArrayList<>();
+                    Set<String> distinctDocuments = new HashSet<>();
                     int count = 0;
                     for (Document document : entry.getValue().find()) {
                         if (count >= limit) {
@@ -70,13 +73,6 @@ public class Main {
                                                 removeKeys.add(property);
                                             }
                                         }
-
-//                                        if (property.equals(columnTable.get(0))) {
-//                                            if (aliasToTable.get(entry.getKey()).equals(columnTable.get(1))) {
-//                                                System.out.println("SHOULD ENFORCE USING TABLE ALIAS");
-//                                                removeKeys.add(property);
-//                                            }
-//                                        }
                                     }
                                 }
                                 removeKeys.forEach(document::remove);
@@ -318,6 +314,18 @@ public class Main {
                     }
                     stack.push(predicate);
                 }
+            }
+
+            @Override
+            public void exitGroupByClause(GroupByClauseContext ctx) {
+                List<String> columns = ctx.columnItem().stream().map((x) -> x.columnName().WORD().getSymbol().getText()).collect(Collectors.toList());
+
+                groupByFunc = (doc) -> {
+                    List<Object> group = columns.stream().filter(doc::containsKey).map(doc::get).collect(Collectors.toList());
+                    Map<List<Object>, List<Map<String, Object>>> groupedDoc = new HashMap<>();
+                    groupedDoc.put(group, Collections.singletonList(doc));
+                    return groupedDoc;
+                };
             }
 
             @Override

@@ -136,7 +136,7 @@ conditionInner:
 ;
 
 groupByClause:
-    GROUP_SYMBOL BY_SYMBOL columnItem
+    GROUP_SYMBOL BY_SYMBOL columnItem (COMMA_SYMBOL columnItem)*
 ;
 
 orderList:
