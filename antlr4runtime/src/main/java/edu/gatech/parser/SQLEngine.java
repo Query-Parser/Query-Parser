@@ -20,7 +20,7 @@ public class SQLEngine {
         MySQLQueryLexer lexer = new MySQLQueryLexer(CharStreams.fromString(query));
         MySQLQueryParser parser = new MySQLQueryParser(new BufferedTokenStream(lexer));
         Map<String, List<Map<String, Object>>> output = new HashMap<>();
-        MySQLQueryBaseListener listener = new ASTWalker(output, db.getDatabase("test"));
+        MySQLQueryBaseListener listener = new ASTInterpreter(output, db.getDatabase("test"));
 
         ParseTreeWalker.DEFAULT.walk(listener, parser.query());
         return output;

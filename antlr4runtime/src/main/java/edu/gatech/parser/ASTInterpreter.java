@@ -11,7 +11,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class ASTWalker extends MySQLQueryBaseListener {
+public class ASTInterpreter extends MySQLQueryBaseListener {
     private final MongoDatabase db;
     private Map<String, List<Map<String, Object>>> output;
     private int level;
@@ -28,7 +28,7 @@ public class ASTWalker extends MySQLQueryBaseListener {
     private Predicate<Map<String, Object>> queryFilter = null;
     private Function<Map<String, Object>, Map<List<Object>, List<Map<String, Object>>>> groupByFunc = null;
 
-    public ASTWalker(Map<String, List<Map<String, Object>>> output, MongoDatabase db) {
+    public ASTInterpreter(Map<String, List<Map<String, Object>>> output, MongoDatabase db) {
         this.db = db;
         this.output = output;
     }
