@@ -94,13 +94,18 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             List<String> columnTable = new ArrayList<>();
             columnTable.add(property);
             columnTable.add(null);
+            List<String> tuple = null;
             if (columnToAlias.containsKey(List.of(property, tableName))) {
-                columnTable = List.of(property, tableName);
+                tuple = List.of(property, tableName);
+            } else if (columnToAlias.containsKey(columnTable)) {
+                tuple = columnTable;
             }
-            String alias = columnToAlias.get(columnTable).get(0);
-            String func = columnToAlias.get(columnTable).get(1);
-            if (func == null && alias != null) {
-                updatedKeys.put(property, alias);
+            if (tuple != null) {
+                String alias = columnToAlias.get(tuple).get(0);
+                String func = columnToAlias.get(tuple).get(1);
+                if (func == null && alias != null) {
+                    updatedKeys.put(property, alias);
+                }
             }
         }
         updatedKeys.keySet().forEach(key -> {
