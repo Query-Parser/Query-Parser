@@ -321,10 +321,14 @@ public class Main {
                 List<String> columns = ctx.columnItem().stream().map((x) -> x.columnName().WORD().getSymbol().getText()).collect(Collectors.toList());
 
                 groupByFunc = (doc) -> {
-                    List<Object> group = columns.stream().filter(doc::containsKey).map(doc::get).collect(Collectors.toList());
-                    Map<List<Object>, List<Map<String, Object>>> groupedDoc = new HashMap<>();
-                    groupedDoc.put(group, Collections.singletonList(doc));
-                    return groupedDoc;
+                    if (columns.stream().anyMatch((col) -> !doc.containsKey(col))) {
+                        return new HashMap<>();
+                    } else {
+                        List<Object> group = columns.stream().map(doc::get).collect(Collectors.toList());
+                        Map<List<Object>, List<Map<String, Object>>> groupedDoc = new HashMap<>();
+                        groupedDoc.put(group, Collections.singletonList(doc));
+                        return groupedDoc;
+                    }
                 };
             }
 
