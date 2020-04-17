@@ -55,7 +55,7 @@
                 <version>4.8</version>
                 <executions>
                     <execution>
-                         <goals>
+                        <goals>
                             <goal>antlr4</goal>
                         </goals>
                     </execution>

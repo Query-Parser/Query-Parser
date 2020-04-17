@@ -21,10 +21,10 @@ simpleStatement:
 
 //SELECT
 selectStatement:
-     OPEN_PAR_SYMBOL? SELECT_SYMBOL distinctClause? selectItemList intoClause?
-         fromClause joinClause? unionClause? whereClause?
-         groupByClause? havingClause? orderClause? CLOSE_PAR_SYMBOL?
- ;
+    OPEN_PAR_SYMBOL? SELECT_SYMBOL distinctClause? selectItemList intoClause?
+        fromClause joinClause? unionClause? whereClause?
+        groupByClause? havingClause? orderClause? CLOSE_PAR_SYMBOL?
+;
 
 distinctClause:
     DISTINCT_SYMBOL
@@ -40,28 +40,28 @@ selectItem:
 ;
 
 sumClause:
-    SUM_SYMBOL OPEN_PAR_SYMBOL columnName ((ARITHMETIC | MULT_OPERATOR) (NUMBER | columnName))* CLOSE_PAR_SYMBOL
+    SUM_SYMBOL OPEN_PAR_SYMBOL columnItem CLOSE_PAR_SYMBOL
 ;
 
 countClause:
-     COUNT_SYMBOL OPEN_PAR_SYMBOL columnItem ((ARITHMETIC | MULT_OPERATOR) (NUMBER | columnName))* CLOSE_PAR_SYMBOL
+     COUNT_SYMBOL OPEN_PAR_SYMBOL columnItem CLOSE_PAR_SYMBOL
 ;
 
 avgClause:
-    AVERAGE_SYMBOL OPEN_PAR_SYMBOL columnItem ((ARITHMETIC | MULT_OPERATOR) (NUMBER | columnName))* CLOSE_PAR_SYMBOL
+    AVERAGE_SYMBOL OPEN_PAR_SYMBOL columnItem CLOSE_PAR_SYMBOL
 ;
 
 minClause:
-    MIN_SYMBOL OPEN_PAR_SYMBOL columnItem ((ARITHMETIC | MULT_OPERATOR) (NUMBER | columnName))* CLOSE_PAR_SYMBOL
+    MIN_SYMBOL OPEN_PAR_SYMBOL columnItem CLOSE_PAR_SYMBOL
 ;
 
 maxClause:
-    MAX_SYMBOL OPEN_PAR_SYMBOL columnItem ((ARITHMETIC | MULT_OPERATOR) (NUMBER | columnName))* CLOSE_PAR_SYMBOL
+    MAX_SYMBOL OPEN_PAR_SYMBOL columnItem CLOSE_PAR_SYMBOL
 ;
 
 
 columnName:
-    TC_NAME | WORD
+    WORD
 ;
 selectAlias:
     AS_SYMBOL alias
@@ -72,10 +72,10 @@ alias:
 ;
 
 intoClause:
-    INTO_SYMBOL (OUTFILE_SYMBOL (SQ_TEXT | DQ_TEXT)
+    INTO_SYMBOL (
+        OUTFILE_SYMBOL (SQ_TEXT | DQ_TEXT)
         | DUMPFILE_SYMBOL (SQ_TEXT | DQ_TEXT)
         | WORD (COMMA_SYMBOL WORD)*
-        | VARIABLE
     )
 
 ;
@@ -108,7 +108,7 @@ whereClause:
 ;
 
 likeClause:
-    LIKE_SYMBOL LIKE_TEXT
+    LIKE_SYMBOL SINGLE_QUOTE MOD_OPERATOR? WORD MOD_OPERATOR? SINGLE_QUOTE
 ;
 
 inClause:
@@ -120,7 +120,7 @@ valuesList:
 ;
 
 valueName:
-    ((ARITHMETIC | MULT_OPERATOR) NUMBER)
+    (ARITHMETIC NUMBER)
     | NUMBER
     | SQ_TEXT
     | DQ_TEXT
@@ -132,7 +132,7 @@ condition:
 
 conditionInner:
     OPEN_PAR_SYMBOL condition CLOSE_PAR_SYMBOL ( (OR_SYMBOL condition)? | (AND_SYMBOL condition)? )
-    | columnItem (compOp (SQ_TEXT | DQ_TEXT | valueName | columnItem | (ANY_SYMBOL selectStatement)))? (AND_SYMBOL condition)?
+    | columnItem (compOp (valueName | columnItem | (ANY_SYMBOL query)))? (AND_SYMBOL condition)?
 ;
 
 groupByClause:
@@ -153,7 +153,7 @@ direction:
 ;
 
 havingClause:
-    HAVING_SYMBOL ((sumClause | countClause | avgClause | minClause | maxClause) compOp (columnName | NUMBER)) | condition
+    HAVING_SYMBOL condition
 ;
 
 compOp:
@@ -317,12 +317,12 @@ LESS_THAN_OPERATOR:        '<';
 NOT_EQUAL_OPERATOR:        '!=';
 NOT_EQUAL2_OPERATOR:       '<>' -> type(NOT_EQUAL_OPERATOR);
 
-ARITHMETIC: ('+' | '-' | '/' | '%');
 PLUS_OPERATOR:  '+';
 MULT_OPERATOR: '*';
 MINUS_OPERATOR: '-';
 DIV_OPERATOR:   '/';
 MOD_OPERATOR: '%';
+ARITHMETIC: ('+' | '*' | '-' | '/' | '%');
 
 LOGICAL_NOT_OPERATOR: '!';
 BITWISE_NOT_OPERATOR: '~';
@@ -383,12 +383,15 @@ fragment X: [xX];
 fragment Y: [yY];
 fragment Z: [zZ];
 
-LIKE_TEXT: '\'' (MOD_OPERATOR | WORD)+ '\'';
-SQ_TEXT: '\'' (WORD | EMAIL | WHITESPACE)+ '\'';
-DQ_TEXT: '"' (WORD | EMAIL | WHITESPACE)+ '"';
+SQ_TEXT: '\'' WORD '\'';
+DQ_TEXT: '"' WORD '"';
 NAME: '\'' WORD WHITESPACE WORD '\'';
 SINGLE_QUOTE: '\'' -> skip;
 DOUBLE_QUOTE: '"' -> skip;
+
+fragment LETTER_WHEN_UNQUOTED: DIGIT | LETTER_WHEN_UNQUOTED_NO_DIGIT;
+fragment LETTER_WHEN_UNQUOTED_NO_DIGIT: [a-zA-Z_$\u0080-\uffff];
+fragment LETTER_WITHOUT_FLOAT_PART: [a-df-zA-DF-Z_$\u0080-\uffff];
 
 fragment DIGIT:    [0-9];
 fragment DIGITS:   DIGIT+;
@@ -396,9 +399,7 @@ NUMBER         : DIGIT+ ([.,] DIGIT+)? ;
 
 fragment LOWERCASE  : [a-z] ;
 fragment UPPERCASE  : [A-Z];
-WORD                : (LOWERCASE | UPPERCASE | '_' | DIGITS)+ ;
-VARIABLE            : (LOWERCASE| UPPERCASE| '@')+ ;
-TC_NAME             : (LOWERCASE| UPPERCASE| DIGIT)+ [.] (LOWERCASE| UPPERCASE| DIGIT)+ ;
-EMAIL               : (LOWERCASE | UPPERCASE | DIGIT | '_' | '.' | '@')+ ;
+TABLE_NAME          : (WORD DOT_SYMBOL);
+WORD                : (LOWERCASE | UPPERCASE | DIGIT | '_' | '.' | '@' | '/')+ ;
 WHITESPACE          : (' ' | '\t') -> skip;
 NEWLINE             : ('\r'? '\n' | '\r')+ -> skip;

@@ -1,4 +1,4 @@
-// Generated from c:\Users\julia\OneDrive\Documents\GitHub\Query-Parser\antlr4runtime\src\main\antlr4\edu\gatech\parser\MySQLQuery.g4 by ANTLR 4.7.1
+// Generated from MySQLQuery.g4 by ANTLR 4.7
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class MySQLQueryParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.7.1", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -39,12 +39,12 @@ public class MySQLQueryParser extends Parser {
 		TC_NAME=89, EMAIL=90, WHITESPACE=91, NEWLINE=92, NOT_EQUAL2_OPERATOR=93;
 	public static final int
 		RULE_query = 0, RULE_useClause = 1, RULE_simpleStatement = 2, RULE_selectStatement = 3, 
-		RULE_distinctClause = 4, RULE_selectItemList = 5, RULE_selectItem = 6, 
-		RULE_sumClause = 7, RULE_countClause = 8, RULE_avgClause = 9, RULE_minClause = 10, 
-		RULE_maxClause = 11, RULE_columnName = 12, RULE_selectAlias = 13, RULE_alias = 14, 
-		RULE_intoClause = 15, RULE_fromClause = 16, RULE_tableList = 17, RULE_tableItem = 18, 
-		RULE_tableName = 19, RULE_whereClause = 20, RULE_likeClause = 21, RULE_inClause = 22, 
-		RULE_valuesList = 23, RULE_valueName = 24, RULE_condition = 25, RULE_conditionInner = 26, 
+		RULE_selectStatementParens = 4, RULE_distinctClause = 5, RULE_selectItemList = 6, 
+		RULE_selectItem = 7, RULE_sumClause = 8, RULE_countClause = 9, RULE_avgClause = 10, 
+		RULE_minClause = 11, RULE_maxClause = 12, RULE_columnName = 13, RULE_selectAlias = 14, 
+		RULE_alias = 15, RULE_intoClause = 16, RULE_fromClause = 17, RULE_tableList = 18, 
+		RULE_tableItem = 19, RULE_tableName = 20, RULE_whereClause = 21, RULE_likeClause = 22, 
+		RULE_inClause = 23, RULE_valuesList = 24, RULE_valueName = 25, RULE_expr = 26, 
 		RULE_groupByClause = 27, RULE_orderList = 28, RULE_orderExpression = 29, 
 		RULE_direction = 30, RULE_havingClause = 31, RULE_compOp = 32, RULE_orderClause = 33, 
 		RULE_deleteStatement = 34, RULE_limitClause = 35, RULE_createStatement = 36, 
@@ -54,17 +54,16 @@ public class MySQLQueryParser extends Parser {
 		RULE_joinClause = 47, RULE_innerJoin = 48, RULE_leftJoin = 49, RULE_rightJoin = 50, 
 		RULE_onClause = 51, RULE_onList = 52, RULE_unionClause = 53;
 	public static final String[] ruleNames = {
-		"query", "useClause", "simpleStatement", "selectStatement", "distinctClause", 
-		"selectItemList", "selectItem", "sumClause", "countClause", "avgClause", 
-		"minClause", "maxClause", "columnName", "selectAlias", "alias", "intoClause", 
-		"fromClause", "tableList", "tableItem", "tableName", "whereClause", "likeClause", 
-		"inClause", "valuesList", "valueName", "condition", "conditionInner", 
-		"groupByClause", "orderList", "orderExpression", "direction", "havingClause", 
-		"compOp", "orderClause", "deleteStatement", "limitClause", "createStatement", 
-		"newTable", "existingTable", "insertStatement", "columnPar", "columnList", 
-		"columnItem", "valueItem", "updateStatement", "tableRefList", "assignmentList", 
-		"joinClause", "innerJoin", "leftJoin", "rightJoin", "onClause", "onList", 
-		"unionClause"
+		"query", "useClause", "simpleStatement", "selectStatement", "selectStatementParens", 
+		"distinctClause", "selectItemList", "selectItem", "sumClause", "countClause", 
+		"avgClause", "minClause", "maxClause", "columnName", "selectAlias", "alias", 
+		"intoClause", "fromClause", "tableList", "tableItem", "tableName", "whereClause", 
+		"likeClause", "inClause", "valuesList", "valueName", "expr", "groupByClause", 
+		"orderList", "orderExpression", "direction", "havingClause", "compOp", 
+		"orderClause", "deleteStatement", "limitClause", "createStatement", "newTable", 
+		"existingTable", "insertStatement", "columnPar", "columnList", "columnItem", 
+		"valueItem", "updateStatement", "tableRefList", "assignmentList", "joinClause", 
+		"innerJoin", "leftJoin", "rightJoin", "onClause", "onList", "unionClause"
 	};
 
 	private static final String[] _LITERAL_NAMES = {
@@ -162,6 +161,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_query; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterQuery(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitQuery(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitQuery(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final QueryContext query() throws RecognitionException {
@@ -183,7 +195,6 @@ public class MySQLQueryParser extends Parser {
 			case INSERT_SYMBOL:
 			case SELECT_SYMBOL:
 			case UPDATE_SYMBOL:
-			case OPEN_PAR_SYMBOL:
 				enterOuterAlt(_localctx, 2);
 				{
 				{
@@ -216,6 +227,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_useClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterUseClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitUseClause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitUseClause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final UseClauseContext useClause() throws RecognitionException {
@@ -261,6 +285,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_simpleStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterSimpleStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitSimpleStatement(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitSimpleStatement(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final SimpleStatementContext simpleStatement() throws RecognitionException {
@@ -285,7 +322,6 @@ public class MySQLQueryParser extends Parser {
 				}
 				break;
 			case SELECT_SYMBOL:
-			case OPEN_PAR_SYMBOL:
 				enterOuterAlt(_localctx, 3);
 				{
 				setState(119);
@@ -329,7 +365,6 @@ public class MySQLQueryParser extends Parser {
 		public FromClauseContext fromClause() {
 			return getRuleContext(FromClauseContext.class,0);
 		}
-		public TerminalNode OPEN_PAR_SYMBOL() { return getToken(MySQLQueryParser.OPEN_PAR_SYMBOL, 0); }
 		public DistinctClauseContext distinctClause() {
 			return getRuleContext(DistinctClauseContext.class,0);
 		}
@@ -354,11 +389,23 @@ public class MySQLQueryParser extends Parser {
 		public OrderClauseContext orderClause() {
 			return getRuleContext(OrderClauseContext.class,0);
 		}
-		public TerminalNode CLOSE_PAR_SYMBOL() { return getToken(MySQLQueryParser.CLOSE_PAR_SYMBOL, 0); }
 		public SelectStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_selectStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterSelectStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitSelectStatement(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitSelectStatement(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final SelectStatementContext selectStatement() throws RecognitionException {
@@ -368,69 +415,69 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(125);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			if (_la==OPEN_PAR_SYMBOL) {
-				{
-				setState(124);
-				match(OPEN_PAR_SYMBOL);
-				}
-			}
-
-			setState(127);
+			setState(124);
 			match(SELECT_SYMBOL);
-			setState(129);
+			setState(126);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==DISTINCT_SYMBOL) {
 				{
-				setState(128);
+				setState(125);
 				distinctClause();
 				}
 			}
 
-			setState(131);
+			setState(128);
 			selectItemList();
-			setState(133);
+			setState(130);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==INTO_SYMBOL) {
 				{
-				setState(132);
+				setState(129);
 				intoClause();
 				}
 			}
 
-			setState(135);
+			setState(132);
 			fromClause();
-			setState(137);
+			setState(134);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LEFT_SYMBOL) | (1L << INNER_SYMBOL) | (1L << RIGHT_SYMBOL))) != 0)) {
 				{
-				setState(136);
+				setState(133);
 				joinClause();
+				}
+			}
+
+			setState(137);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			if (_la==UNION_SYMBOL) {
+				{
+				setState(136);
+				unionClause();
 				}
 			}
 
 			setState(140);
 			_errHandler.sync(this);
-			_la = _input.LA(1);
-			if (_la==UNION_SYMBOL) {
+			switch ( getInterpreter().adaptivePredict(_input,6,_ctx) ) {
+			case 1:
 				{
 				setState(139);
-				unionClause();
+				whereClause();
 				}
+				break;
 			}
-
 			setState(143);
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,7,_ctx) ) {
 			case 1:
 				{
 				setState(142);
-				whereClause();
+				groupByClause();
 				}
 				break;
 			}
@@ -440,7 +487,7 @@ public class MySQLQueryParser extends Parser {
 			case 1:
 				{
 				setState(145);
-				groupByClause();
+				havingClause();
 				}
 				break;
 			}
@@ -450,30 +497,173 @@ public class MySQLQueryParser extends Parser {
 			case 1:
 				{
 				setState(148);
-				havingClause();
-				}
-				break;
-			}
-			setState(152);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,10,_ctx) ) {
-			case 1:
-				{
-				setState(151);
 				orderClause();
 				}
 				break;
 			}
-			setState(155);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,11,_ctx) ) {
-			case 1:
-				{
-				setState(154);
-				match(CLOSE_PAR_SYMBOL);
-				}
-				break;
 			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class SelectStatementParensContext extends ParserRuleContext {
+		public TerminalNode OPEN_PAR_SYMBOL() { return getToken(MySQLQueryParser.OPEN_PAR_SYMBOL, 0); }
+		public TerminalNode SELECT_SYMBOL() { return getToken(MySQLQueryParser.SELECT_SYMBOL, 0); }
+		public SelectItemListContext selectItemList() {
+			return getRuleContext(SelectItemListContext.class,0);
+		}
+		public FromClauseContext fromClause() {
+			return getRuleContext(FromClauseContext.class,0);
+		}
+		public TerminalNode CLOSE_PAR_SYMBOL() { return getToken(MySQLQueryParser.CLOSE_PAR_SYMBOL, 0); }
+		public DistinctClauseContext distinctClause() {
+			return getRuleContext(DistinctClauseContext.class,0);
+		}
+		public IntoClauseContext intoClause() {
+			return getRuleContext(IntoClauseContext.class,0);
+		}
+		public JoinClauseContext joinClause() {
+			return getRuleContext(JoinClauseContext.class,0);
+		}
+		public UnionClauseContext unionClause() {
+			return getRuleContext(UnionClauseContext.class,0);
+		}
+		public WhereClauseContext whereClause() {
+			return getRuleContext(WhereClauseContext.class,0);
+		}
+		public GroupByClauseContext groupByClause() {
+			return getRuleContext(GroupByClauseContext.class,0);
+		}
+		public HavingClauseContext havingClause() {
+			return getRuleContext(HavingClauseContext.class,0);
+		}
+		public OrderClauseContext orderClause() {
+			return getRuleContext(OrderClauseContext.class,0);
+		}
+		public SelectStatementParensContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_selectStatementParens; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterSelectStatementParens(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitSelectStatementParens(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitSelectStatementParens(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final SelectStatementParensContext selectStatementParens() throws RecognitionException {
+		SelectStatementParensContext _localctx = new SelectStatementParensContext(_ctx, getState());
+		enterRule(_localctx, 8, RULE_selectStatementParens);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(151);
+			match(OPEN_PAR_SYMBOL);
+			setState(152);
+			match(SELECT_SYMBOL);
+			setState(154);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			if (_la==DISTINCT_SYMBOL) {
+				{
+				setState(153);
+				distinctClause();
+				}
+			}
+
+			setState(156);
+			selectItemList();
+			setState(158);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			if (_la==INTO_SYMBOL) {
+				{
+				setState(157);
+				intoClause();
+				}
+			}
+
+			setState(160);
+			fromClause();
+			setState(162);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LEFT_SYMBOL) | (1L << INNER_SYMBOL) | (1L << RIGHT_SYMBOL))) != 0)) {
+				{
+				setState(161);
+				joinClause();
+				}
+			}
+
+			setState(165);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			if (_la==UNION_SYMBOL) {
+				{
+				setState(164);
+				unionClause();
+				}
+			}
+
+			setState(168);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			if (_la==WHERE_SYMBOL) {
+				{
+				setState(167);
+				whereClause();
+				}
+			}
+
+			setState(171);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			if (_la==GROUP_SYMBOL) {
+				{
+				setState(170);
+				groupByClause();
+				}
+			}
+
+			setState(174);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			if (_la==HAVING_SYMBOL) {
+				{
+				setState(173);
+				havingClause();
+				}
+			}
+
+			setState(177);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			if (_la==ORDER_SYMBOL) {
+				{
+				setState(176);
+				orderClause();
+				}
+			}
+
+			setState(179);
+			match(CLOSE_PAR_SYMBOL);
 			}
 		}
 		catch (RecognitionException re) {
@@ -493,15 +683,28 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_distinctClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterDistinctClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitDistinctClause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitDistinctClause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final DistinctClauseContext distinctClause() throws RecognitionException {
 		DistinctClauseContext _localctx = new DistinctClauseContext(_ctx, getState());
-		enterRule(_localctx, 8, RULE_distinctClause);
+		enterRule(_localctx, 10, RULE_distinctClause);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(157);
+			setState(181);
 			match(DISTINCT_SYMBOL);
 			}
 		}
@@ -532,16 +735,29 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_selectItemList; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterSelectItemList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitSelectItemList(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitSelectItemList(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final SelectItemListContext selectItemList() throws RecognitionException {
 		SelectItemListContext _localctx = new SelectItemListContext(_ctx, getState());
-		enterRule(_localctx, 10, RULE_selectItemList);
+		enterRule(_localctx, 12, RULE_selectItemList);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(161);
+			setState(185);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case AVERAGE_SYMBOL:
@@ -553,33 +769,34 @@ public class MySQLQueryParser extends Parser {
 			case COMMA_SYMBOL:
 			case INTO_SYMBOL:
 			case WORD:
+			case TC_NAME:
 				{
-				setState(159);
+				setState(183);
 				selectItem();
 				}
 				break;
 			case MULT_OPERATOR:
 				{
-				setState(160);
+				setState(184);
 				match(MULT_OPERATOR);
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
 			}
-			setState(167);
+			setState(191);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==COMMA_SYMBOL) {
 				{
 				{
-				setState(163);
+				setState(187);
 				match(COMMA_SYMBOL);
-				setState(164);
+				setState(188);
 				selectItem();
 				}
 				}
-				setState(169);
+				setState(193);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -625,20 +842,34 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_selectItem; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterSelectItem(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitSelectItem(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitSelectItem(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final SelectItemContext selectItem() throws RecognitionException {
 		SelectItemContext _localctx = new SelectItemContext(_ctx, getState());
-		enterRule(_localctx, 12, RULE_selectItem);
+		enterRule(_localctx, 14, RULE_selectItem);
 		int _la;
 		try {
-			setState(184);
+			setState(208);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case WORD:
+			case TC_NAME:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(170);
+				setState(194);
 				columnItem();
 				}
 				break;
@@ -652,53 +883,53 @@ public class MySQLQueryParser extends Parser {
 			case INTO_SYMBOL:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(182);
+				setState(206);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << AVERAGE_SYMBOL) | (1L << COUNT_SYMBOL) | (1L << MIN_SYMBOL) | (1L << MAX_SYMBOL) | (1L << SUM_SYMBOL))) != 0)) {
 					{
-					setState(176);
+					setState(200);
 					_errHandler.sync(this);
 					switch (_input.LA(1)) {
 					case SUM_SYMBOL:
 						{
-						setState(171);
+						setState(195);
 						sumClause();
 						}
 						break;
 					case COUNT_SYMBOL:
 						{
-						setState(172);
+						setState(196);
 						countClause();
 						}
 						break;
 					case AVERAGE_SYMBOL:
 						{
-						setState(173);
+						setState(197);
 						avgClause();
 						}
 						break;
 					case MIN_SYMBOL:
 						{
-						setState(174);
+						setState(198);
 						minClause();
 						}
 						break;
 					case MAX_SYMBOL:
 						{
-						setState(175);
+						setState(199);
 						maxClause();
 						}
 						break;
 					default:
 						throw new NoViableAltException(this);
 					}
-					setState(180);
+					setState(204);
 					_errHandler.sync(this);
 					switch (_input.LA(1)) {
 					case AS_SYMBOL:
 						{
-						setState(178);
+						setState(202);
 						selectAlias();
 						}
 						break;
@@ -706,7 +937,7 @@ public class MySQLQueryParser extends Parser {
 					case DQ_TEXT:
 					case WORD:
 						{
-						setState(179);
+						setState(203);
 						alias();
 						}
 						break;
@@ -748,21 +979,34 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_sumClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterSumClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitSumClause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitSumClause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final SumClauseContext sumClause() throws RecognitionException {
 		SumClauseContext _localctx = new SumClauseContext(_ctx, getState());
-		enterRule(_localctx, 14, RULE_sumClause);
+		enterRule(_localctx, 16, RULE_sumClause);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(186);
+			setState(210);
 			match(SUM_SYMBOL);
-			setState(187);
+			setState(211);
 			match(OPEN_PAR_SYMBOL);
-			setState(188);
+			setState(212);
 			columnItem();
-			setState(189);
+			setState(213);
 			match(CLOSE_PAR_SYMBOL);
 			}
 		}
@@ -788,21 +1032,34 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_countClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterCountClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitCountClause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitCountClause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final CountClauseContext countClause() throws RecognitionException {
 		CountClauseContext _localctx = new CountClauseContext(_ctx, getState());
-		enterRule(_localctx, 16, RULE_countClause);
+		enterRule(_localctx, 18, RULE_countClause);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(191);
+			setState(215);
 			match(COUNT_SYMBOL);
-			setState(192);
+			setState(216);
 			match(OPEN_PAR_SYMBOL);
-			setState(193);
+			setState(217);
 			columnItem();
-			setState(194);
+			setState(218);
 			match(CLOSE_PAR_SYMBOL);
 			}
 		}
@@ -828,21 +1085,34 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_avgClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterAvgClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitAvgClause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitAvgClause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final AvgClauseContext avgClause() throws RecognitionException {
 		AvgClauseContext _localctx = new AvgClauseContext(_ctx, getState());
-		enterRule(_localctx, 18, RULE_avgClause);
+		enterRule(_localctx, 20, RULE_avgClause);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(196);
+			setState(220);
 			match(AVERAGE_SYMBOL);
-			setState(197);
+			setState(221);
 			match(OPEN_PAR_SYMBOL);
-			setState(198);
+			setState(222);
 			columnItem();
-			setState(199);
+			setState(223);
 			match(CLOSE_PAR_SYMBOL);
 			}
 		}
@@ -868,21 +1138,34 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_minClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterMinClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitMinClause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitMinClause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final MinClauseContext minClause() throws RecognitionException {
 		MinClauseContext _localctx = new MinClauseContext(_ctx, getState());
-		enterRule(_localctx, 20, RULE_minClause);
+		enterRule(_localctx, 22, RULE_minClause);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(201);
+			setState(225);
 			match(MIN_SYMBOL);
-			setState(202);
+			setState(226);
 			match(OPEN_PAR_SYMBOL);
-			setState(203);
+			setState(227);
 			columnItem();
-			setState(204);
+			setState(228);
 			match(CLOSE_PAR_SYMBOL);
 			}
 		}
@@ -908,21 +1191,34 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_maxClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterMaxClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitMaxClause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitMaxClause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final MaxClauseContext maxClause() throws RecognitionException {
 		MaxClauseContext _localctx = new MaxClauseContext(_ctx, getState());
-		enterRule(_localctx, 22, RULE_maxClause);
+		enterRule(_localctx, 24, RULE_maxClause);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(206);
+			setState(230);
 			match(MAX_SYMBOL);
-			setState(207);
+			setState(231);
 			match(OPEN_PAR_SYMBOL);
-			setState(208);
+			setState(232);
 			columnItem();
-			setState(209);
+			setState(233);
 			match(CLOSE_PAR_SYMBOL);
 			}
 		}
@@ -938,21 +1234,44 @@ public class MySQLQueryParser extends Parser {
 	}
 
 	public static class ColumnNameContext extends ParserRuleContext {
+		public TerminalNode TC_NAME() { return getToken(MySQLQueryParser.TC_NAME, 0); }
 		public TerminalNode WORD() { return getToken(MySQLQueryParser.WORD, 0); }
 		public ColumnNameContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_columnName; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterColumnName(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitColumnName(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitColumnName(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ColumnNameContext columnName() throws RecognitionException {
 		ColumnNameContext _localctx = new ColumnNameContext(_ctx, getState());
-		enterRule(_localctx, 24, RULE_columnName);
+		enterRule(_localctx, 26, RULE_columnName);
+		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(211);
-			match(WORD);
+			setState(235);
+			_la = _input.LA(1);
+			if ( !(_la==WORD || _la==TC_NAME) ) {
+			_errHandler.recoverInline(this);
+			}
+			else {
+				if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+				_errHandler.reportMatch(this);
+				consume();
+			}
 			}
 		}
 		catch (RecognitionException re) {
@@ -975,17 +1294,30 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_selectAlias; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterSelectAlias(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitSelectAlias(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitSelectAlias(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final SelectAliasContext selectAlias() throws RecognitionException {
 		SelectAliasContext _localctx = new SelectAliasContext(_ctx, getState());
-		enterRule(_localctx, 26, RULE_selectAlias);
+		enterRule(_localctx, 28, RULE_selectAlias);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(213);
+			setState(237);
 			match(AS_SYMBOL);
-			setState(214);
+			setState(238);
 			alias();
 			}
 		}
@@ -1008,16 +1340,29 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_alias; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterAlias(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitAlias(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitAlias(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final AliasContext alias() throws RecognitionException {
 		AliasContext _localctx = new AliasContext(_ctx, getState());
-		enterRule(_localctx, 28, RULE_alias);
+		enterRule(_localctx, 30, RULE_alias);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(216);
+			setState(240);
 			_la = _input.LA(1);
 			if ( !(((((_la - 81)) & ~0x3f) == 0 && ((1L << (_la - 81)) & ((1L << (SQ_TEXT - 81)) | (1L << (DQ_TEXT - 81)) | (1L << (WORD - 81)))) != 0)) ) {
 			_errHandler.recoverInline(this);
@@ -1048,6 +1393,10 @@ public class MySQLQueryParser extends Parser {
 		public TerminalNode WORD(int i) {
 			return getToken(MySQLQueryParser.WORD, i);
 		}
+		public List<TerminalNode> VARIABLE() { return getTokens(MySQLQueryParser.VARIABLE); }
+		public TerminalNode VARIABLE(int i) {
+			return getToken(MySQLQueryParser.VARIABLE, i);
+		}
 		public TerminalNode SQ_TEXT() { return getToken(MySQLQueryParser.SQ_TEXT, 0); }
 		public TerminalNode DQ_TEXT() { return getToken(MySQLQueryParser.DQ_TEXT, 0); }
 		public List<TerminalNode> COMMA_SYMBOL() { return getTokens(MySQLQueryParser.COMMA_SYMBOL); }
@@ -1058,25 +1407,38 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_intoClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterIntoClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitIntoClause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitIntoClause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final IntoClauseContext intoClause() throws RecognitionException {
 		IntoClauseContext _localctx = new IntoClauseContext(_ctx, getState());
-		enterRule(_localctx, 30, RULE_intoClause);
+		enterRule(_localctx, 32, RULE_intoClause);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(218);
+			setState(242);
 			match(INTO_SYMBOL);
-			setState(231);
+			setState(263);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case OUTFILE_SYMBOL:
 				{
-				setState(219);
+				setState(243);
 				match(OUTFILE_SYMBOL);
-				setState(220);
+				setState(244);
 				_la = _input.LA(1);
 				if ( !(_la==SQ_TEXT || _la==DQ_TEXT) ) {
 				_errHandler.recoverInline(this);
@@ -1090,9 +1452,9 @@ public class MySQLQueryParser extends Parser {
 				break;
 			case DUMPFILE_SYMBOL:
 				{
-				setState(221);
+				setState(245);
 				match(DUMPFILE_SYMBOL);
-				setState(222);
+				setState(246);
 				_la = _input.LA(1);
 				if ( !(_la==SQ_TEXT || _la==DQ_TEXT) ) {
 				_errHandler.recoverInline(this);
@@ -1106,21 +1468,43 @@ public class MySQLQueryParser extends Parser {
 				break;
 			case WORD:
 				{
-				setState(223);
+				setState(247);
 				match(WORD);
-				setState(228);
+				setState(252);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				while (_la==COMMA_SYMBOL) {
 					{
 					{
-					setState(224);
+					setState(248);
 					match(COMMA_SYMBOL);
-					setState(225);
+					setState(249);
 					match(WORD);
 					}
 					}
-					setState(230);
+					setState(254);
+					_errHandler.sync(this);
+					_la = _input.LA(1);
+				}
+				}
+				break;
+			case VARIABLE:
+				{
+				setState(255);
+				match(VARIABLE);
+				setState(260);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+				while (_la==COMMA_SYMBOL) {
+					{
+					{
+					setState(256);
+					match(COMMA_SYMBOL);
+					setState(257);
+					match(VARIABLE);
+					}
+					}
+					setState(262);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
@@ -1151,17 +1535,30 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_fromClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterFromClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitFromClause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitFromClause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final FromClauseContext fromClause() throws RecognitionException {
 		FromClauseContext _localctx = new FromClauseContext(_ctx, getState());
-		enterRule(_localctx, 32, RULE_fromClause);
+		enterRule(_localctx, 34, RULE_fromClause);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(233);
+			setState(265);
 			match(FROM_SYMBOL);
-			setState(234);
+			setState(266);
 			tableList();
 			}
 		}
@@ -1191,30 +1588,43 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_tableList; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterTableList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitTableList(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitTableList(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final TableListContext tableList() throws RecognitionException {
 		TableListContext _localctx = new TableListContext(_ctx, getState());
-		enterRule(_localctx, 34, RULE_tableList);
+		enterRule(_localctx, 36, RULE_tableList);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(236);
+			setState(268);
 			tableItem();
-			setState(241);
+			setState(273);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==COMMA_SYMBOL) {
 				{
 				{
-				setState(237);
+				setState(269);
 				match(COMMA_SYMBOL);
-				setState(238);
+				setState(270);
 				tableItem();
 				}
 				}
-				setState(243);
+				setState(275);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -1245,19 +1655,32 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_tableItem; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterTableItem(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitTableItem(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitTableItem(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final TableItemContext tableItem() throws RecognitionException {
 		TableItemContext _localctx = new TableItemContext(_ctx, getState());
-		enterRule(_localctx, 36, RULE_tableItem);
+		enterRule(_localctx, 38, RULE_tableItem);
 		try {
-			setState(251);
+			setState(283);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,21,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,28,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(244);
+				setState(276);
 				tableName();
 				}
 				break;
@@ -1265,9 +1688,9 @@ public class MySQLQueryParser extends Parser {
 				enterOuterAlt(_localctx, 2);
 				{
 				{
-				setState(245);
+				setState(277);
 				tableName();
-				setState(246);
+				setState(278);
 				alias();
 				}
 				}
@@ -1276,9 +1699,9 @@ public class MySQLQueryParser extends Parser {
 				enterOuterAlt(_localctx, 3);
 				{
 				{
-				setState(248);
+				setState(280);
 				tableName();
-				setState(249);
+				setState(281);
 				selectAlias();
 				}
 				}
@@ -1302,15 +1725,28 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_tableName; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterTableName(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitTableName(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitTableName(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final TableNameContext tableName() throws RecognitionException {
 		TableNameContext _localctx = new TableNameContext(_ctx, getState());
-		enterRule(_localctx, 38, RULE_tableName);
+		enterRule(_localctx, 40, RULE_tableName);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(253);
+			setState(285);
 			match(WORD);
 			}
 		}
@@ -1327,19 +1763,20 @@ public class MySQLQueryParser extends Parser {
 
 	public static class WhereClauseContext extends ParserRuleContext {
 		public TerminalNode WHERE_SYMBOL() { return getToken(MySQLQueryParser.WHERE_SYMBOL, 0); }
-		public ConditionContext condition() {
-			return getRuleContext(ConditionContext.class,0);
-		}
 		public LikeClauseContext likeClause() {
 			return getRuleContext(LikeClauseContext.class,0);
 		}
 		public InClauseContext inClause() {
 			return getRuleContext(InClauseContext.class,0);
 		}
-		public TerminalNode EXISTS_SYMBOL() { return getToken(MySQLQueryParser.EXISTS_SYMBOL, 0); }
-		public SelectStatementContext selectStatement() {
-			return getRuleContext(SelectStatementContext.class,0);
+		public List<ExprContext> expr() {
+			return getRuleContexts(ExprContext.class);
 		}
+		public ExprContext expr(int i) {
+			return getRuleContext(ExprContext.class,i);
+		}
+		public TerminalNode OR_SYMBOL() { return getToken(MySQLQueryParser.OR_SYMBOL, 0); }
+		public TerminalNode EXISTS_SYMBOL() { return getToken(MySQLQueryParser.EXISTS_SYMBOL, 0); }
 		public TerminalNode ANY_SYMBOL() { return getToken(MySQLQueryParser.ANY_SYMBOL, 0); }
 		public TerminalNode BETWEEN_SYMBOL() { return getToken(MySQLQueryParser.BETWEEN_SYMBOL, 0); }
 		public List<ValueNameContext> valueName() {
@@ -1349,110 +1786,198 @@ public class MySQLQueryParser extends Parser {
 			return getRuleContext(ValueNameContext.class,i);
 		}
 		public TerminalNode AND_SYMBOL() { return getToken(MySQLQueryParser.AND_SYMBOL, 0); }
+		public SelectStatementParensContext selectStatementParens() {
+			return getRuleContext(SelectStatementParensContext.class,0);
+		}
+		public SelectStatementContext selectStatement() {
+			return getRuleContext(SelectStatementContext.class,0);
+		}
+		public InsertStatementContext insertStatement() {
+			return getRuleContext(InsertStatementContext.class,0);
+		}
+		public DeleteStatementContext deleteStatement() {
+			return getRuleContext(DeleteStatementContext.class,0);
+		}
+		public UpdateStatementContext updateStatement() {
+			return getRuleContext(UpdateStatementContext.class,0);
+		}
+		public CreateStatementContext createStatement() {
+			return getRuleContext(CreateStatementContext.class,0);
+		}
 		public TerminalNode NOT_SYMBOL() { return getToken(MySQLQueryParser.NOT_SYMBOL, 0); }
 		public WhereClauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_whereClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterWhereClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitWhereClause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitWhereClause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final WhereClauseContext whereClause() throws RecognitionException {
 		WhereClauseContext _localctx = new WhereClauseContext(_ctx, getState());
-		enterRule(_localctx, 40, RULE_whereClause);
+		enterRule(_localctx, 42, RULE_whereClause);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(255);
+			setState(287);
 			match(WHERE_SYMBOL);
-			setState(257);
+			setState(291);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,22,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,29,_ctx) ) {
 			case 1:
 				{
-				setState(256);
-				condition();
-				}
-				break;
-			}
-			setState(260);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			if (_la==LIKE_SYMBOL) {
-				{
-				setState(259);
+				setState(288);
 				likeClause();
 				}
-			}
-
-			setState(263);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,24,_ctx) ) {
-			case 1:
+				break;
+			case 2:
 				{
-				setState(262);
+				setState(289);
 				inClause();
 				}
 				break;
+			case 3:
+				{
+				setState(290);
+				expr();
+				}
+				break;
 			}
-			setState(277);
+			setState(319);
 			_errHandler.sync(this);
-			switch (_input.LA(1)) {
-			case EXISTS_SYMBOL:
-			case NOT_SYMBOL:
+			switch ( getInterpreter().adaptivePredict(_input,34,_ctx) ) {
+			case 1:
 				{
-				{
-				setState(266);
+				setState(315);
 				_errHandler.sync(this);
-				_la = _input.LA(1);
-				if (_la==NOT_SYMBOL) {
+				switch (_input.LA(1)) {
+				case EXISTS_SYMBOL:
+				case NOT_SYMBOL:
 					{
-					setState(265);
-					match(NOT_SYMBOL);
+					{
+					setState(294);
+					_errHandler.sync(this);
+					_la = _input.LA(1);
+					if (_la==NOT_SYMBOL) {
+						{
+						setState(293);
+						match(NOT_SYMBOL);
+						}
 					}
-				}
 
-				setState(268);
-				match(EXISTS_SYMBOL);
-				setState(269);
-				selectStatement();
+					setState(296);
+					match(EXISTS_SYMBOL);
+					setState(299);
+					_errHandler.sync(this);
+					switch (_input.LA(1)) {
+					case OPEN_PAR_SYMBOL:
+						{
+						setState(297);
+						selectStatementParens();
+						}
+						break;
+					case SELECT_SYMBOL:
+						{
+						setState(298);
+						selectStatement();
+						}
+						break;
+					default:
+						throw new NoViableAltException(this);
+					}
+					}
+					}
+					break;
+				case ANY_SYMBOL:
+					{
+					{
+					setState(301);
+					match(ANY_SYMBOL);
+					setState(308);
+					_errHandler.sync(this);
+					switch (_input.LA(1)) {
+					case OPEN_PAR_SYMBOL:
+						{
+						setState(302);
+						selectStatementParens();
+						}
+						break;
+					case SELECT_SYMBOL:
+						{
+						setState(303);
+						selectStatement();
+						}
+						break;
+					case INSERT_SYMBOL:
+						{
+						setState(304);
+						insertStatement();
+						}
+						break;
+					case DELETE_SYMBOL:
+						{
+						setState(305);
+						deleteStatement();
+						}
+						break;
+					case UPDATE_SYMBOL:
+						{
+						setState(306);
+						updateStatement();
+						}
+						break;
+					case CREATE_SYMBOL:
+						{
+						setState(307);
+						createStatement();
+						}
+						break;
+					default:
+						throw new NoViableAltException(this);
+					}
+					}
+					}
+					break;
+				case BETWEEN_SYMBOL:
+					{
+					{
+					setState(310);
+					match(BETWEEN_SYMBOL);
+					setState(311);
+					valueName();
+					setState(312);
+					match(AND_SYMBOL);
+					setState(313);
+					valueName();
+					}
+					}
+					break;
+				default:
+					throw new NoViableAltException(this);
 				}
 				}
 				break;
-			case ANY_SYMBOL:
+			case 2:
 				{
 				{
-				setState(270);
-				match(ANY_SYMBOL);
-				setState(271);
-				selectStatement();
+				setState(317);
+				match(OR_SYMBOL);
+				setState(318);
+				expr();
 				}
 				}
-				break;
-			case BETWEEN_SYMBOL:
-				{
-				{
-				setState(272);
-				match(BETWEEN_SYMBOL);
-				setState(273);
-				valueName();
-				setState(274);
-				match(AND_SYMBOL);
-				setState(275);
-				valueName();
-				}
-				}
-				break;
-			case GROUP_SYMBOL:
-			case ORDER_SYMBOL:
-			case WHERE_SYMBOL:
-			case SEMICOLON_SYMBOL:
-			case CLOSE_PAR_SYMBOL:
-			case HAVING_SYMBOL:
-			case NUMBER:
-			case WORD:
-				break;
-			default:
 				break;
 			}
 			}
@@ -1483,42 +2008,55 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_likeClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterLikeClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitLikeClause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitLikeClause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final LikeClauseContext likeClause() throws RecognitionException {
 		LikeClauseContext _localctx = new LikeClauseContext(_ctx, getState());
-		enterRule(_localctx, 42, RULE_likeClause);
+		enterRule(_localctx, 44, RULE_likeClause);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(279);
+			setState(321);
 			match(LIKE_SYMBOL);
-			setState(280);
+			setState(322);
 			match(SINGLE_QUOTE);
-			setState(282);
+			setState(324);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==MOD_OPERATOR) {
 				{
-				setState(281);
+				setState(323);
 				match(MOD_OPERATOR);
 				}
 			}
 
-			setState(284);
+			setState(326);
 			match(WORD);
-			setState(286);
+			setState(328);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==MOD_OPERATOR) {
 				{
-				setState(285);
+				setState(327);
 				match(MOD_OPERATOR);
 				}
 			}
 
-			setState(288);
+			setState(330);
 			match(SINGLE_QUOTE);
 			}
 		}
@@ -1534,66 +2072,105 @@ public class MySQLQueryParser extends Parser {
 	}
 
 	public static class InClauseContext extends ParserRuleContext {
+		public ColumnNameContext columnName() {
+			return getRuleContext(ColumnNameContext.class,0);
+		}
 		public TerminalNode IN_SYMBOL() { return getToken(MySQLQueryParser.IN_SYMBOL, 0); }
 		public TerminalNode OPEN_PAR_SYMBOL() { return getToken(MySQLQueryParser.OPEN_PAR_SYMBOL, 0); }
 		public TerminalNode CLOSE_PAR_SYMBOL() { return getToken(MySQLQueryParser.CLOSE_PAR_SYMBOL, 0); }
 		public ValuesListContext valuesList() {
 			return getRuleContext(ValuesListContext.class,0);
 		}
+		public TerminalNode NOT_SYMBOL() { return getToken(MySQLQueryParser.NOT_SYMBOL, 0); }
+		public SelectStatementParensContext selectStatementParens() {
+			return getRuleContext(SelectStatementParensContext.class,0);
+		}
 		public SelectStatementContext selectStatement() {
 			return getRuleContext(SelectStatementContext.class,0);
 		}
-		public TerminalNode NOT_SYMBOL() { return getToken(MySQLQueryParser.NOT_SYMBOL, 0); }
 		public InClauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_inClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterInClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitInClause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitInClause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final InClauseContext inClause() throws RecognitionException {
 		InClauseContext _localctx = new InClauseContext(_ctx, getState());
-		enterRule(_localctx, 44, RULE_inClause);
+		enterRule(_localctx, 46, RULE_inClause);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(291);
+			setState(332);
+			columnName();
+			setState(334);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==NOT_SYMBOL) {
 				{
-				setState(290);
+				setState(333);
 				match(NOT_SYMBOL);
 				}
 			}
 
-			setState(293);
+			setState(336);
 			match(IN_SYMBOL);
-			setState(294);
+			setState(337);
 			match(OPEN_PAR_SYMBOL);
-			setState(297);
+			setState(343);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case ARITHMETIC:
 			case SQ_TEXT:
 			case DQ_TEXT:
 			case NUMBER:
+			case WORD:
+			case EMAIL:
 				{
-				setState(295);
+				setState(338);
 				valuesList();
 				}
 				break;
 			case SELECT_SYMBOL:
 			case OPEN_PAR_SYMBOL:
 				{
-				setState(296);
-				selectStatement();
+				setState(341);
+				_errHandler.sync(this);
+				switch (_input.LA(1)) {
+				case OPEN_PAR_SYMBOL:
+					{
+					setState(339);
+					selectStatementParens();
+					}
+					break;
+				case SELECT_SYMBOL:
+					{
+					setState(340);
+					selectStatement();
+					}
+					break;
+				default:
+					throw new NoViableAltException(this);
+				}
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
 			}
-			setState(299);
+			setState(345);
 			match(CLOSE_PAR_SYMBOL);
 			}
 		}
@@ -1623,30 +2200,43 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_valuesList; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterValuesList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitValuesList(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitValuesList(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ValuesListContext valuesList() throws RecognitionException {
 		ValuesListContext _localctx = new ValuesListContext(_ctx, getState());
-		enterRule(_localctx, 46, RULE_valuesList);
+		enterRule(_localctx, 48, RULE_valuesList);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(301);
+			setState(347);
 			valueName();
-			setState(306);
+			setState(352);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==COMMA_SYMBOL) {
 				{
 				{
-				setState(302);
+				setState(348);
 				match(COMMA_SYMBOL);
-				setState(303);
+				setState(349);
 				valueName();
 				}
 				}
-				setState(308);
+				setState(354);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -1664,53 +2254,82 @@ public class MySQLQueryParser extends Parser {
 	}
 
 	public static class ValueNameContext extends ParserRuleContext {
+		public TerminalNode WORD() { return getToken(MySQLQueryParser.WORD, 0); }
 		public TerminalNode ARITHMETIC() { return getToken(MySQLQueryParser.ARITHMETIC, 0); }
 		public TerminalNode NUMBER() { return getToken(MySQLQueryParser.NUMBER, 0); }
 		public TerminalNode SQ_TEXT() { return getToken(MySQLQueryParser.SQ_TEXT, 0); }
 		public TerminalNode DQ_TEXT() { return getToken(MySQLQueryParser.DQ_TEXT, 0); }
+		public TerminalNode EMAIL() { return getToken(MySQLQueryParser.EMAIL, 0); }
 		public ValueNameContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_valueName; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterValueName(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitValueName(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitValueName(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ValueNameContext valueName() throws RecognitionException {
 		ValueNameContext _localctx = new ValueNameContext(_ctx, getState());
-		enterRule(_localctx, 48, RULE_valueName);
+		enterRule(_localctx, 50, RULE_valueName);
 		try {
-			setState(314);
+			setState(362);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
-			case ARITHMETIC:
+			case WORD:
 				enterOuterAlt(_localctx, 1);
 				{
+				setState(355);
+				match(WORD);
+				}
+				break;
+			case ARITHMETIC:
+				enterOuterAlt(_localctx, 2);
 				{
-				setState(309);
+				{
+				setState(356);
 				match(ARITHMETIC);
-				setState(310);
+				setState(357);
 				match(NUMBER);
 				}
 				}
 				break;
 			case NUMBER:
-				enterOuterAlt(_localctx, 2);
+				enterOuterAlt(_localctx, 3);
 				{
-				setState(311);
+				setState(358);
 				match(NUMBER);
 				}
 				break;
 			case SQ_TEXT:
-				enterOuterAlt(_localctx, 3);
+				enterOuterAlt(_localctx, 4);
 				{
-				setState(312);
+				setState(359);
 				match(SQ_TEXT);
 				}
 				break;
 			case DQ_TEXT:
-				enterOuterAlt(_localctx, 4);
+				enterOuterAlt(_localctx, 5);
 				{
-				setState(313);
+				setState(360);
 				match(DQ_TEXT);
+				}
+				break;
+			case EMAIL:
+				enterOuterAlt(_localctx, 6);
+				{
+				setState(361);
+				match(EMAIL);
 				}
 				break;
 			default:
@@ -1728,203 +2347,144 @@ public class MySQLQueryParser extends Parser {
 		return _localctx;
 	}
 
-	public static class ConditionContext extends ParserRuleContext {
-		public ConditionInnerContext conditionInner() {
-			return getRuleContext(ConditionInnerContext.class,0);
-		}
-		public TerminalNode OR_SYMBOL() { return getToken(MySQLQueryParser.OR_SYMBOL, 0); }
-		public ConditionContext condition() {
-			return getRuleContext(ConditionContext.class,0);
-		}
-		public ConditionContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_condition; }
-	}
-
-	public final ConditionContext condition() throws RecognitionException {
-		ConditionContext _localctx = new ConditionContext(_ctx, getState());
-		enterRule(_localctx, 50, RULE_condition);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(316);
-			conditionInner();
-			setState(319);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,33,_ctx) ) {
-			case 1:
-				{
-				setState(317);
-				match(OR_SYMBOL);
-				setState(318);
-				condition();
-				}
-				break;
-			}
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class ConditionInnerContext extends ParserRuleContext {
-		public TerminalNode OPEN_PAR_SYMBOL() { return getToken(MySQLQueryParser.OPEN_PAR_SYMBOL, 0); }
-		public List<ConditionContext> condition() {
-			return getRuleContexts(ConditionContext.class);
-		}
-		public ConditionContext condition(int i) {
-			return getRuleContext(ConditionContext.class,i);
-		}
-		public TerminalNode CLOSE_PAR_SYMBOL() { return getToken(MySQLQueryParser.CLOSE_PAR_SYMBOL, 0); }
-		public TerminalNode OR_SYMBOL() { return getToken(MySQLQueryParser.OR_SYMBOL, 0); }
-		public TerminalNode AND_SYMBOL() { return getToken(MySQLQueryParser.AND_SYMBOL, 0); }
+	public static class ExprContext extends ParserRuleContext {
 		public List<ColumnItemContext> columnItem() {
 			return getRuleContexts(ColumnItemContext.class);
 		}
 		public ColumnItemContext columnItem(int i) {
 			return getRuleContext(ColumnItemContext.class,i);
 		}
+		public TerminalNode NUMBER() { return getToken(MySQLQueryParser.NUMBER, 0); }
+		public TerminalNode NAME() { return getToken(MySQLQueryParser.NAME, 0); }
+		public TerminalNode SQ_TEXT() { return getToken(MySQLQueryParser.SQ_TEXT, 0); }
+		public TerminalNode DQ_TEXT() { return getToken(MySQLQueryParser.DQ_TEXT, 0); }
 		public CompOpContext compOp() {
 			return getRuleContext(CompOpContext.class,0);
 		}
-		public ValueNameContext valueName() {
-			return getRuleContext(ValueNameContext.class,0);
+		public TerminalNode AND_SYMBOL() { return getToken(MySQLQueryParser.AND_SYMBOL, 0); }
+		public ExprContext expr() {
+			return getRuleContext(ExprContext.class,0);
 		}
 		public TerminalNode ANY_SYMBOL() { return getToken(MySQLQueryParser.ANY_SYMBOL, 0); }
-		public QueryContext query() {
-			return getRuleContext(QueryContext.class,0);
+		public SelectStatementParensContext selectStatementParens() {
+			return getRuleContext(SelectStatementParensContext.class,0);
 		}
-		public ConditionInnerContext(ParserRuleContext parent, int invokingState) {
+		public SelectStatementContext selectStatement() {
+			return getRuleContext(SelectStatementContext.class,0);
+		}
+		public ExprContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_conditionInner; }
+		@Override public int getRuleIndex() { return RULE_expr; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterExpr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitExpr(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitExpr(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
-	public final ConditionInnerContext conditionInner() throws RecognitionException {
-		ConditionInnerContext _localctx = new ConditionInnerContext(_ctx, getState());
-		enterRule(_localctx, 52, RULE_conditionInner);
+	public final ExprContext expr() throws RecognitionException {
+		ExprContext _localctx = new ExprContext(_ctx, getState());
+		enterRule(_localctx, 52, RULE_expr);
 		int _la;
 		try {
-			setState(348);
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(364);
+			columnItem();
+			setState(366);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << EQUAL_OPERATOR) | (1L << NULL_SAFE_EQUAL_OPERATOR) | (1L << GREATER_OR_EQUAL_OPERATOR) | (1L << GREATER_THAN_OPERATOR) | (1L << LESS_OR_EQUAL_OPERATOR) | (1L << LESS_THAN_OPERATOR) | (1L << NOT_EQUAL_OPERATOR))) != 0)) {
+				{
+				setState(365);
+				compOp();
+				}
+			}
+
+			setState(378);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
-			case OPEN_PAR_SYMBOL:
-				enterOuterAlt(_localctx, 1);
+			case NUMBER:
 				{
-				setState(321);
-				match(OPEN_PAR_SYMBOL);
-				setState(322);
-				condition();
-				setState(323);
-				match(CLOSE_PAR_SYMBOL);
-				setState(332);
-				_errHandler.sync(this);
-				switch ( getInterpreter().adaptivePredict(_input,36,_ctx) ) {
-				case 1:
-					{
-					setState(326);
-					_errHandler.sync(this);
-					switch ( getInterpreter().adaptivePredict(_input,34,_ctx) ) {
-					case 1:
-						{
-						setState(324);
-						match(OR_SYMBOL);
-						setState(325);
-						condition();
-						}
-						break;
-					}
-					}
-					break;
-				case 2:
-					{
-					setState(330);
-					_errHandler.sync(this);
-					_la = _input.LA(1);
-					if (_la==AND_SYMBOL) {
-						{
-						setState(328);
-						match(AND_SYMBOL);
-						setState(329);
-						condition();
-						}
-					}
-
-					}
-					break;
-				}
+				setState(368);
+				match(NUMBER);
 				}
 				break;
 			case WORD:
-				enterOuterAlt(_localctx, 2);
+			case TC_NAME:
 				{
-				setState(334);
+				setState(369);
 				columnItem();
-				setState(342);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << EQUAL_OPERATOR) | (1L << NULL_SAFE_EQUAL_OPERATOR) | (1L << GREATER_OR_EQUAL_OPERATOR) | (1L << GREATER_THAN_OPERATOR) | (1L << LESS_OR_EQUAL_OPERATOR) | (1L << LESS_THAN_OPERATOR) | (1L << NOT_EQUAL_OPERATOR))) != 0)) {
-					{
-					setState(335);
-					compOp();
-					setState(340);
-					_errHandler.sync(this);
-					switch (_input.LA(1)) {
-					case ARITHMETIC:
-					case SQ_TEXT:
-					case DQ_TEXT:
-					case NUMBER:
-						{
-						setState(336);
-						valueName();
-						}
-						break;
-					case WORD:
-						{
-						setState(337);
-						columnItem();
-						}
-						break;
-					case ANY_SYMBOL:
-						{
-						{
-						setState(338);
-						match(ANY_SYMBOL);
-						setState(339);
-						query();
-						}
-						}
-						break;
-					default:
-						throw new NoViableAltException(this);
-					}
-					}
 				}
-
-				setState(346);
+				break;
+			case ANY_SYMBOL:
+				{
+				{
+				setState(370);
+				match(ANY_SYMBOL);
+				setState(373);
 				_errHandler.sync(this);
-				_la = _input.LA(1);
-				if (_la==AND_SYMBOL) {
+				switch (_input.LA(1)) {
+				case OPEN_PAR_SYMBOL:
 					{
-					setState(344);
-					match(AND_SYMBOL);
-					setState(345);
-					condition();
+					setState(371);
+					selectStatementParens();
 					}
+					break;
+				case SELECT_SYMBOL:
+					{
+					setState(372);
+					selectStatement();
+					}
+					break;
+				default:
+					throw new NoViableAltException(this);
 				}
-
+				}
+				}
+				break;
+			case NAME:
+				{
+				setState(375);
+				match(NAME);
+				}
+				break;
+			case SQ_TEXT:
+				{
+				setState(376);
+				match(SQ_TEXT);
+				}
+				break;
+			case DQ_TEXT:
+				{
+				setState(377);
+				match(DQ_TEXT);
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
+			}
+			setState(382);
+			_errHandler.sync(this);
+			switch ( getInterpreter().adaptivePredict(_input,45,_ctx) ) {
+			case 1:
+				{
+				setState(380);
+				match(AND_SYMBOL);
+				setState(381);
+				expr();
+				}
+				break;
+			}
 			}
 		}
 		catch (RecognitionException re) {
@@ -1948,6 +2508,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_groupByClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterGroupByClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitGroupByClause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitGroupByClause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final GroupByClauseContext groupByClause() throws RecognitionException {
@@ -1956,11 +2529,11 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(350);
+			setState(384);
 			match(GROUP_SYMBOL);
-			setState(351);
+			setState(385);
 			match(BY_SYMBOL);
-			setState(352);
+			setState(386);
 			columnItem();
 			}
 		}
@@ -1990,6 +2563,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_orderList; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterOrderList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitOrderList(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitOrderList(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final OrderListContext orderList() throws RecognitionException {
@@ -1999,21 +2585,21 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(354);
+			setState(388);
 			orderExpression();
-			setState(359);
+			setState(393);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==COMMA_SYMBOL) {
 				{
 				{
-				setState(355);
+				setState(389);
 				match(COMMA_SYMBOL);
-				setState(356);
+				setState(390);
 				orderExpression();
 				}
 				}
-				setState(361);
+				setState(395);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -2041,6 +2627,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_orderExpression; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterOrderExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitOrderExpression(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitOrderExpression(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final OrderExpressionContext orderExpression() throws RecognitionException {
@@ -2050,14 +2649,14 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(362);
+			setState(396);
 			columnItem();
-			setState(364);
+			setState(398);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==ASC_SYMBOL || _la==DESC_SYMBOL) {
 				{
-				setState(363);
+				setState(397);
 				direction();
 				}
 			}
@@ -2082,6 +2681,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_direction; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterDirection(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitDirection(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitDirection(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final DirectionContext direction() throws RecognitionException {
@@ -2091,7 +2703,7 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(366);
+			setState(400);
 			_la = _input.LA(1);
 			if ( !(_la==ASC_SYMBOL || _la==DESC_SYMBOL) ) {
 			_errHandler.recoverInline(this);
@@ -2116,13 +2728,26 @@ public class MySQLQueryParser extends Parser {
 
 	public static class HavingClauseContext extends ParserRuleContext {
 		public TerminalNode HAVING_SYMBOL() { return getToken(MySQLQueryParser.HAVING_SYMBOL, 0); }
-		public ConditionContext condition() {
-			return getRuleContext(ConditionContext.class,0);
+		public ExprContext expr() {
+			return getRuleContext(ExprContext.class,0);
 		}
 		public HavingClauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_havingClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterHavingClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitHavingClause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitHavingClause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final HavingClauseContext havingClause() throws RecognitionException {
@@ -2131,10 +2756,10 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(368);
+			setState(402);
 			match(HAVING_SYMBOL);
-			setState(369);
-			condition();
+			setState(403);
+			expr();
 			}
 		}
 		catch (RecognitionException re) {
@@ -2160,6 +2785,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_compOp; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterCompOp(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitCompOp(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitCompOp(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final CompOpContext compOp() throws RecognitionException {
@@ -2169,7 +2807,7 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(371);
+			setState(405);
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << EQUAL_OPERATOR) | (1L << NULL_SAFE_EQUAL_OPERATOR) | (1L << GREATER_OR_EQUAL_OPERATOR) | (1L << GREATER_THAN_OPERATOR) | (1L << LESS_OR_EQUAL_OPERATOR) | (1L << LESS_THAN_OPERATOR) | (1L << NOT_EQUAL_OPERATOR))) != 0)) ) {
 			_errHandler.recoverInline(this);
@@ -2202,6 +2840,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_orderClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterOrderClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitOrderClause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitOrderClause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final OrderClauseContext orderClause() throws RecognitionException {
@@ -2210,11 +2861,11 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(373);
+			setState(407);
 			match(ORDER_SYMBOL);
-			setState(374);
+			setState(408);
 			match(BY_SYMBOL);
-			setState(375);
+			setState(409);
 			orderList();
 			}
 		}
@@ -2248,51 +2899,63 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_deleteStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterDeleteStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitDeleteStatement(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitDeleteStatement(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final DeleteStatementContext deleteStatement() throws RecognitionException {
 		DeleteStatementContext _localctx = new DeleteStatementContext(_ctx, getState());
 		enterRule(_localctx, 68, RULE_deleteStatement);
-		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(377);
+			setState(411);
 			match(DELETE_SYMBOL);
-			setState(378);
+			setState(412);
 			match(FROM_SYMBOL);
-			setState(379);
+			setState(413);
 			tableList();
-			setState(381);
+			setState(415);
 			_errHandler.sync(this);
-			_la = _input.LA(1);
-			if (_la==WHERE_SYMBOL) {
+			switch ( getInterpreter().adaptivePredict(_input,48,_ctx) ) {
+			case 1:
 				{
-				setState(380);
+				setState(414);
 				whereClause();
 				}
+				break;
 			}
-
-			setState(384);
+			setState(418);
 			_errHandler.sync(this);
-			_la = _input.LA(1);
-			if (_la==ORDER_SYMBOL) {
+			switch ( getInterpreter().adaptivePredict(_input,49,_ctx) ) {
+			case 1:
 				{
-				setState(383);
+				setState(417);
 				orderClause();
 				}
+				break;
 			}
-
-			setState(387);
+			setState(421);
 			_errHandler.sync(this);
-			_la = _input.LA(1);
-			if (_la==NUMBER || _la==WORD) {
+			switch ( getInterpreter().adaptivePredict(_input,50,_ctx) ) {
+			case 1:
 				{
-				setState(386);
+				setState(420);
 				limitClause();
 				}
+				break;
 			}
-
 			}
 		}
 		catch (RecognitionException re) {
@@ -2313,6 +2976,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_limitClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterLimitClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitLimitClause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitLimitClause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final LimitClauseContext limitClause() throws RecognitionException {
@@ -2322,7 +2998,7 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(389);
+			setState(423);
 			_la = _input.LA(1);
 			if ( !(_la==NUMBER || _la==WORD) ) {
 			_errHandler.recoverInline(this);
@@ -2356,6 +3032,9 @@ public class MySQLQueryParser extends Parser {
 			return getRuleContext(ExistingTableContext.class,0);
 		}
 		public TerminalNode AS_SYMBOL() { return getToken(MySQLQueryParser.AS_SYMBOL, 0); }
+		public SelectStatementParensContext selectStatementParens() {
+			return getRuleContext(SelectStatementParensContext.class,0);
+		}
 		public SelectStatementContext selectStatement() {
 			return getRuleContext(SelectStatementContext.class,0);
 		}
@@ -2363,6 +3042,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_createStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterCreateStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitCreateStatement(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitCreateStatement(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final CreateStatementContext createStatement() throws RecognitionException {
@@ -2371,30 +3063,46 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(391);
+			setState(425);
 			match(CREATE_SYMBOL);
-			setState(392);
+			setState(426);
 			match(TABLE_SYMBOL);
-			setState(393);
+			setState(427);
 			newTable();
-			setState(398);
+			setState(435);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case LIKE_SYMBOL:
 				{
-				setState(394);
+				setState(428);
 				match(LIKE_SYMBOL);
-				setState(395);
+				setState(429);
 				existingTable();
 				}
 				break;
 			case AS_SYMBOL:
 				{
 				{
-				setState(396);
+				setState(430);
 				match(AS_SYMBOL);
-				setState(397);
-				selectStatement();
+				setState(433);
+				_errHandler.sync(this);
+				switch (_input.LA(1)) {
+				case OPEN_PAR_SYMBOL:
+					{
+					setState(431);
+					selectStatementParens();
+					}
+					break;
+				case SELECT_SYMBOL:
+					{
+					setState(432);
+					selectStatement();
+					}
+					break;
+				default:
+					throw new NoViableAltException(this);
+				}
 				}
 				}
 				break;
@@ -2422,6 +3130,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_newTable; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterNewTable(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitNewTable(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitNewTable(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final NewTableContext newTable() throws RecognitionException {
@@ -2430,7 +3151,7 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(400);
+			setState(437);
 			tableName();
 			}
 		}
@@ -2457,30 +3178,43 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_existingTable; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterExistingTable(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitExistingTable(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitExistingTable(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ExistingTableContext existingTable() throws RecognitionException {
 		ExistingTableContext _localctx = new ExistingTableContext(_ctx, getState());
 		enterRule(_localctx, 76, RULE_existingTable);
 		try {
-			setState(407);
+			setState(444);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,47,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,53,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(402);
+				setState(439);
 				tableName();
 				}
 				break;
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(403);
+				setState(440);
 				tableName();
-				setState(404);
+				setState(441);
 				match(DOT_SYMBOL);
-				setState(405);
+				setState(442);
 				columnName();
 				}
 				break;
@@ -2507,19 +3241,35 @@ public class MySQLQueryParser extends Parser {
 		public ValueItemContext valueItem() {
 			return getRuleContext(ValueItemContext.class,0);
 		}
-		public SelectStatementContext selectStatement() {
-			return getRuleContext(SelectStatementContext.class,0);
-		}
 		public List<ColumnParContext> columnPar() {
 			return getRuleContexts(ColumnParContext.class);
 		}
 		public ColumnParContext columnPar(int i) {
 			return getRuleContext(ColumnParContext.class,i);
 		}
+		public SelectStatementParensContext selectStatementParens() {
+			return getRuleContext(SelectStatementParensContext.class,0);
+		}
+		public SelectStatementContext selectStatement() {
+			return getRuleContext(SelectStatementContext.class,0);
+		}
 		public InsertStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_insertStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterInsertStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitInsertStatement(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitInsertStatement(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final InsertStatementContext insertStatement() throws RecognitionException {
@@ -2529,44 +3279,60 @@ public class MySQLQueryParser extends Parser {
 			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(409);
+			setState(446);
 			match(INSERT_SYMBOL);
-			setState(410);
+			setState(447);
 			match(INTO_SYMBOL);
-			setState(411);
+			setState(448);
 			tableName();
-			setState(415);
+			setState(452);
 			_errHandler.sync(this);
-			_alt = getInterpreter().adaptivePredict(_input,48,_ctx);
+			_alt = getInterpreter().adaptivePredict(_input,54,_ctx);
 			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					{
 					{
-					setState(412);
+					setState(449);
 					columnPar();
 					}
 					} 
 				}
-				setState(417);
+				setState(454);
 				_errHandler.sync(this);
-				_alt = getInterpreter().adaptivePredict(_input,48,_ctx);
+				_alt = getInterpreter().adaptivePredict(_input,54,_ctx);
 			}
-			setState(421);
+			setState(461);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case VALUES_SYMBOL:
 				{
-				setState(418);
+				setState(455);
 				match(VALUES_SYMBOL);
-				setState(419);
+				setState(456);
 				valueItem();
 				}
 				break;
 			case SELECT_SYMBOL:
 			case OPEN_PAR_SYMBOL:
 				{
-				setState(420);
-				selectStatement();
+				setState(459);
+				_errHandler.sync(this);
+				switch (_input.LA(1)) {
+				case OPEN_PAR_SYMBOL:
+					{
+					setState(457);
+					selectStatementParens();
+					}
+					break;
+				case SELECT_SYMBOL:
+					{
+					setState(458);
+					selectStatement();
+					}
+					break;
+				default:
+					throw new NoViableAltException(this);
+				}
 				}
 				break;
 			default:
@@ -2595,6 +3361,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_columnPar; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterColumnPar(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitColumnPar(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitColumnPar(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ColumnParContext columnPar() throws RecognitionException {
@@ -2603,11 +3382,11 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(423);
+			setState(463);
 			match(OPEN_PAR_SYMBOL);
-			setState(424);
+			setState(464);
 			columnList();
-			setState(425);
+			setState(465);
 			match(CLOSE_PAR_SYMBOL);
 			}
 		}
@@ -2637,6 +3416,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_columnList; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterColumnList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitColumnList(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitColumnList(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ColumnListContext columnList() throws RecognitionException {
@@ -2646,21 +3438,21 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(427);
+			setState(467);
 			columnItem();
-			setState(432);
+			setState(472);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==COMMA_SYMBOL) {
 				{
 				{
-				setState(428);
+				setState(468);
 				match(COMMA_SYMBOL);
-				setState(429);
+				setState(469);
 				columnItem();
 				}
 				}
-				setState(434);
+				setState(474);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -2691,19 +3483,32 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_columnItem; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterColumnItem(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitColumnItem(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitColumnItem(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ColumnItemContext columnItem() throws RecognitionException {
 		ColumnItemContext _localctx = new ColumnItemContext(_ctx, getState());
 		enterRule(_localctx, 84, RULE_columnItem);
 		try {
-			setState(442);
+			setState(482);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,51,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,58,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(435);
+				setState(475);
 				columnName();
 				}
 				break;
@@ -2711,9 +3516,9 @@ public class MySQLQueryParser extends Parser {
 				enterOuterAlt(_localctx, 2);
 				{
 				{
-				setState(436);
+				setState(476);
 				columnName();
-				setState(437);
+				setState(477);
 				alias();
 				}
 				}
@@ -2722,9 +3527,9 @@ public class MySQLQueryParser extends Parser {
 				enterOuterAlt(_localctx, 3);
 				{
 				{
-				setState(439);
+				setState(479);
 				columnName();
-				setState(440);
+				setState(480);
 				selectAlias();
 				}
 				}
@@ -2752,6 +3557,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_valueItem; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterValueItem(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitValueItem(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitValueItem(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ValueItemContext valueItem() throws RecognitionException {
@@ -2760,11 +3578,11 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(444);
+			setState(484);
 			match(OPEN_PAR_SYMBOL);
-			setState(445);
+			setState(485);
 			valuesList();
-			setState(446);
+			setState(486);
 			match(CLOSE_PAR_SYMBOL);
 			}
 		}
@@ -2801,53 +3619,65 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_updateStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterUpdateStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitUpdateStatement(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitUpdateStatement(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final UpdateStatementContext updateStatement() throws RecognitionException {
 		UpdateStatementContext _localctx = new UpdateStatementContext(_ctx, getState());
 		enterRule(_localctx, 88, RULE_updateStatement);
-		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(448);
+			setState(488);
 			match(UPDATE_SYMBOL);
-			setState(449);
+			setState(489);
 			tableRefList();
-			setState(450);
+			setState(490);
 			match(SET_SYMBOL);
-			setState(451);
+			setState(491);
 			assignmentList();
-			setState(453);
+			setState(493);
 			_errHandler.sync(this);
-			_la = _input.LA(1);
-			if (_la==WHERE_SYMBOL) {
+			switch ( getInterpreter().adaptivePredict(_input,59,_ctx) ) {
+			case 1:
 				{
-				setState(452);
+				setState(492);
 				whereClause();
 				}
+				break;
 			}
-
-			setState(456);
+			setState(496);
 			_errHandler.sync(this);
-			_la = _input.LA(1);
-			if (_la==ORDER_SYMBOL) {
+			switch ( getInterpreter().adaptivePredict(_input,60,_ctx) ) {
+			case 1:
 				{
-				setState(455);
+				setState(495);
 				orderClause();
 				}
+				break;
 			}
-
-			setState(459);
+			setState(499);
 			_errHandler.sync(this);
-			_la = _input.LA(1);
-			if (_la==NUMBER || _la==WORD) {
+			switch ( getInterpreter().adaptivePredict(_input,61,_ctx) ) {
+			case 1:
 				{
-				setState(458);
+				setState(498);
 				limitClause();
 				}
+				break;
 			}
-
 			}
 		}
 		catch (RecognitionException re) {
@@ -2874,6 +3704,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_tableRefList; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterTableRefList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitTableRefList(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitTableRefList(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final TableRefListContext tableRefList() throws RecognitionException {
@@ -2883,21 +3726,21 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(461);
+			setState(501);
 			match(WORD);
-			setState(466);
+			setState(506);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==COMMA_SYMBOL) {
 				{
 				{
-				setState(462);
+				setState(502);
 				match(COMMA_SYMBOL);
-				setState(463);
+				setState(503);
 				match(WORD);
 				}
 				}
-				setState(468);
+				setState(508);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -2939,6 +3782,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_assignmentList; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterAssignmentList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitAssignmentList(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitAssignmentList(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final AssignmentListContext assignmentList() throws RecognitionException {
@@ -2948,29 +3804,29 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(469);
+			setState(509);
 			columnItem();
-			setState(470);
+			setState(510);
 			match(EQUAL_OPERATOR);
-			setState(471);
+			setState(511);
 			valueName();
-			setState(479);
+			setState(519);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==COMMA_SYMBOL) {
 				{
 				{
-				setState(472);
+				setState(512);
 				match(COMMA_SYMBOL);
-				setState(473);
+				setState(513);
 				columnItem();
-				setState(474);
+				setState(514);
 				match(EQUAL_OPERATOR);
-				setState(475);
+				setState(515);
 				valueName();
 				}
 				}
-				setState(481);
+				setState(521);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -3019,6 +3875,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_joinClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterJoinClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitJoinClause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitJoinClause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final JoinClauseContext joinClause() throws RecognitionException {
@@ -3028,71 +3897,71 @@ public class MySQLQueryParser extends Parser {
 			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(485);
+			setState(525);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case INNER_SYMBOL:
 				{
-				setState(482);
+				setState(522);
 				innerJoin();
 				}
 				break;
 			case RIGHT_SYMBOL:
 				{
-				setState(483);
+				setState(523);
 				rightJoin();
 				}
 				break;
 			case LEFT_SYMBOL:
 				{
-				setState(484);
+				setState(524);
 				leftJoin();
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
 			}
-			setState(487);
+			setState(527);
 			tableItem();
-			setState(494);
+			setState(534);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case ON_SYMBOL:
 				{
-				setState(488);
+				setState(528);
 				onClause();
 				}
 				break;
 			case USING_SYMBOL:
 				{
-				setState(489);
+				setState(529);
 				match(USING_SYMBOL);
-				setState(490);
+				setState(530);
 				match(OPEN_PAR_SYMBOL);
-				setState(491);
+				setState(531);
 				columnItem();
-				setState(492);
+				setState(532);
 				match(CLOSE_PAR_SYMBOL);
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
 			}
-			setState(499);
+			setState(539);
 			_errHandler.sync(this);
-			_alt = getInterpreter().adaptivePredict(_input,59,_ctx);
+			_alt = getInterpreter().adaptivePredict(_input,66,_ctx);
 			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					{
 					{
-					setState(496);
+					setState(536);
 					joinClause();
 					}
 					} 
 				}
-				setState(501);
+				setState(541);
 				_errHandler.sync(this);
-				_alt = getInterpreter().adaptivePredict(_input,59,_ctx);
+				_alt = getInterpreter().adaptivePredict(_input,66,_ctx);
 			}
 			}
 		}
@@ -3114,6 +3983,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_innerJoin; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterInnerJoin(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitInnerJoin(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitInnerJoin(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final InnerJoinContext innerJoin() throws RecognitionException {
@@ -3122,9 +4004,9 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(502);
+			setState(542);
 			match(INNER_SYMBOL);
-			setState(503);
+			setState(543);
 			match(JOIN_SYMBOL);
 			}
 		}
@@ -3146,6 +4028,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_leftJoin; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterLeftJoin(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitLeftJoin(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitLeftJoin(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final LeftJoinContext leftJoin() throws RecognitionException {
@@ -3154,9 +4049,9 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(505);
+			setState(545);
 			match(LEFT_SYMBOL);
-			setState(506);
+			setState(546);
 			match(JOIN_SYMBOL);
 			}
 		}
@@ -3178,6 +4073,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_rightJoin; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterRightJoin(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitRightJoin(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitRightJoin(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final RightJoinContext rightJoin() throws RecognitionException {
@@ -3186,9 +4094,9 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(508);
+			setState(548);
 			match(RIGHT_SYMBOL);
-			setState(509);
+			setState(549);
 			match(JOIN_SYMBOL);
 			}
 		}
@@ -3219,34 +4127,49 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_onClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterOnClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitOnClause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitOnClause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final OnClauseContext onClause() throws RecognitionException {
 		OnClauseContext _localctx = new OnClauseContext(_ctx, getState());
 		enterRule(_localctx, 102, RULE_onClause);
-		int _la;
 		try {
+			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(511);
+			setState(551);
 			match(ON_SYMBOL);
-			setState(512);
+			setState(552);
 			onList();
-			setState(517);
+			setState(557);
 			_errHandler.sync(this);
-			_la = _input.LA(1);
-			while (_la==AND_SYMBOL) {
-				{
-				{
-				setState(513);
-				match(AND_SYMBOL);
-				setState(514);
-				onList();
+			_alt = getInterpreter().adaptivePredict(_input,67,_ctx);
+			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
+				if ( _alt==1 ) {
+					{
+					{
+					setState(553);
+					match(AND_SYMBOL);
+					setState(554);
+					onList();
+					}
+					} 
 				}
-				}
-				setState(519);
+				setState(559);
 				_errHandler.sync(this);
-				_la = _input.LA(1);
+				_alt = getInterpreter().adaptivePredict(_input,67,_ctx);
 			}
 			}
 		}
@@ -3275,6 +4198,19 @@ public class MySQLQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_onList; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterOnList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitOnList(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitOnList(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final OnListContext onList() throws RecognitionException {
@@ -3283,11 +4219,11 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(520);
+			setState(560);
 			columnItem();
-			setState(521);
+			setState(561);
 			compOp();
-			setState(522);
+			setState(562);
 			columnItem();
 			}
 		}
@@ -3304,18 +4240,34 @@ public class MySQLQueryParser extends Parser {
 
 	public static class UnionClauseContext extends ParserRuleContext {
 		public TerminalNode UNION_SYMBOL() { return getToken(MySQLQueryParser.UNION_SYMBOL, 0); }
-		public SelectStatementContext selectStatement() {
-			return getRuleContext(SelectStatementContext.class,0);
-		}
 		public TerminalNode TABLE_SYMBOL() { return getToken(MySQLQueryParser.TABLE_SYMBOL, 0); }
 		public TableNameContext tableName() {
 			return getRuleContext(TableNameContext.class,0);
 		}
 		public TerminalNode ALL_SYMBOL() { return getToken(MySQLQueryParser.ALL_SYMBOL, 0); }
+		public SelectStatementContext selectStatement() {
+			return getRuleContext(SelectStatementContext.class,0);
+		}
+		public SelectStatementParensContext selectStatementParens() {
+			return getRuleContext(SelectStatementParensContext.class,0);
+		}
 		public UnionClauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_unionClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).enterUnionClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof MySQLQueryListener ) ((MySQLQueryListener)listener).exitUnionClause(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof MySQLQueryVisitor ) return ((MySQLQueryVisitor<? extends T>)visitor).visitUnionClause(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final UnionClauseContext unionClause() throws RecognitionException {
@@ -3324,33 +4276,65 @@ public class MySQLQueryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(524);
+			setState(564);
 			match(UNION_SYMBOL);
-			setState(530);
+			setState(576);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case ALL_SYMBOL:
 				{
 				{
-				setState(525);
+				setState(565);
 				match(ALL_SYMBOL);
-				setState(526);
-				selectStatement();
+				setState(568);
+				_errHandler.sync(this);
+				switch (_input.LA(1)) {
+				case SELECT_SYMBOL:
+					{
+					setState(566);
+					selectStatement();
+					}
+					break;
+				case OPEN_PAR_SYMBOL:
+					{
+					setState(567);
+					selectStatementParens();
+					}
+					break;
+				default:
+					throw new NoViableAltException(this);
+				}
 				}
 				}
 				break;
 			case SELECT_SYMBOL:
 			case OPEN_PAR_SYMBOL:
 				{
-				setState(527);
-				selectStatement();
+				setState(572);
+				_errHandler.sync(this);
+				switch (_input.LA(1)) {
+				case SELECT_SYMBOL:
+					{
+					setState(570);
+					selectStatement();
+					}
+					break;
+				case OPEN_PAR_SYMBOL:
+					{
+					setState(571);
+					selectStatementParens();
+					}
+					break;
+				default:
+					throw new NoViableAltException(this);
+				}
 				}
 				break;
 			case TABLE_SYMBOL:
 				{
-				setState(528);
+				setState(574);
 				match(TABLE_SYMBOL);
-				setState(529);
+				setState(575);
 				tableName();
 				}
 				break;
@@ -3371,7 +4355,7 @@ public class MySQLQueryParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3_\u0217\4\2\t\2\4"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3_\u0245\4\2\t\2\4"+
 		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
 		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
 		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31\t\31"+
@@ -3379,192 +4363,216 @@ public class MySQLQueryParser extends Parser {
 		"\t!\4\"\t\"\4#\t#\4$\t$\4%\t%\4&\t&\4\'\t\'\4(\t(\4)\t)\4*\t*\4+\t+\4"+
 		",\t,\4-\t-\4.\t.\4/\t/\4\60\t\60\4\61\t\61\4\62\t\62\4\63\t\63\4\64\t"+
 		"\64\4\65\t\65\4\66\t\66\4\67\t\67\3\2\3\2\3\2\3\2\5\2s\n\2\3\3\3\3\3\3"+
-		"\3\4\3\4\3\4\3\4\3\4\5\4}\n\4\3\5\5\5\u0080\n\5\3\5\3\5\5\5\u0084\n\5"+
-		"\3\5\3\5\5\5\u0088\n\5\3\5\3\5\5\5\u008c\n\5\3\5\5\5\u008f\n\5\3\5\5\5"+
-		"\u0092\n\5\3\5\5\5\u0095\n\5\3\5\5\5\u0098\n\5\3\5\5\5\u009b\n\5\3\5\5"+
-		"\5\u009e\n\5\3\6\3\6\3\7\3\7\5\7\u00a4\n\7\3\7\3\7\7\7\u00a8\n\7\f\7\16"+
-		"\7\u00ab\13\7\3\b\3\b\3\b\3\b\3\b\3\b\5\b\u00b3\n\b\3\b\3\b\5\b\u00b7"+
-		"\n\b\5\b\u00b9\n\b\5\b\u00bb\n\b\3\t\3\t\3\t\3\t\3\t\3\n\3\n\3\n\3\n\3"+
-		"\n\3\13\3\13\3\13\3\13\3\13\3\f\3\f\3\f\3\f\3\f\3\r\3\r\3\r\3\r\3\r\3"+
-		"\16\3\16\3\17\3\17\3\17\3\20\3\20\3\21\3\21\3\21\3\21\3\21\3\21\3\21\3"+
-		"\21\7\21\u00e5\n\21\f\21\16\21\u00e8\13\21\5\21\u00ea\n\21\3\22\3\22\3"+
-		"\22\3\23\3\23\3\23\7\23\u00f2\n\23\f\23\16\23\u00f5\13\23\3\24\3\24\3"+
-		"\24\3\24\3\24\3\24\3\24\5\24\u00fe\n\24\3\25\3\25\3\26\3\26\5\26\u0104"+
-		"\n\26\3\26\5\26\u0107\n\26\3\26\5\26\u010a\n\26\3\26\5\26\u010d\n\26\3"+
-		"\26\3\26\3\26\3\26\3\26\3\26\3\26\3\26\3\26\5\26\u0118\n\26\3\27\3\27"+
-		"\3\27\5\27\u011d\n\27\3\27\3\27\5\27\u0121\n\27\3\27\3\27\3\30\5\30\u0126"+
-		"\n\30\3\30\3\30\3\30\3\30\5\30\u012c\n\30\3\30\3\30\3\31\3\31\3\31\7\31"+
-		"\u0133\n\31\f\31\16\31\u0136\13\31\3\32\3\32\3\32\3\32\3\32\5\32\u013d"+
-		"\n\32\3\33\3\33\3\33\5\33\u0142\n\33\3\34\3\34\3\34\3\34\3\34\5\34\u0149"+
-		"\n\34\3\34\3\34\5\34\u014d\n\34\5\34\u014f\n\34\3\34\3\34\3\34\3\34\3"+
-		"\34\3\34\5\34\u0157\n\34\5\34\u0159\n\34\3\34\3\34\5\34\u015d\n\34\5\34"+
-		"\u015f\n\34\3\35\3\35\3\35\3\35\3\36\3\36\3\36\7\36\u0168\n\36\f\36\16"+
-		"\36\u016b\13\36\3\37\3\37\5\37\u016f\n\37\3 \3 \3!\3!\3!\3\"\3\"\3#\3"+
-		"#\3#\3#\3$\3$\3$\3$\5$\u0180\n$\3$\5$\u0183\n$\3$\5$\u0186\n$\3%\3%\3"+
-		"&\3&\3&\3&\3&\3&\3&\5&\u0191\n&\3\'\3\'\3(\3(\3(\3(\3(\5(\u019a\n(\3)"+
-		"\3)\3)\3)\7)\u01a0\n)\f)\16)\u01a3\13)\3)\3)\3)\5)\u01a8\n)\3*\3*\3*\3"+
-		"*\3+\3+\3+\7+\u01b1\n+\f+\16+\u01b4\13+\3,\3,\3,\3,\3,\3,\3,\5,\u01bd"+
-		"\n,\3-\3-\3-\3-\3.\3.\3.\3.\3.\5.\u01c8\n.\3.\5.\u01cb\n.\3.\5.\u01ce"+
-		"\n.\3/\3/\3/\7/\u01d3\n/\f/\16/\u01d6\13/\3\60\3\60\3\60\3\60\3\60\3\60"+
-		"\3\60\3\60\7\60\u01e0\n\60\f\60\16\60\u01e3\13\60\3\61\3\61\3\61\5\61"+
-		"\u01e8\n\61\3\61\3\61\3\61\3\61\3\61\3\61\3\61\5\61\u01f1\n\61\3\61\7"+
-		"\61\u01f4\n\61\f\61\16\61\u01f7\13\61\3\62\3\62\3\62\3\63\3\63\3\63\3"+
-		"\64\3\64\3\64\3\65\3\65\3\65\3\65\7\65\u0206\n\65\f\65\16\65\u0209\13"+
-		"\65\3\66\3\66\3\66\3\66\3\67\3\67\3\67\3\67\3\67\3\67\5\67\u0215\n\67"+
-		"\3\67\2\28\2\4\6\b\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\66"+
-		"8:<>@BDFHJLNPRTVXZ\\^`bdfhjl\2\7\4\2STYY\3\2ST\3\2IJ\4\2((*/\3\2XY\2\u022f"+
-		"\2r\3\2\2\2\4t\3\2\2\2\6|\3\2\2\2\b\177\3\2\2\2\n\u009f\3\2\2\2\f\u00a3"+
-		"\3\2\2\2\16\u00ba\3\2\2\2\20\u00bc\3\2\2\2\22\u00c1\3\2\2\2\24\u00c6\3"+
-		"\2\2\2\26\u00cb\3\2\2\2\30\u00d0\3\2\2\2\32\u00d5\3\2\2\2\34\u00d7\3\2"+
-		"\2\2\36\u00da\3\2\2\2 \u00dc\3\2\2\2\"\u00eb\3\2\2\2$\u00ee\3\2\2\2&\u00fd"+
-		"\3\2\2\2(\u00ff\3\2\2\2*\u0101\3\2\2\2,\u0119\3\2\2\2.\u0125\3\2\2\2\60"+
-		"\u012f\3\2\2\2\62\u013c\3\2\2\2\64\u013e\3\2\2\2\66\u015e\3\2\2\28\u0160"+
-		"\3\2\2\2:\u0164\3\2\2\2<\u016c\3\2\2\2>\u0170\3\2\2\2@\u0172\3\2\2\2B"+
-		"\u0175\3\2\2\2D\u0177\3\2\2\2F\u017b\3\2\2\2H\u0187\3\2\2\2J\u0189\3\2"+
-		"\2\2L\u0192\3\2\2\2N\u0199\3\2\2\2P\u019b\3\2\2\2R\u01a9\3\2\2\2T\u01ad"+
-		"\3\2\2\2V\u01bc\3\2\2\2X\u01be\3\2\2\2Z\u01c2\3\2\2\2\\\u01cf\3\2\2\2"+
-		"^\u01d7\3\2\2\2`\u01e7\3\2\2\2b\u01f8\3\2\2\2d\u01fb\3\2\2\2f\u01fe\3"+
-		"\2\2\2h\u0201\3\2\2\2j\u020a\3\2\2\2l\u020e\3\2\2\2ns\5\4\3\2op\5\6\4"+
+		"\3\4\3\4\3\4\3\4\3\4\5\4}\n\4\3\5\3\5\5\5\u0081\n\5\3\5\3\5\5\5\u0085"+
+		"\n\5\3\5\3\5\5\5\u0089\n\5\3\5\5\5\u008c\n\5\3\5\5\5\u008f\n\5\3\5\5\5"+
+		"\u0092\n\5\3\5\5\5\u0095\n\5\3\5\5\5\u0098\n\5\3\6\3\6\3\6\5\6\u009d\n"+
+		"\6\3\6\3\6\5\6\u00a1\n\6\3\6\3\6\5\6\u00a5\n\6\3\6\5\6\u00a8\n\6\3\6\5"+
+		"\6\u00ab\n\6\3\6\5\6\u00ae\n\6\3\6\5\6\u00b1\n\6\3\6\5\6\u00b4\n\6\3\6"+
+		"\3\6\3\7\3\7\3\b\3\b\5\b\u00bc\n\b\3\b\3\b\7\b\u00c0\n\b\f\b\16\b\u00c3"+
+		"\13\b\3\t\3\t\3\t\3\t\3\t\3\t\5\t\u00cb\n\t\3\t\3\t\5\t\u00cf\n\t\5\t"+
+		"\u00d1\n\t\5\t\u00d3\n\t\3\n\3\n\3\n\3\n\3\n\3\13\3\13\3\13\3\13\3\13"+
+		"\3\f\3\f\3\f\3\f\3\f\3\r\3\r\3\r\3\r\3\r\3\16\3\16\3\16\3\16\3\16\3\17"+
+		"\3\17\3\20\3\20\3\20\3\21\3\21\3\22\3\22\3\22\3\22\3\22\3\22\3\22\3\22"+
+		"\7\22\u00fd\n\22\f\22\16\22\u0100\13\22\3\22\3\22\3\22\7\22\u0105\n\22"+
+		"\f\22\16\22\u0108\13\22\5\22\u010a\n\22\3\23\3\23\3\23\3\24\3\24\3\24"+
+		"\7\24\u0112\n\24\f\24\16\24\u0115\13\24\3\25\3\25\3\25\3\25\3\25\3\25"+
+		"\3\25\5\25\u011e\n\25\3\26\3\26\3\27\3\27\3\27\3\27\5\27\u0126\n\27\3"+
+		"\27\5\27\u0129\n\27\3\27\3\27\3\27\5\27\u012e\n\27\3\27\3\27\3\27\3\27"+
+		"\3\27\3\27\3\27\5\27\u0137\n\27\3\27\3\27\3\27\3\27\3\27\5\27\u013e\n"+
+		"\27\3\27\3\27\5\27\u0142\n\27\3\30\3\30\3\30\5\30\u0147\n\30\3\30\3\30"+
+		"\5\30\u014b\n\30\3\30\3\30\3\31\3\31\5\31\u0151\n\31\3\31\3\31\3\31\3"+
+		"\31\3\31\5\31\u0158\n\31\5\31\u015a\n\31\3\31\3\31\3\32\3\32\3\32\7\32"+
+		"\u0161\n\32\f\32\16\32\u0164\13\32\3\33\3\33\3\33\3\33\3\33\3\33\3\33"+
+		"\5\33\u016d\n\33\3\34\3\34\5\34\u0171\n\34\3\34\3\34\3\34\3\34\3\34\5"+
+		"\34\u0178\n\34\3\34\3\34\3\34\5\34\u017d\n\34\3\34\3\34\5\34\u0181\n\34"+
+		"\3\35\3\35\3\35\3\35\3\36\3\36\3\36\7\36\u018a\n\36\f\36\16\36\u018d\13"+
+		"\36\3\37\3\37\5\37\u0191\n\37\3 \3 \3!\3!\3!\3\"\3\"\3#\3#\3#\3#\3$\3"+
+		"$\3$\3$\5$\u01a2\n$\3$\5$\u01a5\n$\3$\5$\u01a8\n$\3%\3%\3&\3&\3&\3&\3"+
+		"&\3&\3&\3&\5&\u01b4\n&\5&\u01b6\n&\3\'\3\'\3(\3(\3(\3(\3(\5(\u01bf\n("+
+		"\3)\3)\3)\3)\7)\u01c5\n)\f)\16)\u01c8\13)\3)\3)\3)\3)\5)\u01ce\n)\5)\u01d0"+
+		"\n)\3*\3*\3*\3*\3+\3+\3+\7+\u01d9\n+\f+\16+\u01dc\13+\3,\3,\3,\3,\3,\3"+
+		",\3,\5,\u01e5\n,\3-\3-\3-\3-\3.\3.\3.\3.\3.\5.\u01f0\n.\3.\5.\u01f3\n"+
+		".\3.\5.\u01f6\n.\3/\3/\3/\7/\u01fb\n/\f/\16/\u01fe\13/\3\60\3\60\3\60"+
+		"\3\60\3\60\3\60\3\60\3\60\7\60\u0208\n\60\f\60\16\60\u020b\13\60\3\61"+
+		"\3\61\3\61\5\61\u0210\n\61\3\61\3\61\3\61\3\61\3\61\3\61\3\61\5\61\u0219"+
+		"\n\61\3\61\7\61\u021c\n\61\f\61\16\61\u021f\13\61\3\62\3\62\3\62\3\63"+
+		"\3\63\3\63\3\64\3\64\3\64\3\65\3\65\3\65\3\65\7\65\u022e\n\65\f\65\16"+
+		"\65\u0231\13\65\3\66\3\66\3\66\3\66\3\67\3\67\3\67\3\67\5\67\u023b\n\67"+
+		"\3\67\3\67\5\67\u023f\n\67\3\67\3\67\5\67\u0243\n\67\3\67\2\28\2\4\6\b"+
+		"\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\668:<>@BDFHJLNPRTVX"+
+		"Z\\^`bdfhjl\2\b\4\2YY[[\4\2STYY\3\2ST\3\2IJ\4\2((*/\3\2XY\2\u0272\2r\3"+
+		"\2\2\2\4t\3\2\2\2\6|\3\2\2\2\b~\3\2\2\2\n\u0099\3\2\2\2\f\u00b7\3\2\2"+
+		"\2\16\u00bb\3\2\2\2\20\u00d2\3\2\2\2\22\u00d4\3\2\2\2\24\u00d9\3\2\2\2"+
+		"\26\u00de\3\2\2\2\30\u00e3\3\2\2\2\32\u00e8\3\2\2\2\34\u00ed\3\2\2\2\36"+
+		"\u00ef\3\2\2\2 \u00f2\3\2\2\2\"\u00f4\3\2\2\2$\u010b\3\2\2\2&\u010e\3"+
+		"\2\2\2(\u011d\3\2\2\2*\u011f\3\2\2\2,\u0121\3\2\2\2.\u0143\3\2\2\2\60"+
+		"\u014e\3\2\2\2\62\u015d\3\2\2\2\64\u016c\3\2\2\2\66\u016e\3\2\2\28\u0182"+
+		"\3\2\2\2:\u0186\3\2\2\2<\u018e\3\2\2\2>\u0192\3\2\2\2@\u0194\3\2\2\2B"+
+		"\u0197\3\2\2\2D\u0199\3\2\2\2F\u019d\3\2\2\2H\u01a9\3\2\2\2J\u01ab\3\2"+
+		"\2\2L\u01b7\3\2\2\2N\u01be\3\2\2\2P\u01c0\3\2\2\2R\u01d1\3\2\2\2T\u01d5"+
+		"\3\2\2\2V\u01e4\3\2\2\2X\u01e6\3\2\2\2Z\u01ea\3\2\2\2\\\u01f7\3\2\2\2"+
+		"^\u01ff\3\2\2\2`\u020f\3\2\2\2b\u0220\3\2\2\2d\u0223\3\2\2\2f\u0226\3"+
+		"\2\2\2h\u0229\3\2\2\2j\u0232\3\2\2\2l\u0236\3\2\2\2ns\5\4\3\2op\5\6\4"+
 		"\2pq\7@\2\2qs\3\2\2\2rn\3\2\2\2ro\3\2\2\2s\3\3\2\2\2tu\7$\2\2uv\7Y\2\2"+
 		"v\5\3\2\2\2w}\5F$\2x}\5P)\2y}\5\b\5\2z}\5Z.\2{}\5J&\2|w\3\2\2\2|x\3\2"+
-		"\2\2|y\3\2\2\2|z\3\2\2\2|{\3\2\2\2}\7\3\2\2\2~\u0080\7B\2\2\177~\3\2\2"+
-		"\2\177\u0080\3\2\2\2\u0080\u0081\3\2\2\2\u0081\u0083\7\35\2\2\u0082\u0084"+
-		"\5\n\6\2\u0083\u0082\3\2\2\2\u0083\u0084\3\2\2\2\u0084\u0085\3\2\2\2\u0085"+
-		"\u0087\5\f\7\2\u0086\u0088\5 \21\2\u0087\u0086\3\2\2\2\u0087\u0088\3\2"+
-		"\2\2\u0088\u0089\3\2\2\2\u0089\u008b\5\"\22\2\u008a\u008c\5`\61\2\u008b"+
-		"\u008a\3\2\2\2\u008b\u008c\3\2\2\2\u008c\u008e\3\2\2\2\u008d\u008f\5l"+
-		"\67\2\u008e\u008d\3\2\2\2\u008e\u008f\3\2\2\2\u008f\u0091\3\2\2\2\u0090"+
-		"\u0092\5*\26\2\u0091\u0090\3\2\2\2\u0091\u0092\3\2\2\2\u0092\u0094\3\2"+
-		"\2\2\u0093\u0095\58\35\2\u0094\u0093\3\2\2\2\u0094\u0095\3\2\2\2\u0095"+
-		"\u0097\3\2\2\2\u0096\u0098\5@!\2\u0097\u0096\3\2\2\2\u0097\u0098\3\2\2"+
-		"\2\u0098\u009a\3\2\2\2\u0099\u009b\5D#\2\u009a\u0099\3\2\2\2\u009a\u009b"+
-		"\3\2\2\2\u009b\u009d\3\2\2\2\u009c\u009e\7C\2\2\u009d\u009c\3\2\2\2\u009d"+
-		"\u009e\3\2\2\2\u009e\t\3\2\2\2\u009f\u00a0\7\f\2\2\u00a0\13\3\2\2\2\u00a1"+
-		"\u00a4\5\16\b\2\u00a2\u00a4\7\61\2\2\u00a3\u00a1\3\2\2\2\u00a3\u00a2\3"+
-		"\2\2\2\u00a4\u00a9\3\2\2\2\u00a5\u00a6\7?\2\2\u00a6\u00a8\5\16\b\2\u00a7"+
-		"\u00a5\3\2\2\2\u00a8\u00ab\3\2\2\2\u00a9\u00a7\3\2\2\2\u00a9\u00aa\3\2"+
-		"\2\2\u00aa\r\3\2\2\2\u00ab\u00a9\3\2\2\2\u00ac\u00bb\5V,\2\u00ad\u00b3"+
-		"\5\20\t\2\u00ae\u00b3\5\22\n\2\u00af\u00b3\5\24\13\2\u00b0\u00b3\5\26"+
-		"\f\2\u00b1\u00b3\5\30\r\2\u00b2\u00ad\3\2\2\2\u00b2\u00ae\3\2\2\2\u00b2"+
-		"\u00af\3\2\2\2\u00b2\u00b0\3\2\2\2\u00b2\u00b1\3\2\2\2\u00b3\u00b6\3\2"+
-		"\2\2\u00b4\u00b7\5\34\17\2\u00b5\u00b7\5\36\20\2\u00b6\u00b4\3\2\2\2\u00b6"+
-		"\u00b5\3\2\2\2\u00b6\u00b7\3\2\2\2\u00b7\u00b9\3\2\2\2\u00b8\u00b2\3\2"+
-		"\2\2\u00b8\u00b9\3\2\2\2\u00b9\u00bb\3\2\2\2\u00ba\u00ac\3\2\2\2\u00ba"+
-		"\u00b8\3\2\2\2\u00bb\17\3\2\2\2\u00bc\u00bd\7\37\2\2\u00bd\u00be\7B\2"+
-		"\2\u00be\u00bf\5V,\2\u00bf\u00c0\7C\2\2\u00c0\21\3\2\2\2\u00c1\u00c2\7"+
-		"\n\2\2\u00c2\u00c3\7B\2\2\u00c3\u00c4\5V,\2\u00c4\u00c5\7C\2\2\u00c5\23"+
-		"\3\2\2\2\u00c6\u00c7\7\5\2\2\u00c7\u00c8\7B\2\2\u00c8\u00c9\5V,\2\u00c9"+
-		"\u00ca\7C\2\2\u00ca\25\3\2\2\2\u00cb\u00cc\7\27\2\2\u00cc\u00cd\7B\2\2"+
-		"\u00cd\u00ce\5V,\2\u00ce\u00cf\7C\2\2\u00cf\27\3\2\2\2\u00d0\u00d1\7\30"+
-		"\2\2\u00d1\u00d2\7B\2\2\u00d2\u00d3\5V,\2\u00d3\u00d4\7C\2\2\u00d4\31"+
-		"\3\2\2\2\u00d5\u00d6\7Y\2\2\u00d6\33\3\2\2\2\u00d7\u00d8\7\6\2\2\u00d8"+
-		"\u00d9\5\36\20\2\u00d9\35\3\2\2\2\u00da\u00db\t\2\2\2\u00db\37\3\2\2\2"+
-		"\u00dc\u00e9\7O\2\2\u00dd\u00de\7P\2\2\u00de\u00ea\t\3\2\2\u00df\u00e0"+
-		"\7Q\2\2\u00e0\u00ea\t\3\2\2\u00e1\u00e6\7Y\2\2\u00e2\u00e3\7?\2\2\u00e3"+
-		"\u00e5\7Y\2\2\u00e4\u00e2\3\2\2\2\u00e5\u00e8\3\2\2\2\u00e6\u00e4\3\2"+
-		"\2\2\u00e6\u00e7\3\2\2\2\u00e7\u00ea\3\2\2\2\u00e8\u00e6\3\2\2\2\u00e9"+
-		"\u00dd\3\2\2\2\u00e9\u00df\3\2\2\2\u00e9\u00e1\3\2\2\2\u00ea!\3\2\2\2"+
-		"\u00eb\u00ec\7\20\2\2\u00ec\u00ed\5$\23\2\u00ed#\3\2\2\2\u00ee\u00f3\5"+
-		"&\24\2\u00ef\u00f0\7?\2\2\u00f0\u00f2\5&\24\2\u00f1\u00ef\3\2\2\2\u00f2"+
-		"\u00f5\3\2\2\2\u00f3\u00f1\3\2\2\2\u00f3\u00f4\3\2\2\2\u00f4%\3\2\2\2"+
-		"\u00f5\u00f3\3\2\2\2\u00f6\u00fe\5(\25\2\u00f7\u00f8\5(\25\2\u00f8\u00f9"+
-		"\5\36\20\2\u00f9\u00fe\3\2\2\2\u00fa\u00fb\5(\25\2\u00fb\u00fc\5\34\17"+
-		"\2\u00fc\u00fe\3\2\2\2\u00fd\u00f6\3\2\2\2\u00fd\u00f7\3\2\2\2\u00fd\u00fa"+
-		"\3\2\2\2\u00fe\'\3\2\2\2\u00ff\u0100\7Y\2\2\u0100)\3\2\2\2\u0101\u0103"+
-		"\7\'\2\2\u0102\u0104\5\64\33\2\u0103\u0102\3\2\2\2\u0103\u0104\3\2\2\2"+
-		"\u0104\u0106\3\2\2\2\u0105\u0107\5,\27\2\u0106\u0105\3\2\2\2\u0106\u0107"+
-		"\3\2\2\2\u0107\u0109\3\2\2\2\u0108\u010a\5.\30\2\u0109\u0108\3\2\2\2\u0109"+
-		"\u010a\3\2\2\2\u010a\u0117\3\2\2\2\u010b\u010d\7\32\2\2\u010c\u010b\3"+
-		"\2\2\2\u010c\u010d\3\2\2\2\u010d\u010e\3\2\2\2\u010e\u010f\7\16\2\2\u010f"+
-		"\u0118\5\b\5\2\u0110\u0111\7\7\2\2\u0111\u0118\5\b\5\2\u0112\u0113\7\b"+
-		"\2\2\u0113\u0114\5\62\32\2\u0114\u0115\7\4\2\2\u0115\u0116\5\62\32\2\u0116"+
-		"\u0118\3\2\2\2\u0117\u010c\3\2\2\2\u0117\u0110\3\2\2\2\u0117\u0112\3\2"+
-		"\2\2\u0117\u0118\3\2\2\2\u0118+\3\2\2\2\u0119\u011a\7\26\2\2\u011a\u011c"+
-		"\7V\2\2\u011b\u011d\7\64\2\2\u011c\u011b\3\2\2\2\u011c\u011d\3\2\2\2\u011d"+
-		"\u011e\3\2\2\2\u011e\u0120\7Y\2\2\u011f\u0121\7\64\2\2\u0120\u011f\3\2"+
-		"\2\2\u0120\u0121\3\2\2\2\u0121\u0122\3\2\2\2\u0122\u0123\7V\2\2\u0123"+
-		"-\3\2\2\2\u0124\u0126\7\32\2\2\u0125\u0124\3\2\2\2\u0125\u0126\3\2\2\2"+
-		"\u0126\u0127\3\2\2\2\u0127\u0128\7\22\2\2\u0128\u012b\7B\2\2\u0129\u012c"+
-		"\5\60\31\2\u012a\u012c\5\b\5\2\u012b\u0129\3\2\2\2\u012b\u012a\3\2\2\2"+
-		"\u012c\u012d\3\2\2\2\u012d\u012e\7C\2\2\u012e/\3\2\2\2\u012f\u0134\5\62"+
-		"\32\2\u0130\u0131\7?\2\2\u0131\u0133\5\62\32\2\u0132\u0130\3\2\2\2\u0133"+
-		"\u0136\3\2\2\2\u0134\u0132\3\2\2\2\u0134\u0135\3\2\2\2\u0135\61\3\2\2"+
-		"\2\u0136\u0134\3\2\2\2\u0137\u0138\7\65\2\2\u0138\u013d\7X\2\2\u0139\u013d"+
-		"\7X\2\2\u013a\u013d\7S\2\2\u013b\u013d\7T\2\2\u013c\u0137\3\2\2\2\u013c"+
-		"\u0139\3\2\2\2\u013c\u013a\3\2\2\2\u013c\u013b\3\2\2\2\u013d\63\3\2\2"+
-		"\2\u013e\u0141\5\66\34\2\u013f\u0140\7\33\2\2\u0140\u0142\5\64\33\2\u0141"+
-		"\u013f\3\2\2\2\u0141\u0142\3\2\2\2\u0142\65\3\2\2\2\u0143\u0144\7B\2\2"+
-		"\u0144\u0145\5\64\33\2\u0145\u014e\7C\2\2\u0146\u0147\7\33\2\2\u0147\u0149"+
-		"\5\64\33\2\u0148\u0146\3\2\2\2\u0148\u0149\3\2\2\2\u0149\u014f\3\2\2\2"+
-		"\u014a\u014b\7\4\2\2\u014b\u014d\5\64\33\2\u014c\u014a\3\2\2\2\u014c\u014d"+
-		"\3\2\2\2\u014d\u014f\3\2\2\2\u014e\u0148\3\2\2\2\u014e\u014c\3\2\2\2\u014f"+
-		"\u015f\3\2\2\2\u0150\u0158\5V,\2\u0151\u0156\5B\"\2\u0152\u0157\5\62\32"+
-		"\2\u0153\u0157\5V,\2\u0154\u0155\7\7\2\2\u0155\u0157\5\2\2\2\u0156\u0152"+
-		"\3\2\2\2\u0156\u0153\3\2\2\2\u0156\u0154\3\2\2\2\u0157\u0159\3\2\2\2\u0158"+
-		"\u0151\3\2\2\2\u0158\u0159\3\2\2\2\u0159\u015c\3\2\2\2\u015a\u015b\7\4"+
-		"\2\2\u015b\u015d\5\64\33\2\u015c\u015a\3\2\2\2\u015c\u015d\3\2\2\2\u015d"+
-		"\u015f\3\2\2\2\u015e\u0143\3\2\2\2\u015e\u0150\3\2\2\2\u015f\67\3\2\2"+
-		"\2\u0160\u0161\7\21\2\2\u0161\u0162\7\t\2\2\u0162\u0163\5V,\2\u01639\3"+
-		"\2\2\2\u0164\u0169\5<\37\2\u0165\u0166\7?\2\2\u0166\u0168\5<\37\2\u0167"+
-		"\u0165\3\2\2\2\u0168\u016b\3\2\2\2\u0169\u0167\3\2\2\2\u0169\u016a\3\2"+
-		"\2\2\u016a;\3\2\2\2\u016b\u0169\3\2\2\2\u016c\u016e\5V,\2\u016d\u016f"+
-		"\5> \2\u016e\u016d\3\2\2\2\u016e\u016f\3\2\2\2\u016f=\3\2\2\2\u0170\u0171"+
-		"\t\4\2\2\u0171?\3\2\2\2\u0172\u0173\7R\2\2\u0173\u0174\5\64\33\2\u0174"+
-		"A\3\2\2\2\u0175\u0176\t\5\2\2\u0176C\3\2\2\2\u0177\u0178\7\31\2\2\u0178"+
-		"\u0179\7\t\2\2\u0179\u017a\5:\36\2\u017aE\3\2\2\2\u017b\u017c\7\13\2\2"+
-		"\u017c\u017d\7\20\2\2\u017d\u017f\5$\23\2\u017e\u0180\5*\26\2\u017f\u017e"+
-		"\3\2\2\2\u017f\u0180\3\2\2\2\u0180\u0182\3\2\2\2\u0181\u0183\5D#\2\u0182"+
-		"\u0181\3\2\2\2\u0182\u0183\3\2\2\2\u0183\u0185\3\2\2\2\u0184\u0186\5H"+
-		"%\2\u0185\u0184\3\2\2\2\u0185\u0186\3\2\2\2\u0186G\3\2\2\2\u0187\u0188"+
-		"\t\6\2\2\u0188I\3\2\2\2\u0189\u018a\7\r\2\2\u018a\u018b\7 \2\2\u018b\u0190"+
-		"\5L\'\2\u018c\u018d\7\26\2\2\u018d\u0191\5N(\2\u018e\u018f\7\6\2\2\u018f"+
-		"\u0191\5\b\5\2\u0190\u018c\3\2\2\2\u0190\u018e\3\2\2\2\u0191K\3\2\2\2"+
-		"\u0192\u0193\5(\25\2\u0193M\3\2\2\2\u0194\u019a\5(\25\2\u0195\u0196\5"+
-		"(\25\2\u0196\u0197\7>\2\2\u0197\u0198\5\32\16\2\u0198\u019a\3\2\2\2\u0199"+
-		"\u0194\3\2\2\2\u0199\u0195\3\2\2\2\u019aO\3\2\2\2\u019b\u019c\7\24\2\2"+
-		"\u019c\u019d\7O\2\2\u019d\u01a1\5(\25\2\u019e\u01a0\5R*\2\u019f\u019e"+
-		"\3\2\2\2\u01a0\u01a3\3\2\2\2\u01a1\u019f\3\2\2\2\u01a1\u01a2\3\2\2\2\u01a2"+
-		"\u01a7\3\2\2\2\u01a3\u01a1\3\2\2\2\u01a4\u01a5\7&\2\2\u01a5\u01a8\5X-"+
-		"\2\u01a6\u01a8\5\b\5\2\u01a7\u01a4\3\2\2\2\u01a7\u01a6\3\2\2\2\u01a8Q"+
-		"\3\2\2\2\u01a9\u01aa\7B\2\2\u01aa\u01ab\5T+\2\u01ab\u01ac\7C\2\2\u01ac"+
-		"S\3\2\2\2\u01ad\u01b2\5V,\2\u01ae\u01af\7?\2\2\u01af\u01b1\5V,\2\u01b0"+
-		"\u01ae\3\2\2\2\u01b1\u01b4\3\2\2\2\u01b2\u01b0\3\2\2\2\u01b2\u01b3\3\2"+
-		"\2\2\u01b3U\3\2\2\2\u01b4\u01b2\3\2\2\2\u01b5\u01bd\5\32\16\2\u01b6\u01b7"+
-		"\5\32\16\2\u01b7\u01b8\5\36\20\2\u01b8\u01bd\3\2\2\2\u01b9\u01ba\5\32"+
-		"\16\2\u01ba\u01bb\5\34\17\2\u01bb\u01bd\3\2\2\2\u01bc\u01b5\3\2\2\2\u01bc"+
-		"\u01b6\3\2\2\2\u01bc\u01b9\3\2\2\2\u01bdW\3\2\2\2\u01be\u01bf\7B\2\2\u01bf"+
-		"\u01c0\5\60\31\2\u01c0\u01c1\7C\2\2\u01c1Y\3\2\2\2\u01c2\u01c3\7!\2\2"+
-		"\u01c3\u01c4\5\\/\2\u01c4\u01c5\7\36\2\2\u01c5\u01c7\5^\60\2\u01c6\u01c8"+
-		"\5*\26\2\u01c7\u01c6\3\2\2\2\u01c7\u01c8\3\2\2\2\u01c8\u01ca\3\2\2\2\u01c9"+
-		"\u01cb\5D#\2\u01ca\u01c9\3\2\2\2\u01ca\u01cb\3\2\2\2\u01cb\u01cd\3\2\2"+
-		"\2\u01cc\u01ce\5H%\2\u01cd\u01cc\3\2\2\2\u01cd\u01ce\3\2\2\2\u01ce[\3"+
-		"\2\2\2\u01cf\u01d4\7Y\2\2\u01d0\u01d1\7?\2\2\u01d1\u01d3\7Y\2\2\u01d2"+
-		"\u01d0\3\2\2\2\u01d3\u01d6\3\2\2\2\u01d4\u01d2\3\2\2\2\u01d4\u01d5\3\2"+
-		"\2\2\u01d5]\3\2\2\2\u01d6\u01d4\3\2\2\2\u01d7\u01d8\5V,\2\u01d8\u01d9"+
-		"\7(\2\2\u01d9\u01e1\5\62\32\2\u01da\u01db\7?\2\2\u01db\u01dc\5V,\2\u01dc"+
-		"\u01dd\7(\2\2\u01dd\u01de\5\62\32\2\u01de\u01e0\3\2\2\2\u01df\u01da\3"+
-		"\2\2\2\u01e0\u01e3\3\2\2\2\u01e1\u01df\3\2\2\2\u01e1\u01e2\3\2\2\2\u01e2"+
-		"_\3\2\2\2\u01e3\u01e1\3\2\2\2\u01e4\u01e8\5b\62\2\u01e5\u01e8\5f\64\2"+
-		"\u01e6\u01e8\5d\63\2\u01e7\u01e4\3\2\2\2\u01e7\u01e5\3\2\2\2\u01e7\u01e6"+
-		"\3\2\2\2\u01e8\u01e9\3\2\2\2\u01e9\u01f0\5&\24\2\u01ea\u01f1\5h\65\2\u01eb"+
-		"\u01ec\7#\2\2\u01ec\u01ed\7B\2\2\u01ed\u01ee\5V,\2\u01ee\u01ef\7C\2\2"+
-		"\u01ef\u01f1\3\2\2\2\u01f0\u01ea\3\2\2\2\u01f0\u01eb\3\2\2\2\u01f1\u01f5"+
-		"\3\2\2\2\u01f2\u01f4\5`\61\2\u01f3\u01f2\3\2\2\2\u01f4\u01f7\3\2\2\2\u01f5"+
-		"\u01f3\3\2\2\2\u01f5\u01f6\3\2\2\2\u01f6a\3\2\2\2\u01f7\u01f5\3\2\2\2"+
-		"\u01f8\u01f9\7\23\2\2\u01f9\u01fa\7\25\2\2\u01fac\3\2\2\2\u01fb\u01fc"+
-		"\7\17\2\2\u01fc\u01fd\7\25\2\2\u01fde\3\2\2\2\u01fe\u01ff\7\34\2\2\u01ff"+
-		"\u0200\7\25\2\2\u0200g\3\2\2\2\u0201\u0202\7%\2\2\u0202\u0207\5j\66\2"+
-		"\u0203\u0204\7\4\2\2\u0204\u0206\5j\66\2\u0205\u0203\3\2\2\2\u0206\u0209"+
-		"\3\2\2\2\u0207\u0205\3\2\2\2\u0207\u0208\3\2\2\2\u0208i\3\2\2\2\u0209"+
-		"\u0207\3\2\2\2\u020a\u020b\5V,\2\u020b\u020c\5B\"\2\u020c\u020d\5V,\2"+
-		"\u020dk\3\2\2\2\u020e\u0214\7\"\2\2\u020f\u0210\7\3\2\2\u0210\u0215\5"+
-		"\b\5\2\u0211\u0215\5\b\5\2\u0212\u0213\7 \2\2\u0213\u0215\5(\25\2\u0214"+
-		"\u020f\3\2\2\2\u0214\u0211\3\2\2\2\u0214\u0212\3\2\2\2\u0215m\3\2\2\2"+
-		"@r|\177\u0083\u0087\u008b\u008e\u0091\u0094\u0097\u009a\u009d\u00a3\u00a9"+
-		"\u00b2\u00b6\u00b8\u00ba\u00e6\u00e9\u00f3\u00fd\u0103\u0106\u0109\u010c"+
-		"\u0117\u011c\u0120\u0125\u012b\u0134\u013c\u0141\u0148\u014c\u014e\u0156"+
-		"\u0158\u015c\u015e\u0169\u016e\u017f\u0182\u0185\u0190\u0199\u01a1\u01a7"+
-		"\u01b2\u01bc\u01c7\u01ca\u01cd\u01d4\u01e1\u01e7\u01f0\u01f5\u0207\u0214";
+		"\2\2|y\3\2\2\2|z\3\2\2\2|{\3\2\2\2}\7\3\2\2\2~\u0080\7\35\2\2\177\u0081"+
+		"\5\f\7\2\u0080\177\3\2\2\2\u0080\u0081\3\2\2\2\u0081\u0082\3\2\2\2\u0082"+
+		"\u0084\5\16\b\2\u0083\u0085\5\"\22\2\u0084\u0083\3\2\2\2\u0084\u0085\3"+
+		"\2\2\2\u0085\u0086\3\2\2\2\u0086\u0088\5$\23\2\u0087\u0089\5`\61\2\u0088"+
+		"\u0087\3\2\2\2\u0088\u0089\3\2\2\2\u0089\u008b\3\2\2\2\u008a\u008c\5l"+
+		"\67\2\u008b\u008a\3\2\2\2\u008b\u008c\3\2\2\2\u008c\u008e\3\2\2\2\u008d"+
+		"\u008f\5,\27\2\u008e\u008d\3\2\2\2\u008e\u008f\3\2\2\2\u008f\u0091\3\2"+
+		"\2\2\u0090\u0092\58\35\2\u0091\u0090\3\2\2\2\u0091\u0092\3\2\2\2\u0092"+
+		"\u0094\3\2\2\2\u0093\u0095\5@!\2\u0094\u0093\3\2\2\2\u0094\u0095\3\2\2"+
+		"\2\u0095\u0097\3\2\2\2\u0096\u0098\5D#\2\u0097\u0096\3\2\2\2\u0097\u0098"+
+		"\3\2\2\2\u0098\t\3\2\2\2\u0099\u009a\7B\2\2\u009a\u009c\7\35\2\2\u009b"+
+		"\u009d\5\f\7\2\u009c\u009b\3\2\2\2\u009c\u009d\3\2\2\2\u009d\u009e\3\2"+
+		"\2\2\u009e\u00a0\5\16\b\2\u009f\u00a1\5\"\22\2\u00a0\u009f\3\2\2\2\u00a0"+
+		"\u00a1\3\2\2\2\u00a1\u00a2\3\2\2\2\u00a2\u00a4\5$\23\2\u00a3\u00a5\5`"+
+		"\61\2\u00a4\u00a3\3\2\2\2\u00a4\u00a5\3\2\2\2\u00a5\u00a7\3\2\2\2\u00a6"+
+		"\u00a8\5l\67\2\u00a7\u00a6\3\2\2\2\u00a7\u00a8\3\2\2\2\u00a8\u00aa\3\2"+
+		"\2\2\u00a9\u00ab\5,\27\2\u00aa\u00a9\3\2\2\2\u00aa\u00ab\3\2\2\2\u00ab"+
+		"\u00ad\3\2\2\2\u00ac\u00ae\58\35\2\u00ad\u00ac\3\2\2\2\u00ad\u00ae\3\2"+
+		"\2\2\u00ae\u00b0\3\2\2\2\u00af\u00b1\5@!\2\u00b0\u00af\3\2\2\2\u00b0\u00b1"+
+		"\3\2\2\2\u00b1\u00b3\3\2\2\2\u00b2\u00b4\5D#\2\u00b3\u00b2\3\2\2\2\u00b3"+
+		"\u00b4\3\2\2\2\u00b4\u00b5\3\2\2\2\u00b5\u00b6\7C\2\2\u00b6\13\3\2\2\2"+
+		"\u00b7\u00b8\7\f\2\2\u00b8\r\3\2\2\2\u00b9\u00bc\5\20\t\2\u00ba\u00bc"+
+		"\7\61\2\2\u00bb\u00b9\3\2\2\2\u00bb\u00ba\3\2\2\2\u00bc\u00c1\3\2\2\2"+
+		"\u00bd\u00be\7?\2\2\u00be\u00c0\5\20\t\2\u00bf\u00bd\3\2\2\2\u00c0\u00c3"+
+		"\3\2\2\2\u00c1\u00bf\3\2\2\2\u00c1\u00c2\3\2\2\2\u00c2\17\3\2\2\2\u00c3"+
+		"\u00c1\3\2\2\2\u00c4\u00d3\5V,\2\u00c5\u00cb\5\22\n\2\u00c6\u00cb\5\24"+
+		"\13\2\u00c7\u00cb\5\26\f\2\u00c8\u00cb\5\30\r\2\u00c9\u00cb\5\32\16\2"+
+		"\u00ca\u00c5\3\2\2\2\u00ca\u00c6\3\2\2\2\u00ca\u00c7\3\2\2\2\u00ca\u00c8"+
+		"\3\2\2\2\u00ca\u00c9\3\2\2\2\u00cb\u00ce\3\2\2\2\u00cc\u00cf\5\36\20\2"+
+		"\u00cd\u00cf\5 \21\2\u00ce\u00cc\3\2\2\2\u00ce\u00cd\3\2\2\2\u00ce\u00cf"+
+		"\3\2\2\2\u00cf\u00d1\3\2\2\2\u00d0\u00ca\3\2\2\2\u00d0\u00d1\3\2\2\2\u00d1"+
+		"\u00d3\3\2\2\2\u00d2\u00c4\3\2\2\2\u00d2\u00d0\3\2\2\2\u00d3\21\3\2\2"+
+		"\2\u00d4\u00d5\7\37\2\2\u00d5\u00d6\7B\2\2\u00d6\u00d7\5V,\2\u00d7\u00d8"+
+		"\7C\2\2\u00d8\23\3\2\2\2\u00d9\u00da\7\n\2\2\u00da\u00db\7B\2\2\u00db"+
+		"\u00dc\5V,\2\u00dc\u00dd\7C\2\2\u00dd\25\3\2\2\2\u00de\u00df\7\5\2\2\u00df"+
+		"\u00e0\7B\2\2\u00e0\u00e1\5V,\2\u00e1\u00e2\7C\2\2\u00e2\27\3\2\2\2\u00e3"+
+		"\u00e4\7\27\2\2\u00e4\u00e5\7B\2\2\u00e5\u00e6\5V,\2\u00e6\u00e7\7C\2"+
+		"\2\u00e7\31\3\2\2\2\u00e8\u00e9\7\30\2\2\u00e9\u00ea\7B\2\2\u00ea\u00eb"+
+		"\5V,\2\u00eb\u00ec\7C\2\2\u00ec\33\3\2\2\2\u00ed\u00ee\t\2\2\2\u00ee\35"+
+		"\3\2\2\2\u00ef\u00f0\7\6\2\2\u00f0\u00f1\5 \21\2\u00f1\37\3\2\2\2\u00f2"+
+		"\u00f3\t\3\2\2\u00f3!\3\2\2\2\u00f4\u0109\7O\2\2\u00f5\u00f6\7P\2\2\u00f6"+
+		"\u010a\t\4\2\2\u00f7\u00f8\7Q\2\2\u00f8\u010a\t\4\2\2\u00f9\u00fe\7Y\2"+
+		"\2\u00fa\u00fb\7?\2\2\u00fb\u00fd\7Y\2\2\u00fc\u00fa\3\2\2\2\u00fd\u0100"+
+		"\3\2\2\2\u00fe\u00fc\3\2\2\2\u00fe\u00ff\3\2\2\2\u00ff\u010a\3\2\2\2\u0100"+
+		"\u00fe\3\2\2\2\u0101\u0106\7Z\2\2\u0102\u0103\7?\2\2\u0103\u0105\7Z\2"+
+		"\2\u0104\u0102\3\2\2\2\u0105\u0108\3\2\2\2\u0106\u0104\3\2\2\2\u0106\u0107"+
+		"\3\2\2\2\u0107\u010a\3\2\2\2\u0108\u0106\3\2\2\2\u0109\u00f5\3\2\2\2\u0109"+
+		"\u00f7\3\2\2\2\u0109\u00f9\3\2\2\2\u0109\u0101\3\2\2\2\u010a#\3\2\2\2"+
+		"\u010b\u010c\7\20\2\2\u010c\u010d\5&\24\2\u010d%\3\2\2\2\u010e\u0113\5"+
+		"(\25\2\u010f\u0110\7?\2\2\u0110\u0112\5(\25\2\u0111\u010f\3\2\2\2\u0112"+
+		"\u0115\3\2\2\2\u0113\u0111\3\2\2\2\u0113\u0114\3\2\2\2\u0114\'\3\2\2\2"+
+		"\u0115\u0113\3\2\2\2\u0116\u011e\5*\26\2\u0117\u0118\5*\26\2\u0118\u0119"+
+		"\5 \21\2\u0119\u011e\3\2\2\2\u011a\u011b\5*\26\2\u011b\u011c\5\36\20\2"+
+		"\u011c\u011e\3\2\2\2\u011d\u0116\3\2\2\2\u011d\u0117\3\2\2\2\u011d\u011a"+
+		"\3\2\2\2\u011e)\3\2\2\2\u011f\u0120\7Y\2\2\u0120+\3\2\2\2\u0121\u0125"+
+		"\7\'\2\2\u0122\u0126\5.\30\2\u0123\u0126\5\60\31\2\u0124\u0126\5\66\34"+
+		"\2\u0125\u0122\3\2\2\2\u0125\u0123\3\2\2\2\u0125\u0124\3\2\2\2\u0125\u0126"+
+		"\3\2\2\2\u0126\u0141\3\2\2\2\u0127\u0129\7\32\2\2\u0128\u0127\3\2\2\2"+
+		"\u0128\u0129\3\2\2\2\u0129\u012a\3\2\2\2\u012a\u012d\7\16\2\2\u012b\u012e"+
+		"\5\n\6\2\u012c\u012e\5\b\5\2\u012d\u012b\3\2\2\2\u012d\u012c\3\2\2\2\u012e"+
+		"\u013e\3\2\2\2\u012f\u0136\7\7\2\2\u0130\u0137\5\n\6\2\u0131\u0137\5\b"+
+		"\5\2\u0132\u0137\5P)\2\u0133\u0137\5F$\2\u0134\u0137\5Z.\2\u0135\u0137"+
+		"\5J&\2\u0136\u0130\3\2\2\2\u0136\u0131\3\2\2\2\u0136\u0132\3\2\2\2\u0136"+
+		"\u0133\3\2\2\2\u0136\u0134\3\2\2\2\u0136\u0135\3\2\2\2\u0137\u013e\3\2"+
+		"\2\2\u0138\u0139\7\b\2\2\u0139\u013a\5\64\33\2\u013a\u013b\7\4\2\2\u013b"+
+		"\u013c\5\64\33\2\u013c\u013e\3\2\2\2\u013d\u0128\3\2\2\2\u013d\u012f\3"+
+		"\2\2\2\u013d\u0138\3\2\2\2\u013e\u0142\3\2\2\2\u013f\u0140\7\33\2\2\u0140"+
+		"\u0142\5\66\34\2\u0141\u013d\3\2\2\2\u0141\u013f\3\2\2\2\u0141\u0142\3"+
+		"\2\2\2\u0142-\3\2\2\2\u0143\u0144\7\26\2\2\u0144\u0146\7V\2\2\u0145\u0147"+
+		"\7\64\2\2\u0146\u0145\3\2\2\2\u0146\u0147\3\2\2\2\u0147\u0148\3\2\2\2"+
+		"\u0148\u014a\7Y\2\2\u0149\u014b\7\64\2\2\u014a\u0149\3\2\2\2\u014a\u014b"+
+		"\3\2\2\2\u014b\u014c\3\2\2\2\u014c\u014d\7V\2\2\u014d/\3\2\2\2\u014e\u0150"+
+		"\5\34\17\2\u014f\u0151\7\32\2\2\u0150\u014f\3\2\2\2\u0150\u0151\3\2\2"+
+		"\2\u0151\u0152\3\2\2\2\u0152\u0153\7\22\2\2\u0153\u0159\7B\2\2\u0154\u015a"+
+		"\5\62\32\2\u0155\u0158\5\n\6\2\u0156\u0158\5\b\5\2\u0157\u0155\3\2\2\2"+
+		"\u0157\u0156\3\2\2\2\u0158\u015a\3\2\2\2\u0159\u0154\3\2\2\2\u0159\u0157"+
+		"\3\2\2\2\u015a\u015b\3\2\2\2\u015b\u015c\7C\2\2\u015c\61\3\2\2\2\u015d"+
+		"\u0162\5\64\33\2\u015e\u015f\7?\2\2\u015f\u0161\5\64\33\2\u0160\u015e"+
+		"\3\2\2\2\u0161\u0164\3\2\2\2\u0162\u0160\3\2\2\2\u0162\u0163\3\2\2\2\u0163"+
+		"\63\3\2\2\2\u0164\u0162\3\2\2\2\u0165\u016d\7Y\2\2\u0166\u0167\7\65\2"+
+		"\2\u0167\u016d\7X\2\2\u0168\u016d\7X\2\2\u0169\u016d\7S\2\2\u016a\u016d"+
+		"\7T\2\2\u016b\u016d\7\\\2\2\u016c\u0165\3\2\2\2\u016c\u0166\3\2\2\2\u016c"+
+		"\u0168\3\2\2\2\u016c\u0169\3\2\2\2\u016c\u016a\3\2\2\2\u016c\u016b\3\2"+
+		"\2\2\u016d\65\3\2\2\2\u016e\u0170\5V,\2\u016f\u0171\5B\"\2\u0170\u016f"+
+		"\3\2\2\2\u0170\u0171\3\2\2\2\u0171\u017c\3\2\2\2\u0172\u017d\7X\2\2\u0173"+
+		"\u017d\5V,\2\u0174\u0177\7\7\2\2\u0175\u0178\5\n\6\2\u0176\u0178\5\b\5"+
+		"\2\u0177\u0175\3\2\2\2\u0177\u0176\3\2\2\2\u0178\u017d\3\2\2\2\u0179\u017d"+
+		"\7U\2\2\u017a\u017d\7S\2\2\u017b\u017d\7T\2\2\u017c\u0172\3\2\2\2\u017c"+
+		"\u0173\3\2\2\2\u017c\u0174\3\2\2\2\u017c\u0179\3\2\2\2\u017c\u017a\3\2"+
+		"\2\2\u017c\u017b\3\2\2\2\u017d\u0180\3\2\2\2\u017e\u017f\7\4\2\2\u017f"+
+		"\u0181\5\66\34\2\u0180\u017e\3\2\2\2\u0180\u0181\3\2\2\2\u0181\67\3\2"+
+		"\2\2\u0182\u0183\7\21\2\2\u0183\u0184\7\t\2\2\u0184\u0185\5V,\2\u0185"+
+		"9\3\2\2\2\u0186\u018b\5<\37\2\u0187\u0188\7?\2\2\u0188\u018a\5<\37\2\u0189"+
+		"\u0187\3\2\2\2\u018a\u018d\3\2\2\2\u018b\u0189\3\2\2\2\u018b\u018c\3\2"+
+		"\2\2\u018c;\3\2\2\2\u018d\u018b\3\2\2\2\u018e\u0190\5V,\2\u018f\u0191"+
+		"\5> \2\u0190\u018f\3\2\2\2\u0190\u0191\3\2\2\2\u0191=\3\2\2\2\u0192\u0193"+
+		"\t\5\2\2\u0193?\3\2\2\2\u0194\u0195\7R\2\2\u0195\u0196\5\66\34\2\u0196"+
+		"A\3\2\2\2\u0197\u0198\t\6\2\2\u0198C\3\2\2\2\u0199\u019a\7\31\2\2\u019a"+
+		"\u019b\7\t\2\2\u019b\u019c\5:\36\2\u019cE\3\2\2\2\u019d\u019e\7\13\2\2"+
+		"\u019e\u019f\7\20\2\2\u019f\u01a1\5&\24\2\u01a0\u01a2\5,\27\2\u01a1\u01a0"+
+		"\3\2\2\2\u01a1\u01a2\3\2\2\2\u01a2\u01a4\3\2\2\2\u01a3\u01a5\5D#\2\u01a4"+
+		"\u01a3\3\2\2\2\u01a4\u01a5\3\2\2\2\u01a5\u01a7\3\2\2\2\u01a6\u01a8\5H"+
+		"%\2\u01a7\u01a6\3\2\2\2\u01a7\u01a8\3\2\2\2\u01a8G\3\2\2\2\u01a9\u01aa"+
+		"\t\7\2\2\u01aaI\3\2\2\2\u01ab\u01ac\7\r\2\2\u01ac\u01ad\7 \2\2\u01ad\u01b5"+
+		"\5L\'\2\u01ae\u01af\7\26\2\2\u01af\u01b6\5N(\2\u01b0\u01b3\7\6\2\2\u01b1"+
+		"\u01b4\5\n\6\2\u01b2\u01b4\5\b\5\2\u01b3\u01b1\3\2\2\2\u01b3\u01b2\3\2"+
+		"\2\2\u01b4\u01b6\3\2\2\2\u01b5\u01ae\3\2\2\2\u01b5\u01b0\3\2\2\2\u01b6"+
+		"K\3\2\2\2\u01b7\u01b8\5*\26\2\u01b8M\3\2\2\2\u01b9\u01bf\5*\26\2\u01ba"+
+		"\u01bb\5*\26\2\u01bb\u01bc\7>\2\2\u01bc\u01bd\5\34\17\2\u01bd\u01bf\3"+
+		"\2\2\2\u01be\u01b9\3\2\2\2\u01be\u01ba\3\2\2\2\u01bfO\3\2\2\2\u01c0\u01c1"+
+		"\7\24\2\2\u01c1\u01c2\7O\2\2\u01c2\u01c6\5*\26\2\u01c3\u01c5\5R*\2\u01c4"+
+		"\u01c3\3\2\2\2\u01c5\u01c8\3\2\2\2\u01c6\u01c4\3\2\2\2\u01c6\u01c7\3\2"+
+		"\2\2\u01c7\u01cf\3\2\2\2\u01c8\u01c6\3\2\2\2\u01c9\u01ca\7&\2\2\u01ca"+
+		"\u01d0\5X-\2\u01cb\u01ce\5\n\6\2\u01cc\u01ce\5\b\5\2\u01cd\u01cb\3\2\2"+
+		"\2\u01cd\u01cc\3\2\2\2\u01ce\u01d0\3\2\2\2\u01cf\u01c9\3\2\2\2\u01cf\u01cd"+
+		"\3\2\2\2\u01d0Q\3\2\2\2\u01d1\u01d2\7B\2\2\u01d2\u01d3\5T+\2\u01d3\u01d4"+
+		"\7C\2\2\u01d4S\3\2\2\2\u01d5\u01da\5V,\2\u01d6\u01d7\7?\2\2\u01d7\u01d9"+
+		"\5V,\2\u01d8\u01d6\3\2\2\2\u01d9\u01dc\3\2\2\2\u01da\u01d8\3\2\2\2\u01da"+
+		"\u01db\3\2\2\2\u01dbU\3\2\2\2\u01dc\u01da\3\2\2\2\u01dd\u01e5\5\34\17"+
+		"\2\u01de\u01df\5\34\17\2\u01df\u01e0\5 \21\2\u01e0\u01e5\3\2\2\2\u01e1"+
+		"\u01e2\5\34\17\2\u01e2\u01e3\5\36\20\2\u01e3\u01e5\3\2\2\2\u01e4\u01dd"+
+		"\3\2\2\2\u01e4\u01de\3\2\2\2\u01e4\u01e1\3\2\2\2\u01e5W\3\2\2\2\u01e6"+
+		"\u01e7\7B\2\2\u01e7\u01e8\5\62\32\2\u01e8\u01e9\7C\2\2\u01e9Y\3\2\2\2"+
+		"\u01ea\u01eb\7!\2\2\u01eb\u01ec\5\\/\2\u01ec\u01ed\7\36\2\2\u01ed\u01ef"+
+		"\5^\60\2\u01ee\u01f0\5,\27\2\u01ef\u01ee\3\2\2\2\u01ef\u01f0\3\2\2\2\u01f0"+
+		"\u01f2\3\2\2\2\u01f1\u01f3\5D#\2\u01f2\u01f1\3\2\2\2\u01f2\u01f3\3\2\2"+
+		"\2\u01f3\u01f5\3\2\2\2\u01f4\u01f6\5H%\2\u01f5\u01f4\3\2\2\2\u01f5\u01f6"+
+		"\3\2\2\2\u01f6[\3\2\2\2\u01f7\u01fc\7Y\2\2\u01f8\u01f9\7?\2\2\u01f9\u01fb"+
+		"\7Y\2\2\u01fa\u01f8\3\2\2\2\u01fb\u01fe\3\2\2\2\u01fc\u01fa\3\2\2\2\u01fc"+
+		"\u01fd\3\2\2\2\u01fd]\3\2\2\2\u01fe\u01fc\3\2\2\2\u01ff\u0200\5V,\2\u0200"+
+		"\u0201\7(\2\2\u0201\u0209\5\64\33\2\u0202\u0203\7?\2\2\u0203\u0204\5V"+
+		",\2\u0204\u0205\7(\2\2\u0205\u0206\5\64\33\2\u0206\u0208\3\2\2\2\u0207"+
+		"\u0202\3\2\2\2\u0208\u020b\3\2\2\2\u0209\u0207\3\2\2\2\u0209\u020a\3\2"+
+		"\2\2\u020a_\3\2\2\2\u020b\u0209\3\2\2\2\u020c\u0210\5b\62\2\u020d\u0210"+
+		"\5f\64\2\u020e\u0210\5d\63\2\u020f\u020c\3\2\2\2\u020f\u020d\3\2\2\2\u020f"+
+		"\u020e\3\2\2\2\u0210\u0211\3\2\2\2\u0211\u0218\5(\25\2\u0212\u0219\5h"+
+		"\65\2\u0213\u0214\7#\2\2\u0214\u0215\7B\2\2\u0215\u0216\5V,\2\u0216\u0217"+
+		"\7C\2\2\u0217\u0219\3\2\2\2\u0218\u0212\3\2\2\2\u0218\u0213\3\2\2\2\u0219"+
+		"\u021d\3\2\2\2\u021a\u021c\5`\61\2\u021b\u021a\3\2\2\2\u021c\u021f\3\2"+
+		"\2\2\u021d\u021b\3\2\2\2\u021d\u021e\3\2\2\2\u021ea\3\2\2\2\u021f\u021d"+
+		"\3\2\2\2\u0220\u0221\7\23\2\2\u0221\u0222\7\25\2\2\u0222c\3\2\2\2\u0223"+
+		"\u0224\7\17\2\2\u0224\u0225\7\25\2\2\u0225e\3\2\2\2\u0226\u0227\7\34\2"+
+		"\2\u0227\u0228\7\25\2\2\u0228g\3\2\2\2\u0229\u022a\7%\2\2\u022a\u022f"+
+		"\5j\66\2\u022b\u022c\7\4\2\2\u022c\u022e\5j\66\2\u022d\u022b\3\2\2\2\u022e"+
+		"\u0231\3\2\2\2\u022f\u022d\3\2\2\2\u022f\u0230\3\2\2\2\u0230i\3\2\2\2"+
+		"\u0231\u022f\3\2\2\2\u0232\u0233\5V,\2\u0233\u0234\5B\"\2\u0234\u0235"+
+		"\5V,\2\u0235k\3\2\2\2\u0236\u0242\7\"\2\2\u0237\u023a\7\3\2\2\u0238\u023b"+
+		"\5\b\5\2\u0239\u023b\5\n\6\2\u023a\u0238\3\2\2\2\u023a\u0239\3\2\2\2\u023b"+
+		"\u0243\3\2\2\2\u023c\u023f\5\b\5\2\u023d\u023f\5\n\6\2\u023e\u023c\3\2"+
+		"\2\2\u023e\u023d\3\2\2\2\u023f\u0243\3\2\2\2\u0240\u0241\7 \2\2\u0241"+
+		"\u0243\5*\26\2\u0242\u0237\3\2\2\2\u0242\u023e\3\2\2\2\u0242\u0240\3\2"+
+		"\2\2\u0243m\3\2\2\2Ir|\u0080\u0084\u0088\u008b\u008e\u0091\u0094\u0097"+
+		"\u009c\u00a0\u00a4\u00a7\u00aa\u00ad\u00b0\u00b3\u00bb\u00c1\u00ca\u00ce"+
+		"\u00d0\u00d2\u00fe\u0106\u0109\u0113\u011d\u0125\u0128\u012d\u0136\u013d"+
+		"\u0141\u0146\u014a\u0150\u0157\u0159\u0162\u016c\u0170\u0177\u017c\u0180"+
+		"\u018b\u0190\u01a1\u01a4\u01a7\u01b3\u01b5\u01be\u01c6\u01cd\u01cf\u01da"+
+		"\u01e4\u01ef\u01f2\u01f5\u01fc\u0209\u020f\u0218\u021d\u022f\u023a\u023e"+
+		"\u0242";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {
