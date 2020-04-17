@@ -23,7 +23,7 @@ simpleStatement:
 selectStatement:
     OPEN_PAR_SYMBOL? SELECT_SYMBOL distinctClause? selectItemList intoClause?
         fromClause joinClause? unionClause? whereClause?
-        groupByClause? havingClause? orderClause? CLOSE_PAR_SYMBOL?
+        groupByClause? havingClause? orderClause? limitClause? CLOSE_PAR_SYMBOL?
 ;
 
 distinctClause:
@@ -136,15 +136,15 @@ conditionInner:
 ;
 
 groupByClause:
-    GROUP_SYMBOL BY_SYMBOL columnItem
+    GROUP_SYMBOL BY_SYMBOL columnItem (COMMA_SYMBOL columnItem)*
+;
+
+orderClause:
+    ORDER_SYMBOL BY_SYMBOL orderList direction?
 ;
 
 orderList:
-    orderExpression (COMMA_SYMBOL orderExpression)*
-;
-
-orderExpression:
-    columnItem direction?
+    columnItem (COMMA_SYMBOL columnItem)*
 ;
 
 direction:
@@ -166,18 +166,13 @@ compOp:
     | NOT_EQUAL_OPERATOR
 ;
 
-orderClause:
-    ORDER_SYMBOL BY_SYMBOL orderList
-;
-
 //DELETE
 deleteStatement:
      DELETE_SYMBOL FROM_SYMBOL tableList whereClause? orderClause? limitClause?
 ;
 
 limitClause:
-    WORD
-    | NUMBER
+    LIMIT_SYMBOL NUMBER
 ;
 
 //CREATE
