@@ -20,9 +20,8 @@ import static edu.gatech.parser.MySQLQueryParser.*;
 
 public class Main {
     private static MongoDatabase db = dbConfig();
-
     public static void main(String[] args) {
-        String query = "select CustomerName, LastName from Customers, Employees limit 5;"; // TODO: replace by args later
+        String query = "select C._id, E._id from Customers C, Employees E limit 5;"; // TODO: replace by args later
         if (args != null && args.length != 0) {
             query = args[0];
         }
@@ -34,16 +33,17 @@ public class Main {
             boolean isSelect = false;
             boolean isDistinct = false;
             int limit = Integer.MAX_VALUE;
-            Map<String, List<String>> columnToAlias = new HashMap<>();
+            Map<List<String>, List<String>> columnToAlias = new HashMap<>();
             Map<String, MongoCollection<Document>> tableToCollection = new HashMap<>(); // hashmap of tableName and collection of the same name in mongo
-            Map<String, String> tableAlias = new HashMap<>();
+            Map<String, String> tableToAlias = new HashMap<>();
+            Map<String, String> aliasToTable = new HashMap<>();
             ObjectMapper mapper = new ObjectMapper();
             Stack<Object> stack = new Stack<>();
             Predicate<Map<String, Object>> queryFilter = null;
 
             @Override
             public void exitQuery(QueryContext ctx) {
-                System.out.println(tableAlias);
+                System.out.println(limit);
                 Map<String, List<Document>> result = new HashMap<>();
                 for (Map.Entry<String, MongoCollection<Document>> entry: tableToCollection.entrySet()) {
                     List<String> distinctDocuments = new ArrayList<>();
@@ -53,31 +53,48 @@ public class Main {
                             break;
                         }
                         count++;
-                        // update the current key to alias before applying query filter
-                        List<String> aliases = new ArrayList<>();
-                        applyColumnAlias(entry, document, aliases);
                         if (queryFilter == null || queryFilter.test(document)) {
                             List<Document> docs = result.getOrDefault(entry.getKey(), new ArrayList<>());
-
                             if (isAll) {
                                 docs.add(document);
                                 result.put(entry.getKey(), docs);
                             } else {
-                                List<String> removedKeys = new ArrayList<>();
-                                for (String property : document.keySet()) {
-                                    if (!columnToAlias.containsKey(property) && !aliases.contains(property)) {
-                                        removedKeys.add(property);
-                                    }
-                                    if (columnToAlias.containsKey(property)) {
-                                        if (!columnToAlias.get(property).isEmpty()) {
-                                            String tableName = columnToAlias.get(property).get(0);
-                                            if (tableName != null && !tableName.equals(entry.getKey())) {
-                                                removedKeys.add(property);
+                                List<String> removeKeys = new ArrayList<>();
+                                for (String property: document.keySet()) {
+                                    Set<List<String>> selectedColumnTables = columnToAlias.keySet();
+                                    for (List<String> columnTable : selectedColumnTables) {
+                                        if (!property.equals(columnTable.get(0))) {
+                                            if (columnTable.get(1) != null && !entry.getKey().equals(columnTable.get(1))) {
+                                                removeKeys.add(property);
                                             }
                                         }
                                     }
                                 }
-                                removedKeys.forEach(document::remove);
+                                removeKeys.forEach(document::remove);
+                            }
+
+//                                for (String property : document.keySet()) {
+//                                    if (!columnToAlias.containsKey(property) && !updatedKeys.containsValue(property)) {
+//                                        removedKeys.add(property);
+//                                    }
+//                                    if (columnToAlias.containsKey(property)) {
+//                                        // entry.getKey is the original name of the table
+//                                        // tableName is the part of the tableName.columnName for selected column
+//                                        if (!columnToAlias.get(property).isEmpty()) {
+//                                            String tableName = columnToAlias.get(property).get(0);
+//                                            if (entry.getKey().equals(tableName)
+//                                                    && !tableToAlias.containsKey(tableName)) {
+//                                                removedKeys.add(property);
+//                                            } else if (tableToAlias.containsKey(entry.getKey())
+//                                                    && !tableToAlias.get(entry.getKey()).equals(tableName)) {
+//                                                if (tableName != null) {
+//                                                    removedKeys.add(property);
+//                                                }
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                                removedKeys.forEach(document::remove);
                                 if (isDistinct) {
                                     // apply distinct filter
                                     if (!distinctDocuments.contains(document.toJson())) {
@@ -97,9 +114,6 @@ public class Main {
                             }
                         }
                     }
-                }
-
-                applyTableAlias(result);
                 String jsonOutput = null;
                 try {
                     jsonOutput = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
@@ -112,37 +126,39 @@ public class Main {
             private void applyTableAlias(Map<String, List<Document>> result) {
                 List<String> updatedTableNames = new ArrayList<>();
                 for (String tableName: result.keySet()) {
-                    if (!tableAlias.isEmpty() && tableAlias.containsKey(tableName)) {
+                    if (!tableToAlias.isEmpty() && tableToAlias.containsKey(tableName)) {
                         updatedTableNames.add(tableName);
                     }
                 }
                 for (String tableName : updatedTableNames) {
-                    result.put(tableAlias.get(tableName), result.get(tableName));
+                    result.put(tableToAlias.get(tableName), result.get(tableName));
                     result.remove(tableName);
                 }
             }
 
-            private void applyColumnAlias(Map.Entry<String, MongoCollection<Document>> entry, Document document, List<String> aliases) {
-                List<String> updatedKeys = new ArrayList<>();
+            private void applyColumnAlias(Map.Entry<String, MongoCollection<Document>> entry, Document document, Map<String, String> updatedKeys) {
+                String tableName = entry.getKey();
+                List<String> columnTable = new ArrayList<>();
                 for (String property: document.keySet()) {
-                    if (columnToAlias.get(property) != null) {
-                        String tableName = columnToAlias.get(property).get(0);
-                        String columnAlias = columnToAlias.get(property).get(1);
-                        if (columnAlias != null && !document.containsKey(columnAlias)) {
-                            if (tableName != null) {
-                                if (tableName.equals(entry.getKey())) {
-                                    updatedKeys.add(property);
-                                    aliases.add(columnAlias);
-                                }
-                            } else {
-                                updatedKeys.add(property);
-                                aliases.add(columnAlias);
-                            }
+                    if (columnToAlias.containsKey(List.of(property, tableName)) || columnToAlias.containsKey(List.of(property, null))) {
+                        columnTable = List.of(property, tableName);
+                    } else if (columnToAlias.containsKey(List.of(property, tableToAlias.get(tableName)))) {
+                        columnTable = List.of(property, tableToAlias.get(tableName));
+                    }
+                    if (!columnTable.isEmpty()) {
+                        String alias = columnToAlias.get(columnTable).get(0);
+                        String function = columnToAlias.get(columnTable).get(1);
+                        if (function != null) {
+                            continue;
+                        }
+
+                        if (alias != null && !document.containsKey(alias)) {
+                            updatedKeys.put(property, alias);
                         }
                     }
                 }
-                updatedKeys.forEach(key -> document.put(columnToAlias.get(key).get(1), document.get(key)));
-                updatedKeys.forEach(document::remove);
+                updatedKeys.keySet().forEach(key -> document.put(updatedKeys.get(key), document.get(key)));
+                updatedKeys.keySet().forEach(document::remove);
             }
 
             @Override
@@ -160,25 +176,65 @@ public class Main {
             @Override
             public void enterSelectItem(SelectItemContext ctx) {
                 // table.column alias
-                String selectedItem = ctx.columnItem().columnName().WORD().getText();
-                List<String> tableAndAlias = new ArrayList<>();
-                String alias = null;
-                if (selectedItem.contains(".")) {
-                    int dot = selectedItem.indexOf('.');
-                    tableAndAlias.add(selectedItem.substring(0, dot));
-                    selectedItem = selectedItem.substring(dot+1);
+                ColumnItemContext context = null;
+                Func func = null;
+                if (ctx.columnItem() != null) {
+                    context = ctx.columnItem();
+                } else if(ctx.countClause() != null) {
+                    context = ctx.countClause().columnItem();
+                    func = Func.COUNT;
+                } else if(ctx.sumClause() != null) {
+                    context = ctx.sumClause().columnItem();
+                    func = Func.SUM;
+                } else if(ctx.avgClause() != null) {
+                    context = ctx.avgClause().columnItem();
+                    func = Func.AVERAGE;
+                } else if(ctx.minClause() != null) {
+                    context = ctx.minClause().columnItem();
+                    func = Func.MIN;
+                } else if(ctx.maxClause() != null) {
+                    context = ctx.maxClause().columnItem();
+                    func = Func.MAX;
                 } else {
-                    tableAndAlias.add(null);
+                    System.out.println("CANNOT FIND SELECTED COLUMN");
                 }
 
-                if (ctx.columnItem().selectAlias() != null) {
-                    alias = ctx.columnItem().selectAlias().alias().getText();
-                    tableAndAlias.add(alias);
-                } else {
-                    tableAndAlias.add(null);
+
+                if (context != null) {
+                    String selectedColumn = context.columnName().WORD().getText();
+                    String tableName = null;
+                    String alias = null;
+                    String function = func != null ? func.name() : null;
+                    List<String> columnTable = new ArrayList<>();
+
+                    List<String> mapTableAliasFunc = new ArrayList<>();
+
+                    if (selectedColumn.contains(".")) {
+                        int dot = selectedColumn.indexOf('.');
+                        tableName = selectedColumn.substring(0, dot);
+                        selectedColumn = selectedColumn.substring(dot+1);
+                    }
+
+                    if (context.selectAlias() != null) {
+                        alias = context.selectAlias().alias().getText();
+                    } else if (context.alias() != null) {
+                        alias = context.alias().getText();
+                    }
+
+                    columnTable.add(selectedColumn);
+                    columnTable.add(tableName);
+                    mapTableAliasFunc.add(alias);
+                    mapTableAliasFunc.add(function);
+
+                    columnToAlias.put(columnTable, mapTableAliasFunc);
                 }
-                columnToAlias.put(selectedItem, tableAndAlias);
             }
+
+            @Override
+            public void enterCountClause(CountClauseContext ctx) {
+
+            }
+
             @Override
             public void enterDistinctClause(DistinctClauseContext ctx) {
                 if (ctx != null && ctx.DISTINCT_SYMBOL() != null) {
@@ -189,14 +245,21 @@ public class Main {
             @Override
             public void enterTableItem(TableItemContext ctx) {
                 if (ctx.selectAlias() != null) {
-                    tableAlias.put(ctx.tableName().getText(), ctx.selectAlias().alias().getText());
+                    tableToAlias.put(ctx.tableName().getText(), ctx.selectAlias().alias().getText());
+                    aliasToTable.put(ctx.selectAlias().alias().getText(), ctx.tableName().getText());
+                } else if (ctx.alias() != null) {
+                    tableToAlias.put(ctx.tableName().getText(), ctx.alias().getText());
+                    aliasToTable.put(ctx.alias().getText(), ctx.tableName().getText());
                 }
             }
 
-            @Override // check if the table exist in mongo
+            @Override
             public void exitTableName(TableNameContext ctx) {
                 String tableName = ctx.getText();
                 MongoCollection<Document> collection = db.getCollection(tableName);
+                if (tableToAlias.containsKey(tableName)) {
+                    tableName = tableToAlias.get(tableName);
+                }
                 tableToCollection.put(tableName, collection);
             }
 

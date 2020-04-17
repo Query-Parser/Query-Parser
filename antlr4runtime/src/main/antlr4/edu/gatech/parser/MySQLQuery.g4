@@ -23,7 +23,7 @@ simpleStatement:
 selectStatement:
     OPEN_PAR_SYMBOL? SELECT_SYMBOL distinctClause? selectItemList intoClause?
         fromClause joinClause? unionClause? whereClause?
-        groupByClause? havingClause? orderClause? CLOSE_PAR_SYMBOL? limitClause?
+        groupByClause? havingClause? orderClause? limitClause? CLOSE_PAR_SYMBOL?
 ;
 
 distinctClause:
