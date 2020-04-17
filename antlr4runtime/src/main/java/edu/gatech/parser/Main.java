@@ -34,7 +34,7 @@ public class Main {
             boolean isDistinct = false;
             int limit = Integer.MAX_VALUE;
             Map<List<String>, List<String>> columnToAlias = new HashMap<>();
-            Map<String, List<String>> aliasToColumn = new HashMap<>();
+            Map<Func, List<List<String>>> functionToColumn = new HashMap<>();
             Map<String, MongoCollection<Document>> tableToCollection = new HashMap<>(); // hashmap of tableName and collection of the same name in mongo
             Map<String, String> tableToAlias = new HashMap<>();
             Map<String, String> aliasToTable = new HashMap<>();
@@ -198,15 +198,11 @@ public class Main {
 
                     columnToAlias.put(columnTable, mapTableAliasFunc);
 
-//                    if (alias != null) {
-//                        List<String> mapColumnTableFunc = new ArrayList<>(columnTable);
-//                        if (func != null) {
-//                            mapColumnTableFunc.add(func.name());
-//                        } else {
-//                            mapColumnTableFunc.add(null);
-//                        }
-//                        aliasToColumn.put(alias, mapColumnTableFunc);
-//                    }
+                    if (func != null) {
+                        List<List<String>> mapFuncToCol = functionToColumn.getOrDefault(func, new ArrayList<>());
+                        mapFuncToCol.add(columnTable);
+                        functionToColumn.put(func, mapFuncToCol);
+                    }
                 }
             }
 
