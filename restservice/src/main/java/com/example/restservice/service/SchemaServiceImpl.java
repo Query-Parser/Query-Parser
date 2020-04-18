@@ -40,7 +40,7 @@ public class SchemaServiceImpl implements SchemaService {
             Document newDoc = (Document) doc.get(key);
             handleObjectFields(key, newDoc, tables, currentTable, parentName);
         } else if (parentName != null) {
-            tables.get(currentTable).add(parentName + "." + key);
+            tables.get(currentTable).add(parentName + "_" + key);
         } else {
             tables.get(currentTable).add(key);
         }
@@ -49,7 +49,7 @@ public class SchemaServiceImpl implements SchemaService {
     public void handleObjectFields(String key, Document doc, Map<String, HashSet<String>> tables, String currentTable, String parentName) {
         String newParentName = key;
         if (parentName != null) {
-            newParentName = parentName + "." + key;
+            newParentName = parentName + "_" + key;
         }
         // Iterate through all properties of object
         for (String property: doc.keySet()) {
