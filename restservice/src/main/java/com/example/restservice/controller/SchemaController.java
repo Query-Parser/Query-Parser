@@ -54,7 +54,7 @@ public class SchemaController {
         for (String name: collectionNames) {
             MongoCollection<Document> collection = mongoTemplate.getCollection(name);
             FindIterable<Document> documents = collection.find();
-
+            documents.limit(1000);
             tables.put(name, new HashSet<String>());
             schemaService.getTables(documents, tables, name);
         }
