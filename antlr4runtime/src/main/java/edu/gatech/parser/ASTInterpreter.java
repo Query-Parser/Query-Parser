@@ -45,7 +45,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     @Override
     public void exitQuery(MySQLQueryParser.QueryContext ctx) {
         for (Map.Entry<String, MongoCollection<Document>> tableCollection : tableToCollection.entrySet()) {
-            List<Document> documents = applyOrderBy(tableCollection);
+            Iterator<Document> documents = applyOrderBy(tableCollection);
             Set<String> selectedColumnTables = columnToAlias.keySet().stream()
                     .filter((x) -> x.table == null || x.table.equals(tableCollection.getKey()))
                     .map((x) -> x.columnName)
@@ -64,7 +64,8 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             if (limit != -1) {
                 queryExecutor = queryExecutor.compose(new LimitQuery(limit));
             }
-            for (Document document : tableCollection.getValue().find()) {
+            while (documents.hasNext()) {
+                Document document = documents.next();
                 queryExecutor.acceptDocument(document);
                 collectOutputWithAliases(tableCollection.getKey(), docs, queryExecutor);
                 if (queryExecutor.mustStopExecution()) break;
@@ -78,11 +79,10 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         docs.addAll(queryExecutor.collectOutput().stream().map(x -> applyColumnAlias(x, tableName)).collect(Collectors.toList()));
     }
 
-    private List<Document> applyOrderBy(Map.Entry<String, MongoCollection<Document>> entry ) {
+    private Iterator<Document> applyOrderBy(Map.Entry<String, MongoCollection<Document>> entry ) {
         List<Pair<String, Integer>> columnAndDirections = orderList.stream()
                 .filter((x) -> x.getValue0() == null || x.getValue0().equals(entry.getKey()))
                 .map(Pair::getValue1).collect(Collectors.toList());
-        List<Document> documents = new ArrayList<>();
         MongoCursor<Document> cursor;
         if (columnAndDirections.isEmpty()) {
             cursor = entry.getValue().find().cursor();
@@ -98,10 +98,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                 cursor = entry.getValue().find().sort(Sorts.orderBy(Sorts.descending(descendingColumns))).cursor();
             }
         }
-        while (cursor.hasNext()) {
-            documents.add(cursor.next());
-        }
-        return documents;
+        return cursor;
     }
 
     private Map<String, Object> applyColumnAlias(Map<String, Object> document, String tableName) {
