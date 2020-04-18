@@ -65,7 +65,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                 queryExecutor = queryExecutor.compose(new LimitQuery(limit));
             }
             while (documents.hasNext()) {
-                Document document = documents.next();
+                Map<String, Object> document = longToBigDecimal(documents.next());
                 queryExecutor.acceptDocument(document);
                 collectOutputWithAliases(tableCollection.getKey(), docs, queryExecutor);
                 if (queryExecutor.mustStopExecution()) break;
@@ -73,6 +73,22 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             queryExecutor.done();
             collectOutputWithAliases(tableCollection.getKey(), docs, queryExecutor);
         }
+    }
+
+    private Map<String, Object> longToBigDecimal(Map<String, Object> document) {
+        return document.entrySet().stream()
+                .map((x) -> {
+                    String key = x.getKey();
+                    Object value = x.getValue();
+                    if (value instanceof Number) {
+                        return new Pair<>(key, new BigDecimal(value.toString()));
+                    } else if (value instanceof Map) {
+                        return new Pair<>(key, longToBigDecimal((Map<String, Object>) value));
+                    } else {
+                        return new Pair<>(key, value);
+                    }
+                })
+        .collect(Collectors.toMap(Pair::getValue0, Pair::getValue1));
     }
 
     private void collectOutputWithAliases(String tableName, List<Map<String, Object>> docs, QueryExecutor queryExecutor) {

@@ -27,7 +27,12 @@ public class Aggregators implements AggregationFunction {
                 ColumnRef column = funcColumn.getValue1();
                 Object documentValue = document.getValue1().get(column.columnName);
                 if (!(documentValue instanceof Number)) return accumulator;
-                BigDecimal documentValueBd = new BigDecimal(documentValue.toString());
+                BigDecimal documentValueBd;
+                if (documentValue instanceof BigDecimal) {
+                    documentValueBd = (BigDecimal) documentValue;
+                } else {
+                    documentValueBd = new BigDecimal(documentValue.toString());
+                }
                 switch (function) {
                     case MAX: {
                         String columnWithFunc = "MAX(" + column.columnName + ")";
