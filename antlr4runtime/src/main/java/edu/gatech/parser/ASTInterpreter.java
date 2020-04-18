@@ -23,7 +23,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     private boolean isDistinct = false;
     private int limit = Integer.MAX_VALUE;
     private Map<List<String>, List<String>> columnToAlias = new HashMap<>();
-    private Map<Func, List<List<String>>> functionToColumn = new HashMap<>();
+    private Map<Func, Set<ColumnRef>> functionToColumn = new HashMap<>();
     private Map<String, MongoCollection<Document>> tableToCollection = new HashMap<>(); // hashmap of tableName and collection of the same name in mongo
     private Map<String, String> tableToAlias = new HashMap<>();
     private Map<String, String> aliasToTable = new HashMap<>();
@@ -48,11 +48,19 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                     .collect(Collectors.toSet());
             List<Map<String, Object>> docs = output.getOrDefault(entry.getKey(), new ArrayList<>());
             output.put(entry.getKey(), docs);
-            QueryExecutor queryExecutor = new SimpleSelect(entry.getKey(), selectedColumnTables, docs);
-            for (Document document : entry.getValue().find()) {
-                queryExecutor.applySelect(document);
-                if (queryExecutor.breakTable()) break;
+            QueryExecutor queryExecutor;
+            if (groupByFunc != null) {
+                queryExecutor = new Aggregation(entry.getKey(), selectedColumnTables, docs, groupByFunc, new Aggregators(functionToColumn));
+            } else {
+                queryExecutor = new SimpleSelect(entry.getKey(), selectedColumnTables, docs);
             }
+            for (Document document : entry.getValue().find()) {
+                if (queryFilter == null || queryFilter.test(document)) {
+                    queryExecutor.applySelect(document);
+                    if (queryExecutor.breakTable()) break;
+                }
+            }
+            queryExecutor.done();
         }
     }
 
@@ -150,8 +158,8 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             columnToAlias.put(columnTable, mapTableAliasFunc);
 
             if (func != null) {
-                List<List<String>> mapFuncToCol = functionToColumn.getOrDefault(func, new ArrayList<>());
-                mapFuncToCol.add(columnTable);
+                Set<ColumnRef> mapFuncToCol = functionToColumn.getOrDefault(func, new HashSet<>());
+                mapFuncToCol.add(new ColumnRef(tableName, selectedColumn));
                 functionToColumn.put(func, mapFuncToCol);
             }
         }
@@ -341,7 +349,8 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         }
 
         @Override
-        public void done() { }
+        public void done() {
+        }
 
         @Override
         public void applySelect(Document document) {
@@ -349,26 +358,24 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                 limitReached = true;
                 return;
             }
-            if (queryFilter == null || queryFilter.test(document)) {
-                if (!isAll) {
-                    document = new Document(document.entrySet().stream()
-                            .filter((x) -> selectedColumnTables.contains(x.getKey()))
-                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-                }
-                applyColumnAlias(document, tableName);
-                if (isDistinct) {
-                    // apply distinct filter
-                    if (!distinctDocuments.contains(document.toJson())) {
-                        distinctDocuments.add(document.toJson());
-                        // update result
-                        if (!document.keySet().isEmpty()) {
-                            emit(document);
-                        }
-                    }
-                } else {
+            if (!isAll) {
+                document = new Document(document.entrySet().stream()
+                        .filter((x) -> selectedColumnTables.contains(x.getKey()))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            }
+            applyColumnAlias(document, tableName);
+            if (isDistinct) {
+                // apply distinct filter
+                if (!distinctDocuments.contains(document.toJson())) {
+                    distinctDocuments.add(document.toJson());
+                    // update result
                     if (!document.keySet().isEmpty()) {
                         emit(document);
                     }
+                }
+            } else {
+                if (!document.keySet().isEmpty()) {
+                    emit(document);
                 }
             }
         }
@@ -418,8 +425,11 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                 return;
             }
             Pair<List<Object>, Map<String, Object>> res = groupingFunc.apply(document);
-            Pair<List<Object>, Map<String, Object>> newAgg = aggregationFunction.apply(res, groups.get(res.getValue0()));
-            groups.put(res.getValue0(), newAgg.getValue1());
+            if (res != null) {
+                Map<String, Object> currentAgg = groups.get(res.getValue0());
+                Map<String, Object> newAgg = aggregationFunction.apply(res, currentAgg);
+                groups.put(res.getValue0(), newAgg);
+            }
         }
 
         @Override
