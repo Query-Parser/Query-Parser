@@ -9,8 +9,6 @@ import org.javatuples.Pair;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -50,7 +48,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             output.put(entry.getKey(), docs);
             QueryExecutor queryExecutor;
             if (groupByFunc != null) {
-                queryExecutor = new Aggregation(entry.getKey(), selectedColumnTables, docs, groupByFunc, new Aggregators(functionToColumn));
+                queryExecutor = new AggregationQuery(entry.getKey(), selectedColumnTables, docs, groupByFunc, new Aggregators(functionToColumn));
             } else {
                 queryExecutor = new SimpleSelect(entry.getKey(), selectedColumnTables, docs);
             }
@@ -386,7 +384,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         }
     }
 
-    private class Aggregation implements QueryExecutor {
+    private class AggregationQuery implements QueryExecutor {
         private final String tableName;
         private final Set<String> selectedColumnTables;
         private final List<Map<String, Object>> output;
@@ -396,7 +394,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         private boolean limitReached;
         private int count;
 
-        public Aggregation(
+        public AggregationQuery(
                 String tableName,
                 Set<String> selectedColumnTables,
                 List<Map<String, Object>> output,
