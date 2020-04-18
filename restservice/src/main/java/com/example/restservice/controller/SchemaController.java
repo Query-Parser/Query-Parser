@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoQueryException;
@@ -34,32 +35,29 @@ public class SchemaController {
     @Autowired
     private MongoClient mongoClient;
 
-    @GetMapping("/schema")
-    public Map<String, Map<String, HashSet<String>>> getSchema() {
+    @GetMapping("/dbNames")
+    public Set<String> getDbNames() {
         MongoCursor<String> dbsCursor = mongoClient.listDatabaseNames().iterator();
-        Map<String, Map<String, HashSet<String>>> dbs = new HashMap<String, Map<String, HashSet<String>>>();
-
+        Set<String> dbNames = new HashSet();
         while(dbsCursor.hasNext()) {
-            String dbName = dbsCursor.next();
-            MongoDbFactory mongo = new SimpleMongoDbFactory(mongoClient, dbName);
-            MongoTemplate mongoTemplate = new MongoTemplate(mongo);
-
-            try {
-                Map<String, HashSet<String>> tables = new HashMap<String, HashSet<String>>();
-                dbs.put(dbName, tables);
-                Set<String> collectionNames = mongoTemplate.getCollectionNames();
-
-                for (String name: collectionNames) {
-                    MongoCollection<Document> collection = mongoTemplate.getCollection(name);
-                    FindIterable<Document> documents = collection.find();
-
-                    tables.put(name, new HashSet<String>());
-                    schemaService.getTables(documents, tables, name);
-                }
-            } catch (MongoQueryException e) {
-                System.out.println(e);
-            }
+            dbNames.add(dbsCursor.next());
         }
-        return dbs;
+        return dbNames;
+    }
+
+    @GetMapping("/schema")
+    public Map<String, HashSet<String>> getSchema(@RequestBody String dbName) {
+        MongoDbFactory mongo = new SimpleMongoDbFactory(mongoClient, dbName);
+        MongoTemplate mongoTemplate = new MongoTemplate(mongo);
+        Map<String, HashSet<String>> tables = new HashMap<String, HashSet<String>>();
+        Set<String> collectionNames = mongoTemplate.getCollectionNames();
+        for (String name: collectionNames) {
+            MongoCollection<Document> collection = mongoTemplate.getCollection(name);
+            FindIterable<Document> documents = collection.find();
+
+            tables.put(name, new HashSet<String>());
+            schemaService.getTables(documents, tables, name);
+        }
+        return tables;
     }
 }
