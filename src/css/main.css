@@ -22,10 +22,14 @@ th {
  }
 
  .btn-nav {
-    margin: 0 5px;
+    margin: 5px;
  }
 
 .btn-back {
     background-color: #007bff;
     color: white;
+}
+
+#result-box {
+    max-height: 375px;
 }
