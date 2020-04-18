@@ -3,6 +3,8 @@ package edu.gatech.parser;
 import com.codepoetics.protonpack.StreamUtils;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.bson.Document;
 import org.javatuples.Pair;
@@ -19,7 +21,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     private boolean isAll = false; // might be wrong when there's nested query
     private boolean isSelect = false;
     private boolean isDistinct = false;
-    private int limit = Integer.MAX_VALUE;
+    private int limit = -1;
     private Map<ColumnRef, List<String>> columnToAlias = new HashMap<>();
     private Map<Func, Set<ColumnRef>> functionToColumn = new HashMap<>();
     private Map<String, MongoCollection<Document>> tableToCollection = new HashMap<>(); // hashmap of tableName and collection of the same name in mongo
@@ -48,16 +50,20 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             output.put(tableCollection.getKey(), docs);
             QueryExecutor queryExecutor;
             if (groupByFunc != null) {
-                queryExecutor = new AggregationQuery(tableCollection.getKey(), selectedColumnTables, groupByFunc, new Aggregators(functionToColumn));
+                queryExecutor = new AggregationQuery(groupByFunc, new Aggregators(functionToColumn));
             } else {
-                queryExecutor = new SimpleSelect(tableCollection.getKey(), selectedColumnTables);
+                queryExecutor = new SimpleSelect(selectedColumnTables);
+            }
+            if (queryFilter != null) {
+                queryExecutor = new WhereQuery(queryFilter).compose(queryExecutor);
+            }
+            if (limit != -1) {
+                queryExecutor = queryExecutor.compose(new LimitQuery(limit));
             }
             for (Document document : tableCollection.getValue().find()) {
-                if (queryFilter == null || queryFilter.test(document)) {
-                    queryExecutor.applySelect(document);
-                    collectOutputWithAliases(tableCollection.getKey(), docs, queryExecutor);
-                    if (queryExecutor.mustStopExecution()) break;
-                }
+                queryExecutor.acceptDocument(document);
+                collectOutputWithAliases(tableCollection.getKey(), docs, queryExecutor);
+                if (queryExecutor.mustStopExecution()) break;
             }
             queryExecutor.done();
             collectOutputWithAliases(tableCollection.getKey(), docs, queryExecutor);
@@ -325,22 +331,12 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         System.out.println("|  ".repeat(--level) + "Exiting " + ctx.getClass().getSimpleName());
     }
 
+    @RequiredArgsConstructor
     private class SimpleSelect implements QueryExecutor {
-        private boolean limitReached;
-        private String tableName;
-        private Set<Map<String, Object>> distinctDocuments;
-        private int count;
-        private Set<String> selectedColumnTables;
-        private List<Map<String, Object>> output;
-
-        public SimpleSelect(String tableName, Set<String> selectedColumnTables) {
-            this.tableName = tableName;
-            this.distinctDocuments = new HashSet<>();
-            this.count = 0;
-            this.selectedColumnTables = selectedColumnTables;
-            this.output = new ArrayList<>();
-            this.limitReached = false;
-        }
+        @NonNull private Set<String> selectedColumnTables;
+        private boolean limitReached = false;
+        private Set<Map<String, Object>> distinctDocuments = new HashSet<>();
+        private List<Map<String, Object>> output = new ArrayList<>();
 
         @Override
         public boolean mustStopExecution() {
@@ -359,11 +355,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         }
 
         @Override
-        public void applySelect(Map<String, Object> document) {
-            if (count >= limit) {
-                limitReached = true;
-                return;
-            }
+        public void acceptDocument(Map<String, Object> document) {
             if (!isAll) {
                 document = new Document(document.entrySet().stream()
                         .filter((x) -> selectedColumnTables.contains(x.getKey()))
@@ -375,46 +367,33 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                     distinctDocuments.add(document);
                     // update result
                     if (!document.keySet().isEmpty()) {
-                        emit(document);
+                        output.add(document);
                     }
                 }
             } else {
                 if (!document.keySet().isEmpty()) {
-                    emit(document);
+                    output.add(document);
                 }
             }
-        }
-
-        private void emit(Map<String, Object> document) {
-            output.add(document);
-            count++;
         }
     }
 
     private class AggregationQuery implements QueryExecutor {
-        private final String tableName;
-        private final Set<String> selectedColumnTables;
         private List<Map<String, Object>> output;
         private final GroupingFunction groupingFunc;
         private final AggregationFunction aggregationFunction;
         private final Map<List<Object>, Map<String, Object>> groups;
         private boolean limitReached;
-        private int count;
 
         public AggregationQuery(
-                String tableName,
-                Set<String> selectedColumnTables,
                 GroupingFunction groupingFunc,
                 AggregationFunction aggregationFunction
         ) {
-            this.tableName = tableName;
-            this.selectedColumnTables = selectedColumnTables;
             this.output = new ArrayList<>();
             this.groupingFunc = groupingFunc;
             this.aggregationFunction = aggregationFunction;
             this.groups = new HashMap<>();
             this.limitReached = false;
-            this.count = 0;
         }
 
         @Override
@@ -423,11 +402,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         }
 
         @Override
-        public void applySelect(Map<String, Object> document) {
-            if (count >= limit) {
-                limitReached = true;
-                return;
-            }
+        public void acceptDocument(Map<String, Object> document) {
             Pair<List<Object>, Map<String, Object>> res = groupingFunc.apply(document);
             if (res != null) {
                 Map<String, Object> currentAgg = groups.get(res.getValue0());
