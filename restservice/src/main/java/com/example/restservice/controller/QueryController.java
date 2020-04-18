@@ -1,9 +1,14 @@
 package com.example.restservice.controller;
 
-//import edu.gatech.parser.Main;
-
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import edu.gatech.db.DatabaseConfiguration;
+import edu.gatech.parser.SQLEngine;
+
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,22 +28,14 @@ public class QueryController {
         return getTemplate();
     }
 
-    @ResponseBody
-    @GetMapping(value = "/query")
-    public String getQuery() {
-        return template;
-    }
-
-//    @ResponseBody
-//    @GetMapping(value = "/query")
-//    public String getQuery(@RequestBody String query) {
-//        // TODO: change to pass in query to main method instead of test dummy variable
-//        System.out.println("query");
-//        String[] test = new String[1];
-//        Main.main(test);
-//        // TODO: return data from main method
-//        return query;
-//    }
+   @ResponseBody
+   @GetMapping(value = "/query")
+   public Map<String, List<Map<String, Object>>> getQuery() {
+       System.out.println("getting resulting data");
+       DatabaseConfiguration dbConfig = new DatabaseConfiguration();
+       SQLEngine sqlEngine = new SQLEngine(dbConfig);
+       return sqlEngine.execute(getTemplate());
+   }
 
     public void setTemplate(String template) {
         this.template = template;
