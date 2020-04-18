@@ -34,7 +34,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     private Predicate<Map<String, Object>> queryFilter = null;
     private GroupingFunction groupByFunc = null;
     private List<String> groupByColumns = null;
-    private List<Pair<String, Pair<String, Integer>>> orderList = null;
+    private List<Pair<String, Pair<String, Integer>>> orderList = new ArrayList<>();
 
 
     public ASTInterpreter(Map<String, List<Map<String, Object>>> output, MongoDatabase db) {
@@ -331,11 +331,6 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         if (ctx.LIMIT_SYMBOL() != null) {
             limit = Integer.parseInt(ctx.NUMBER().getText());
         }
-    }
-
-    @Override
-    public void enterOrderList(MySQLQueryParser.OrderListContext ctx) {
-        orderList = new ArrayList<>();
     }
 
     @Override
