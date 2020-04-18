@@ -39,41 +39,16 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     @Override
     public void exitQuery(MySQLQueryParser.QueryContext ctx) {
         for (Map.Entry<String, MongoCollection<Document>> entry: tableToCollection.entrySet()) {
-            Set<String> distinctDocuments = new HashSet<>();
-            int count = 0;
             Set<String> selectedColumnTables = columnToAlias.keySet().stream()
                     .filter((x) -> x.get(1) == null || x.get(1).equals(entry.getKey()))
                     .map((x) -> x.get(0))
                     .collect(Collectors.toSet());
             List<Map<String, Object>> docs = output.getOrDefault(entry.getKey(), new ArrayList<>());
             output.put(entry.getKey(), docs);
+            SimpleSelect simpleSelect = new SimpleSelect(entry, selectedColumnTables, docs);
             for (Document document : entry.getValue().find()) {
-                if (count >= limit) {
-                    break;
-                }
-                count++;
-                if (queryFilter == null || queryFilter.test(document)) {
-                    if (!isAll) {
-                        document = new Document(document.entrySet().stream()
-                                .filter((x) -> selectedColumnTables.contains(x.getKey()))
-                                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-                    }
-                    applyColumnAlias(document, entry.getKey());
-                    if (isDistinct) {
-                        // apply distinct filter
-                        if (!distinctDocuments.contains(document.toJson())) {
-                            distinctDocuments.add(document.toJson());
-                            // update result
-                            if (!document.keySet().isEmpty()) {
-                                docs.add(document);
-                            }
-                        }
-                    } else {
-                        if (!document.keySet().isEmpty()) {
-                            docs.add(document);
-                        }
-                    }
-                }
+                simpleSelect.applySelect(document);
+                if (simpleSelect.limitReached()) break;
             }
         }
     }
@@ -337,5 +312,61 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     @Override
     public void exitEveryRule(ParserRuleContext ctx) {
         System.out.println("|  ".repeat(--level) + "Exiting " + ctx.getClass().getSimpleName());
+    }
+
+    private class SimpleSelect {
+        private boolean limitReached;
+        private Map.Entry<String, MongoCollection<Document>> entry;
+        private Set<String> distinctDocuments;
+        private int count;
+        private Set<String> selectedColumnTables;
+        private List<Map<String, Object>> docs;
+
+        public SimpleSelect(Map.Entry<String, MongoCollection<Document>> entry, Set<String> selectedColumnTables, List<Map<String, Object>> docs) {
+            this.entry = entry;
+            this.distinctDocuments = new HashSet<>();
+            this.count = 0;
+            this.selectedColumnTables = selectedColumnTables;
+            this.docs = docs;
+            this.limitReached = false;
+        }
+
+        boolean limitReached() {
+            return limitReached;
+        }
+
+        public void applySelect(Document document) {
+            if (count >= limit) {
+                limitReached = true;
+                return;
+            }
+            if (queryFilter == null || queryFilter.test(document)) {
+                if (!isAll) {
+                    document = new Document(document.entrySet().stream()
+                            .filter((x) -> selectedColumnTables.contains(x.getKey()))
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                }
+                applyColumnAlias(document, entry.getKey());
+                if (isDistinct) {
+                    // apply distinct filter
+                    if (!distinctDocuments.contains(document.toJson())) {
+                        distinctDocuments.add(document.toJson());
+                        // update result
+                        if (!document.keySet().isEmpty()) {
+                            addDoc(document);
+                        }
+                    }
+                } else {
+                    if (!document.keySet().isEmpty()) {
+                        addDoc(document);
+                    }
+                }
+            }
+        }
+
+        private void addDoc(Document document) {
+            docs.add(document);
+            count++;
+        }
     }
 }
