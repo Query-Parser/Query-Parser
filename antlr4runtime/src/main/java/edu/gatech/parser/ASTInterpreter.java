@@ -4,6 +4,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.bson.Document;
+import org.javatuples.Pair;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -26,7 +27,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     private Map<String, String> aliasToTable = new HashMap<>();
     private Stack<Object> stack = new Stack<>();
     private Predicate<Map<String, Object>> queryFilter = null;
-    private Function<Map<String, Object>, Map<List<Object>, List<Map<String, Object>>>> groupByFunc = null;
+    private Function<Map<String, Object>, Pair<List<Object>, Map<String, Object>>> groupByFunc = null;
     private List<String> orderList = null;
     private Direction direction = null;
 
@@ -37,32 +38,25 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @Override
     public void exitQuery(MySQLQueryParser.QueryContext ctx) {
-        Map<String, List<Map<String, Object>>> result = new HashMap<>();
         for (Map.Entry<String, MongoCollection<Document>> entry: tableToCollection.entrySet()) {
             Set<String> distinctDocuments = new HashSet<>();
             int count = 0;
+            Set<String> selectedColumnTables = columnToAlias.keySet().stream()
+                    .filter((x) -> x.get(1) == null || x.get(1).equals(entry.getKey()))
+                    .map((x) -> x.get(0))
+                    .collect(Collectors.toSet());
+            List<Map<String, Object>> docs = output.getOrDefault(entry.getKey(), new ArrayList<>());
+            output.put(entry.getKey(), docs);
             for (Document document : entry.getValue().find()) {
                 if (count >= limit) {
                     break;
                 }
                 count++;
                 if (queryFilter == null || queryFilter.test(document)) {
-                    List<Map<String, Object>> docs = result.getOrDefault(entry.getKey(), new ArrayList<>());
                     if (!isAll) {
-                        List<String> removeKeys = new ArrayList<>();
-                        for (String property: document.keySet()) {
-                            Set<List<String>> selectedColumnTables = columnToAlias.keySet();
-                            for (List<String> columnTable : selectedColumnTables) {
-                                if (!property.equals(columnTable.get(0))) {
-                                    if (columnTable.get(1) != null && entry.getKey().equals(columnTable.get(1))) {
-                                        removeKeys.add(property);
-                                    } else if(columnTable.get(1) == null) {
-                                        removeKeys.add(property);
-                                    }
-                                }
-                            }
-                        }
-                        removeKeys.forEach(document::remove);
+                        document = new Document(document.entrySet().stream()
+                                .filter((x) -> selectedColumnTables.contains(x.getKey()))
+                                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
                     }
                     applyColumnAlias(document, entry.getKey());
                     if (isDistinct) {
@@ -72,19 +66,16 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                             // update result
                             if (!document.keySet().isEmpty()) {
                                 docs.add(document);
-                                result.put(entry.getKey(), docs);
                             }
                         }
                     } else {
                         if (!document.keySet().isEmpty()) {
                             docs.add(document);
-                            result.put(entry.getKey(), docs);
                         }
                     }
                 }
             }
         }
-        result.forEach((key, value) -> output.put(key, value));
     }
 
     private void applyColumnAlias(Document document, String tableName) {
@@ -308,12 +299,10 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
         groupByFunc = (doc) -> {
             if (columns.stream().anyMatch((col) -> !doc.containsKey(col))) {
-                return new HashMap<>();
+                return null;
             } else {
                 List<Object> group = columns.stream().map(doc::get).collect(Collectors.toList());
-                Map<List<Object>, List<Map<String, Object>>> groupedDoc = new HashMap<>();
-                groupedDoc.put(group, Collections.singletonList(doc));
-                return groupedDoc;
+                return new Pair<>(group, doc);
             }
         };
     }
