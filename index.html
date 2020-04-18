@@ -48,22 +48,21 @@
         <div class="tab-content" id="nav-tabContent">
             <div class="tab-pane fade show active" id="nav-parser" role="tabpanel" aria-labelledby="nav-parser-tab">
                 <div class="row mb-3">
-                    <div class="col-md-6 mt-3">
+                    <div class="col-md-12 mt-3">
                         <!-- Coding area -->
                         <div class="card h-100">
                             <div class="card-header">
                                 Query Parser
                             </div>
                             <div class="card-body">
-                                <p>Write query here.</p>
                                 <div class="input-group border">
-                                    <textarea id="code" class="form-control" aria-label="With textarea" rows="10"></textarea>
+                                    <textarea id="code" class="form-control" aria-label="With textarea" rows="1"></textarea>
                                 </div>
                                 <button type="button" class="btn btn-go btn-primary" onclick="loadDoc()">Go</button>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6 mt-3">
+                    <div class="col-md-12 mt-3">
                         <!-- Result Area -->
                         <div class="card h-100">
                             <div class="card-header">
@@ -85,14 +84,14 @@
     </div>
 </body>
 
-<!-- Add Schema -->
+<!-- Get Result -->
 <script>
     function loadResponse() {
         var http = "";
         http = new XMLHttpRequest();
         http.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
-                document.getElementById("result-box").innerHTML = this.responseText;
+                document.getElementById("result-box").innerHTML = JSON.stringify(JSON.parse(this.responseText), undefined, 2);
             }
         };
         http.open("GET", "http://localhost:8080/query", true);
@@ -102,7 +101,7 @@
 
 <!-- Add Schema -->
 <script>
-    var xmlhttp, myObj, key, col, txt, inx, bar = "";
+    var xmlhttp, myObj, key, col, inx, txt, bar = "";
     xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
@@ -119,7 +118,7 @@
                 }
                 txt += "</div><div style='clear:both'></div>"
             }
-            document.getElementById("schma").innerHTML = txt;
+            document.getElementById("schma").innerHTML = txt; //issue here
             document.getElementById("bar").innerHTML = bar;
         }
     };
