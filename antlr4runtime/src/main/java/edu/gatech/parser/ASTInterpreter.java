@@ -45,10 +45,10 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                     .collect(Collectors.toSet());
             List<Map<String, Object>> docs = output.getOrDefault(entry.getKey(), new ArrayList<>());
             output.put(entry.getKey(), docs);
-            SimpleSelect simpleSelect = new SimpleSelect(entry, selectedColumnTables, docs);
+            QueryExecutor queryExecutor = new SimpleSelect(entry.getKey(), selectedColumnTables, docs);
             for (Document document : entry.getValue().find()) {
-                simpleSelect.applySelect(document);
-                if (simpleSelect.limitReached()) break;
+                queryExecutor.applySelect(document);
+                if (queryExecutor.limitReached()) break;
             }
         }
     }
@@ -314,27 +314,29 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         System.out.println("|  ".repeat(--level) + "Exiting " + ctx.getClass().getSimpleName());
     }
 
-    private class SimpleSelect {
+    private class SimpleSelect implements QueryExecutor {
         private boolean limitReached;
-        private Map.Entry<String, MongoCollection<Document>> entry;
+        private String tableName;
         private Set<String> distinctDocuments;
         private int count;
         private Set<String> selectedColumnTables;
-        private List<Map<String, Object>> docs;
+        private List<Map<String, Object>> output;
 
-        public SimpleSelect(Map.Entry<String, MongoCollection<Document>> entry, Set<String> selectedColumnTables, List<Map<String, Object>> docs) {
-            this.entry = entry;
+        public SimpleSelect(String tableName, Set<String> selectedColumnTables, List<Map<String, Object>> output) {
+            this.tableName = tableName;
             this.distinctDocuments = new HashSet<>();
             this.count = 0;
             this.selectedColumnTables = selectedColumnTables;
-            this.docs = docs;
+            this.output = output;
             this.limitReached = false;
         }
 
-        boolean limitReached() {
+        @Override
+        public boolean limitReached() {
             return limitReached;
         }
 
+        @Override
         public void applySelect(Document document) {
             if (count >= limit) {
                 limitReached = true;
@@ -346,26 +348,26 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                             .filter((x) -> selectedColumnTables.contains(x.getKey()))
                             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
                 }
-                applyColumnAlias(document, entry.getKey());
+                applyColumnAlias(document, tableName);
                 if (isDistinct) {
                     // apply distinct filter
                     if (!distinctDocuments.contains(document.toJson())) {
                         distinctDocuments.add(document.toJson());
                         // update result
                         if (!document.keySet().isEmpty()) {
-                            addDoc(document);
+                            emit(document);
                         }
                     }
                 } else {
                     if (!document.keySet().isEmpty()) {
-                        addDoc(document);
+                        emit(document);
                     }
                 }
             }
         }
 
-        private void addDoc(Document document) {
-            docs.add(document);
+        private void emit(Document document) {
+            output.add(document);
             count++;
         }
     }
