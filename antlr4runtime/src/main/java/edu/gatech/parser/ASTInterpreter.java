@@ -1,7 +1,10 @@
 package edu.gatech.parser;
 
 import com.codepoetics.protonpack.StreamUtils;
+import com.mongodb.BasicDBObject;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.bson.Document;
@@ -13,6 +16,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import com.mongodb.client.model.Sorts;
 
 public class ASTInterpreter extends MySQLQueryBaseListener {
     private final MongoDatabase db;
@@ -30,9 +35,9 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     private Stack<Object> stack = new Stack<>();
     private Predicate<Map<String, Object>> queryFilter = null;
     private GroupingFunction groupByFunc = null;
-    private List<String> orderList = null;
-    private Direction direction = null;
     private List<String> groupByColumns = null;
+    private List<Pair<String, Pair<String, Integer>>> orderList = null;
+
 
     public ASTInterpreter(Map<String, List<Map<String, Object>>> output, MongoDatabase db) {
         this.db = db;
@@ -42,6 +47,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     @Override
     public void exitQuery(MySQLQueryParser.QueryContext ctx) {
         for (Map.Entry<String, MongoCollection<Document>> entry : tableToCollection.entrySet()) {
+            List<Document> documents = applyOrderBy(entry);
             Set<String> selectedColumnTables = columnToAlias.keySet().stream()
                     .filter((x) -> x.get(1) == null || x.get(1).equals(entry.getKey()))
                     .map((x) -> x.get(0))
@@ -49,11 +55,37 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             List<Map<String, Object>> docs = output.getOrDefault(entry.getKey(), new ArrayList<>());
             output.put(entry.getKey(), docs);
             QueryExecutor queryExecutor = new SimpleSelect(entry.getKey(), selectedColumnTables, docs);
-            for (Document document : entry.getValue().find()) {
+            for (Document document : documents) {
                 queryExecutor.applySelect(document);
                 if (queryExecutor.breakTable()) break;
             }
         }
+    }
+
+    private List<Document> applyOrderBy(Map.Entry<String, MongoCollection<Document>> entry ) {
+        List<Pair<String, Integer>> columnAndDirections = orderList.stream()
+                .filter((x) -> x.getValue0() == null || x.getValue0().equals(entry.getKey()))
+                .map(Pair::getValue1).collect(Collectors.toList());
+        List<Document> documents = new ArrayList<>();
+        MongoCursor<Document> cursor;
+        if (columnAndDirections.isEmpty()) {
+            cursor = entry.getValue().find().cursor();
+        } else {
+            List<String> ascendingColumns = columnAndDirections.stream().filter((x) -> x.getValue1() > 0).map(Pair::getValue0).collect(Collectors.toList());
+            List<String> descendingColumns = columnAndDirections.stream().filter((x) -> x.getValue1() < 0).map(Pair::getValue0).collect(Collectors.toList());
+
+            if (!ascendingColumns.isEmpty() && !descendingColumns.isEmpty()) {
+                cursor = entry.getValue().find().sort(Sorts.orderBy(Sorts.ascending(ascendingColumns), Sorts.descending(descendingColumns))).cursor();
+            } else if (descendingColumns.isEmpty()) {
+                cursor = entry.getValue().find().sort(Sorts.orderBy(Sorts.ascending(ascendingColumns))).cursor();
+            } else {
+                cursor = entry.getValue().find().sort(Sorts.orderBy(Sorts.descending(descendingColumns))).cursor();
+            }
+        }
+        while (cursor.hasNext()) {
+            documents.add(cursor.next());
+        }
+        return documents;
     }
 
     private void applyColumnAlias(Document document, String tableName) {
@@ -299,13 +331,18 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     }
 
     @Override
-    public void exitOrderList(MySQLQueryParser.OrderListContext ctx) {
-        ctx.columnItem().forEach(columnItem -> orderList.add(columnItem.columnName().WORD().getSymbol().getText()));
-    }
-
-    @Override
-    public void enterDirection(MySQLQueryParser.DirectionContext ctx) {
-        direction = ctx.DESC_SYMBOL() != null ? Direction.DESC : Direction.ASC;
+    public void enterOrderExpression(MySQLQueryParser.OrderExpressionContext ctx) {
+        String columnName = ctx.columnItem().columnName().getText();
+        String tableName = null;
+        if (columnName != null && columnName.contains(".")) {
+            int dot = columnName.indexOf(".");
+            tableName = columnName.substring(0, dot);
+            columnName = columnName.substring(dot + 1);
+        }
+        int direction = (ctx.direction() != null && ctx.direction().DESC_SYMBOL() != null)
+                ? Direction.DESC.value : Direction.ASC.value;
+        Pair<String, Integer> columnAndDirection = new Pair<>(columnName, direction);
+        orderList.add(new Pair<>(tableName, columnAndDirection));
     }
 
     @Override

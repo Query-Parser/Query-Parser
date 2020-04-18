@@ -140,11 +140,15 @@ groupByClause:
 ;
 
 orderClause:
-    ORDER_SYMBOL BY_SYMBOL orderList direction?
+    ORDER_SYMBOL BY_SYMBOL orderList
 ;
 
 orderList:
-    columnItem (COMMA_SYMBOL columnItem)*
+    orderExpression (COMMA_SYMBOL orderExpression)*
+;
+
+orderExpression:
+    columnItem direction?
 ;
 
 direction:
