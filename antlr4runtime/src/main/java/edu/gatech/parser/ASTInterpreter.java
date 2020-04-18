@@ -20,7 +20,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     private boolean isSelect = false;
     private boolean isDistinct = false;
     private int limit = Integer.MAX_VALUE;
-    private Map<List<String>, List<String>> columnToAlias = new HashMap<>();
+    private Map<ColumnRef, List<String>> columnToAlias = new HashMap<>();
     private Map<Func, Set<ColumnRef>> functionToColumn = new HashMap<>();
     private Map<String, MongoCollection<Document>> tableToCollection = new HashMap<>(); // hashmap of tableName and collection of the same name in mongo
     private Map<String, String> tableToAlias = new HashMap<>();
@@ -41,42 +41,45 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     public void exitQuery(MySQLQueryParser.QueryContext ctx) {
         for (Map.Entry<String, MongoCollection<Document>> entry : tableToCollection.entrySet()) {
             Set<String> selectedColumnTables = columnToAlias.keySet().stream()
-                    .filter((x) -> x.get(1) == null || x.get(1).equals(entry.getKey()))
-                    .map((x) -> x.get(0))
+                    .filter((x) -> x.table == null || x.table.equals(entry.getKey()))
+                    .map((x) -> x.columnName)
                     .collect(Collectors.toSet());
             List<Map<String, Object>> docs = output.getOrDefault(entry.getKey(), new ArrayList<>());
             output.put(entry.getKey(), docs);
             QueryExecutor queryExecutor;
             if (groupByFunc != null) {
-                queryExecutor = new AggregationQuery(entry.getKey(), selectedColumnTables, docs, groupByFunc, new Aggregators(functionToColumn));
+                queryExecutor = new AggregationQuery(entry.getKey(), selectedColumnTables, groupByFunc, new Aggregators(functionToColumn));
             } else {
-                queryExecutor = new SimpleSelect(entry.getKey(), selectedColumnTables, docs);
+                queryExecutor = new SimpleSelect(entry.getKey(), selectedColumnTables);
             }
             for (Document document : entry.getValue().find()) {
                 if (queryFilter == null || queryFilter.test(document)) {
                     queryExecutor.applySelect(document);
-                    if (queryExecutor.breakTable()) break;
+                    collectOutputWithAliases(entry.getKey(), docs, queryExecutor);
+                    if (queryExecutor.mustStopExecution()) break;
                 }
             }
             queryExecutor.done();
+            collectOutputWithAliases(entry.getKey(), docs, queryExecutor);
         }
     }
 
-    private void applyColumnAlias(Document document, String tableName) {
+    private void collectOutputWithAliases(String tableName, List<Map<String, Object>> docs, QueryExecutor queryExecutor) {
+        docs.addAll(queryExecutor.collectOutput().stream().map(x -> applyColumnAlias(x, tableName)).collect(Collectors.toList()));
+    }
+
+    private Map<String, Object> applyColumnAlias(Map<String, Object> document, String tableName) {
         Map<String, String> updatedKeys = new HashMap<>();
         for (String property : document.keySet()) {
-            List<String> columnTable = new ArrayList<>();
-            columnTable.add(property);
-            columnTable.add(null);
-            List<String> tuple = null;
-            if (columnToAlias.containsKey(List.of(property, tableName))) {
-                tuple = List.of(property, tableName);
-            } else if (columnToAlias.containsKey(columnTable)) {
-                tuple = columnTable;
+            ColumnRef columnRef = null;
+            if (columnToAlias.containsKey(new ColumnRef(tableName, property))) {
+                columnRef = new ColumnRef(tableName, property);
+            } else if (columnToAlias.containsKey(new ColumnRef(null, property))) {
+                columnRef = new ColumnRef(null, property);
             }
-            if (tuple != null) {
-                String alias = columnToAlias.get(tuple).get(0);
-                String func = columnToAlias.get(tuple).get(1);
+            if (columnRef != null) {
+                String alias = columnToAlias.get(columnRef).get(0);
+                String func = columnToAlias.get(columnRef).get(1);
                 if (func == null && alias != null) {
                     updatedKeys.put(property, alias);
                 }
@@ -86,6 +89,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             document.put(updatedKeys.get(key), document.get(key));
             document.remove(key);
         });
+        return document;
     }
 
     @Override
@@ -132,7 +136,6 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             String tableName = null;
             String alias = null;
             String function = func != null ? func.name() : null;
-            List<String> columnTable = new ArrayList<>();
 
             List<String> mapTableAliasFunc = new ArrayList<>();
 
@@ -148,12 +151,10 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                 alias = context.alias().getText();
             }
 
-            columnTable.add(selectedColumn);
-            columnTable.add(tableName);
             mapTableAliasFunc.add(alias);
             mapTableAliasFunc.add(function);
 
-            columnToAlias.put(columnTable, mapTableAliasFunc);
+            columnToAlias.put(new ColumnRef(tableName, selectedColumn), mapTableAliasFunc);
 
             if (func != null) {
                 Set<ColumnRef> mapFuncToCol = functionToColumn.getOrDefault(func, new HashSet<>());
@@ -327,23 +328,30 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     private class SimpleSelect implements QueryExecutor {
         private boolean limitReached;
         private String tableName;
-        private Set<String> distinctDocuments;
+        private Set<Map<String, Object>> distinctDocuments;
         private int count;
         private Set<String> selectedColumnTables;
         private List<Map<String, Object>> output;
 
-        public SimpleSelect(String tableName, Set<String> selectedColumnTables, List<Map<String, Object>> output) {
+        public SimpleSelect(String tableName, Set<String> selectedColumnTables) {
             this.tableName = tableName;
             this.distinctDocuments = new HashSet<>();
             this.count = 0;
             this.selectedColumnTables = selectedColumnTables;
-            this.output = output;
+            this.output = new ArrayList<>();
             this.limitReached = false;
         }
 
         @Override
-        public boolean breakTable() {
+        public boolean mustStopExecution() {
             return limitReached;
+        }
+
+        @Override
+        public List<Map<String, Object>> collectOutput() {
+            List<Map<String, Object>> tmp = output;
+            output = new ArrayList<>();
+            return tmp;
         }
 
         @Override
@@ -351,7 +359,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         }
 
         @Override
-        public void applySelect(Document document) {
+        public void applySelect(Map<String, Object> document) {
             if (count >= limit) {
                 limitReached = true;
                 return;
@@ -361,11 +369,10 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                         .filter((x) -> selectedColumnTables.contains(x.getKey()))
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
             }
-            applyColumnAlias(document, tableName);
             if (isDistinct) {
                 // apply distinct filter
-                if (!distinctDocuments.contains(document.toJson())) {
-                    distinctDocuments.add(document.toJson());
+                if (!distinctDocuments.contains(document)) {
+                    distinctDocuments.add(document);
                     // update result
                     if (!document.keySet().isEmpty()) {
                         emit(document);
@@ -378,7 +385,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             }
         }
 
-        private void emit(Document document) {
+        private void emit(Map<String, Object> document) {
             output.add(document);
             count++;
         }
@@ -387,7 +394,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     private class AggregationQuery implements QueryExecutor {
         private final String tableName;
         private final Set<String> selectedColumnTables;
-        private final List<Map<String, Object>> output;
+        private List<Map<String, Object>> output;
         private final GroupingFunction groupingFunc;
         private final AggregationFunction aggregationFunction;
         private final Map<List<Object>, Map<String, Object>> groups;
@@ -397,13 +404,12 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         public AggregationQuery(
                 String tableName,
                 Set<String> selectedColumnTables,
-                List<Map<String, Object>> output,
                 GroupingFunction groupingFunc,
                 AggregationFunction aggregationFunction
         ) {
             this.tableName = tableName;
             this.selectedColumnTables = selectedColumnTables;
-            this.output = output;
+            this.output = new ArrayList<>();
             this.groupingFunc = groupingFunc;
             this.aggregationFunction = aggregationFunction;
             this.groups = new HashMap<>();
@@ -412,12 +418,12 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         }
 
         @Override
-        public boolean breakTable() {
+        public boolean mustStopExecution() {
             return limitReached;
         }
 
         @Override
-        public void applySelect(Document document) {
+        public void applySelect(Map<String, Object> document) {
             if (count >= limit) {
                 limitReached = true;
                 return;
@@ -428,6 +434,13 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                 Map<String, Object> newAgg = aggregationFunction.apply(res, currentAgg);
                 groups.put(res.getValue0(), newAgg);
             }
+        }
+
+        @Override
+        public List<Map<String, Object>> collectOutput() {
+            List<Map<String, Object>> tmp = output;
+            output = new ArrayList<>();
+            return tmp;
         }
 
         @Override

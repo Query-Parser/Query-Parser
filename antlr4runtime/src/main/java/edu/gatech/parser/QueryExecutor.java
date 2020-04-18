@@ -1,9 +1,11 @@
 package edu.gatech.parser;
 
-import org.bson.Document;
+import java.util.List;
+import java.util.Map;
 
 public interface QueryExecutor {
-    boolean breakTable();
-    void applySelect(Document document);
+    boolean mustStopExecution();
+    void applySelect(Map<String, Object> document);
+    List<Map<String, Object>> collectOutput();
     void done();
 }
