@@ -1,5 +1,6 @@
 package edu.gatech.parser;
 
+import com.codepoetics.protonpack.StreamUtils;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -8,6 +9,7 @@ import org.javatuples.Pair;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -27,9 +29,10 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     private Map<String, String> aliasToTable = new HashMap<>();
     private Stack<Object> stack = new Stack<>();
     private Predicate<Map<String, Object>> queryFilter = null;
-    private Function<Map<String, Object>, Pair<List<Object>, Map<String, Object>>> groupByFunc = null;
+    private GroupingFunction groupByFunc = null;
     private List<String> orderList = null;
     private Direction direction = null;
+    private List<String> groupByColumns = null;
 
     public ASTInterpreter(Map<String, List<Map<String, Object>>> output, MongoDatabase db) {
         this.db = db;
@@ -38,7 +41,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @Override
     public void exitQuery(MySQLQueryParser.QueryContext ctx) {
-        for (Map.Entry<String, MongoCollection<Document>> entry: tableToCollection.entrySet()) {
+        for (Map.Entry<String, MongoCollection<Document>> entry : tableToCollection.entrySet()) {
             Set<String> selectedColumnTables = columnToAlias.keySet().stream()
                     .filter((x) -> x.get(1) == null || x.get(1).equals(entry.getKey()))
                     .map((x) -> x.get(0))
@@ -48,14 +51,14 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             QueryExecutor queryExecutor = new SimpleSelect(entry.getKey(), selectedColumnTables, docs);
             for (Document document : entry.getValue().find()) {
                 queryExecutor.applySelect(document);
-                if (queryExecutor.limitReached()) break;
+                if (queryExecutor.breakTable()) break;
             }
         }
     }
 
     private void applyColumnAlias(Document document, String tableName) {
         Map<String, String> updatedKeys = new HashMap<>();
-        for (String property: document.keySet()) {
+        for (String property : document.keySet()) {
             List<String> columnTable = new ArrayList<>();
             columnTable.add(property);
             columnTable.add(null);
@@ -98,19 +101,19 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         Func func = null;
         if (ctx.columnItem() != null) {
             context = ctx.columnItem();
-        } else if(ctx.countClause() != null) {
+        } else if (ctx.countClause() != null) {
             context = ctx.countClause().columnItem();
             func = Func.COUNT;
-        } else if(ctx.sumClause() != null) {
+        } else if (ctx.sumClause() != null) {
             context = ctx.sumClause().columnItem();
             func = Func.SUM;
-        } else if(ctx.avgClause() != null) {
+        } else if (ctx.avgClause() != null) {
             context = ctx.avgClause().columnItem();
             func = Func.AVERAGE;
-        } else if(ctx.minClause() != null) {
+        } else if (ctx.minClause() != null) {
             context = ctx.minClause().columnItem();
             func = Func.MIN;
-        } else if(ctx.maxClause() != null) {
+        } else if (ctx.maxClause() != null) {
             context = ctx.maxClause().columnItem();
             func = Func.MAX;
         } else {
@@ -130,7 +133,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             if (selectedColumn.contains(".")) {
                 int dot = selectedColumn.indexOf('.');
                 tableName = selectedColumn.substring(0, dot);
-                selectedColumn = selectedColumn.substring(dot+1);
+                selectedColumn = selectedColumn.substring(dot + 1);
             }
 
             if (context.selectAlias() != null) {
@@ -250,16 +253,16 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                     predicate = (doc -> doc.get(column) != null && !doc.get(column).equals(operand) && (finalAnd == null || finalAnd.test(doc)));
                     break;
                 case "<":
-                    predicate = (doc -> doc.get(column) != null && ((BigDecimal)doc.get(column)).compareTo((BigDecimal)operand) < 0);
+                    predicate = (doc -> doc.get(column) != null && ((BigDecimal) doc.get(column)).compareTo((BigDecimal) operand) < 0);
                     break;
                 case "<=":
-                    predicate = (doc -> doc.get(column) != null && ((BigDecimal)doc.get(column)).compareTo((BigDecimal)operand) <= 0);
+                    predicate = (doc -> doc.get(column) != null && ((BigDecimal) doc.get(column)).compareTo((BigDecimal) operand) <= 0);
                     break;
                 case ">":
-                    predicate = (doc -> doc.get(column) != null && ((BigDecimal)doc.get(column)).compareTo((BigDecimal)operand) > 0);
+                    predicate = (doc -> doc.get(column) != null && ((BigDecimal) doc.get(column)).compareTo((BigDecimal) operand) > 0);
                     break;
                 case ">=":
-                    predicate = (doc -> doc.get(column) != null && ((BigDecimal)doc.get(column)).compareTo((BigDecimal)operand) >= 0);
+                    predicate = (doc -> doc.get(column) != null && ((BigDecimal) doc.get(column)).compareTo((BigDecimal) operand) >= 0);
                     break;
                 default:
                     throw new RuntimeException("Unexpected operator " + ctx.compOp());
@@ -272,6 +275,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     public void exitGroupByClause(MySQLQueryParser.GroupByClauseContext ctx) {
         List<String> columns = ctx.columnItem().stream().map((x) -> x.columnName().WORD().getSymbol().getText()).collect(Collectors.toList());
 
+        groupByColumns = columns;
         groupByFunc = (doc) -> {
             if (columns.stream().anyMatch((col) -> !doc.containsKey(col))) {
                 return null;
@@ -332,9 +336,12 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         }
 
         @Override
-        public boolean limitReached() {
+        public boolean breakTable() {
             return limitReached;
         }
+
+        @Override
+        public void done() { }
 
         @Override
         public void applySelect(Document document) {
@@ -369,6 +376,59 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         private void emit(Document document) {
             output.add(document);
             count++;
+        }
+    }
+
+    private class Aggregation implements QueryExecutor {
+        private final String tableName;
+        private final Set<String> selectedColumnTables;
+        private final List<Map<String, Object>> output;
+        private final GroupingFunction groupingFunc;
+        private final AggregationFunction aggregationFunction;
+        private final Map<List<Object>, Map<String, Object>> groups;
+        private boolean limitReached;
+        private int count;
+
+        public Aggregation(
+                String tableName,
+                Set<String> selectedColumnTables,
+                List<Map<String, Object>> output,
+                GroupingFunction groupingFunc,
+                AggregationFunction aggregationFunction
+        ) {
+            this.tableName = tableName;
+            this.selectedColumnTables = selectedColumnTables;
+            this.output = output;
+            this.groupingFunc = groupingFunc;
+            this.aggregationFunction = aggregationFunction;
+            this.groups = new HashMap<>();
+            this.limitReached = false;
+            this.count = 0;
+        }
+
+        @Override
+        public boolean breakTable() {
+            return limitReached;
+        }
+
+        @Override
+        public void applySelect(Document document) {
+            if (count >= limit) {
+                limitReached = true;
+                return;
+            }
+            Pair<List<Object>, Map<String, Object>> res = groupingFunc.apply(document);
+            Pair<List<Object>, Map<String, Object>> newAgg = aggregationFunction.apply(res, groups.get(res.getValue0()));
+            groups.put(res.getValue0(), newAgg.getValue1());
+        }
+
+        @Override
+        public void done() {
+            groups.forEach((groupedValues, aggregated) -> {
+                StreamUtils.zip(groupByColumns.stream(), groupedValues.stream(), Pair::new)
+                        .forEach(x -> aggregated.put(x.getValue0(), x.getValue1()));
+                output.add(aggregated);
+            });
         }
     }
 }
