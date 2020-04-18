@@ -302,23 +302,23 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             Predicate<Map<String, Object>> predicate;
             switch (ctx.compOp().getText()) {
                 case "=":
-                    predicate = (doc -> doc.get(column) != null && doc.get(column).equals(operand) && (finalAnd == null || finalAnd.test(doc)));
+                    predicate = (doc -> doc.get(column) != null && doc.get(column) instanceof BigDecimal && doc.get(column).equals(operand) && (finalAnd == null || finalAnd.test(doc)));
                     break;
                 case "<>":
                 case "!=":
-                    predicate = (doc -> doc.get(column) != null && !doc.get(column).equals(operand) && (finalAnd == null || finalAnd.test(doc)));
+                    predicate = (doc -> doc.get(column) != null && doc.get(column) instanceof BigDecimal && !doc.get(column).equals(operand) && (finalAnd == null || finalAnd.test(doc)));
                     break;
                 case "<":
-                    predicate = (doc -> doc.get(column) != null && ((BigDecimal) doc.get(column)).compareTo((BigDecimal) operand) < 0);
+                    predicate = (doc -> doc.get(column) != null && doc.get(column) instanceof BigDecimal && ((BigDecimal) doc.get(column)).compareTo((BigDecimal) operand) < 0);
                     break;
                 case "<=":
-                    predicate = (doc -> doc.get(column) != null && ((BigDecimal) doc.get(column)).compareTo((BigDecimal) operand) <= 0);
+                    predicate = (doc -> doc.get(column) != null && doc.get(column) instanceof BigDecimal && ((BigDecimal) doc.get(column)).compareTo((BigDecimal) operand) <= 0);
                     break;
                 case ">":
-                    predicate = (doc -> doc.get(column) != null && ((BigDecimal) doc.get(column)).compareTo((BigDecimal) operand) > 0);
+                    predicate = (doc -> doc.get(column) != null && doc.get(column) instanceof BigDecimal && ((BigDecimal) doc.get(column)).compareTo((BigDecimal) operand) > 0);
                     break;
                 case ">=":
-                    predicate = (doc -> doc.get(column) != null && ((BigDecimal) doc.get(column)).compareTo((BigDecimal) operand) >= 0);
+                    predicate = (doc -> doc.get(column) != null && doc.get(column) instanceof BigDecimal && ((BigDecimal) doc.get(column)).compareTo((BigDecimal) operand) >= 0);
                     break;
                 default:
                     throw new RuntimeException("Unexpected operator " + ctx.compOp());
