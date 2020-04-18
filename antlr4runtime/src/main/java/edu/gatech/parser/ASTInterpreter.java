@@ -39,28 +39,28 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @Override
     public void exitQuery(MySQLQueryParser.QueryContext ctx) {
-        for (Map.Entry<String, MongoCollection<Document>> entry : tableToCollection.entrySet()) {
+        for (Map.Entry<String, MongoCollection<Document>> tableCollection : tableToCollection.entrySet()) {
             Set<String> selectedColumnTables = columnToAlias.keySet().stream()
-                    .filter((x) -> x.table == null || x.table.equals(entry.getKey()))
+                    .filter((x) -> x.table == null || x.table.equals(tableCollection.getKey()))
                     .map((x) -> x.columnName)
                     .collect(Collectors.toSet());
-            List<Map<String, Object>> docs = output.getOrDefault(entry.getKey(), new ArrayList<>());
-            output.put(entry.getKey(), docs);
+            List<Map<String, Object>> docs = output.getOrDefault(tableCollection.getKey(), new ArrayList<>());
+            output.put(tableCollection.getKey(), docs);
             QueryExecutor queryExecutor;
             if (groupByFunc != null) {
-                queryExecutor = new AggregationQuery(entry.getKey(), selectedColumnTables, groupByFunc, new Aggregators(functionToColumn));
+                queryExecutor = new AggregationQuery(tableCollection.getKey(), selectedColumnTables, groupByFunc, new Aggregators(functionToColumn));
             } else {
-                queryExecutor = new SimpleSelect(entry.getKey(), selectedColumnTables);
+                queryExecutor = new SimpleSelect(tableCollection.getKey(), selectedColumnTables);
             }
-            for (Document document : entry.getValue().find()) {
+            for (Document document : tableCollection.getValue().find()) {
                 if (queryFilter == null || queryFilter.test(document)) {
                     queryExecutor.applySelect(document);
-                    collectOutputWithAliases(entry.getKey(), docs, queryExecutor);
+                    collectOutputWithAliases(tableCollection.getKey(), docs, queryExecutor);
                     if (queryExecutor.mustStopExecution()) break;
                 }
             }
             queryExecutor.done();
-            collectOutputWithAliases(entry.getKey(), docs, queryExecutor);
+            collectOutputWithAliases(tableCollection.getKey(), docs, queryExecutor);
         }
     }
 
