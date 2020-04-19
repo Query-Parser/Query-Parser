@@ -105,6 +105,7 @@ var xhttp, myObj, key, bar, txt = "";
     xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
+            bar = "";
             myObj = JSON.parse(this.responseText);
             for (key in myObj) {
                 bar += "<button type='button' class='btn btn-nav btn-outline-primary' data-toggle='collapse' href='#" + myObj[key] + "' onclick='setActive(event)'>" + myObj[key] + "</button>";
