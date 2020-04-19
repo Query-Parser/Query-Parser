@@ -36,10 +36,8 @@ public class QueryController {
    @ResponseBody
    @PostMapping(value = "/query")
    public Map<String, List<Map<String, Object>>> getQuery(@RequestBody String query) {
-//       System.out.println("getting resulting data");
        if (currentDbName == null) {
             Set<String> dbNames = schemaService.getDbNames(mongoClient);
-            System.out.println(dbNames);
             currentDbName = dbNames.iterator().next();
        }
 
@@ -48,7 +46,6 @@ public class QueryController {
            currentDbName = query.substring(index + 1, query.length() - 1);
        }
 
-       System.out.println(currentDbName);
        DatabaseConfiguration dbConfig = new DatabaseConfiguration();
        SQLEngine sqlEngine = new SQLEngine(dbConfig);
        return sqlEngine.execute(query, currentDbName);
@@ -58,7 +55,6 @@ public class QueryController {
     public String getCurrentDbName() {
        if (currentDbName == null) {
            Set<String> dbNames = schemaService.getDbNames(mongoClient);
-           System.out.println(dbNames);
            currentDbName = dbNames.iterator().next();
        }
        return currentDbName;
