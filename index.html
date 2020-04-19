@@ -58,6 +58,7 @@
                                 Query Parser
                             </div>
                             <div class="card-body">
+                                <div id="current-db-name"></div>
                                 <div class="input-group border">
                                     <textarea id="code" class="form-control" aria-label="With textarea" rows="1"></textarea>
                                 </div>
@@ -114,5 +115,24 @@ var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
     };
     xhttp.open("GET", "http://localhost:8080/dbNames", true);
     xhttp.send();
+</script>
+
+<!-- Displaying currently used database name -->
+<script>
+    loadCurrentDbName();
+
+    function loadCurrentDbName() {
+        console.log("called");
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("current-db-name").innerHTML = "Current database is " + this.responseText;;
+                console.log("finish call", this.responseText);
+            }
+        };
+        document.getElementById("current-db-name").innerHTML = "Current database is loading...";
+        xhttp.open("GET", "http://localhost:8080/currentDb", true);
+        xhttp.send();
+    }
 </script>
 </html>

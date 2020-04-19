@@ -38,12 +38,7 @@ public class SchemaController {
 
     @GetMapping("/dbNames")
     public Set<String> getDbNames() {
-        MongoCursor<String> dbsCursor = mongoClient.listDatabaseNames().iterator();
-        Set<String> dbNames = new HashSet();
-        while(dbsCursor.hasNext()) {
-            dbNames.add(dbsCursor.next());
-        }
-        return dbNames;
+        return schemaService.getDbNames(mongoClient);
     }
 
     @PostMapping("/schema")
