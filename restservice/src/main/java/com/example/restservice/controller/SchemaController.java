@@ -1,6 +1,7 @@
 package com.example.restservice.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.MongoDbFactory;
@@ -45,7 +46,7 @@ public class SchemaController {
         return dbNames;
     }
 
-    @GetMapping("/schema")
+    @PostMapping("/schema")
     public Map<String, HashSet<String>> getSchema(@RequestBody String dbName) {
         MongoDbFactory mongo = new SimpleMongoDbFactory(mongoClient, dbName);
         MongoTemplate mongoTemplate = new MongoTemplate(mongo);
