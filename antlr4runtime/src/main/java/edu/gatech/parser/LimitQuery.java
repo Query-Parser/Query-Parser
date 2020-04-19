@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
-class LimitQuery implements QueryExecutor {
+class LimitQuery implements TransformationQueryNode {
     private final int limit;
     private int count = 0;
     private List<Map<String, Object>> buffer = new ArrayList<>();

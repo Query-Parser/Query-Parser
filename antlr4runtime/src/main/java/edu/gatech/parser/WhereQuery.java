@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 @RequiredArgsConstructor
-class WhereQuery implements QueryExecutor {
+class WhereQuery implements TransformationQueryNode {
     @NonNull private final Predicate<Map<String, Object>> filter;
     private List<Map<String, Object>> buffer = new ArrayList<>();
 

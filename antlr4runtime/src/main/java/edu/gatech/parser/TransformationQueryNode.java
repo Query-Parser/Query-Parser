@@ -3,23 +3,21 @@ package edu.gatech.parser;
 import java.util.List;
 import java.util.Map;
 
-public interface QueryExecutor {
-    boolean mustStopExecution();
+public interface TransformationQueryNode extends SourceQueryNode {
     void acceptDocument(Map<String, Object> document);
     void done();
-    List<Map<String, Object>> collectOutput();
 
-    default QueryExecutor compose(QueryExecutor other) {
-        return new QueryExecutor() {
+    default TransformationQueryNode compose(TransformationQueryNode other) {
+        return new TransformationQueryNode() {
             @Override
             public boolean mustStopExecution() {
-                return QueryExecutor.this.mustStopExecution() || other.mustStopExecution();
+                return TransformationQueryNode.this.mustStopExecution() || other.mustStopExecution();
             }
 
             @Override
             public void acceptDocument(Map<String, Object> document) {
-                QueryExecutor.this.acceptDocument(document);
-                List<Map<String, Object>> output = QueryExecutor.this.collectOutput();
+                TransformationQueryNode.this.acceptDocument(document);
+                List<Map<String, Object>> output = TransformationQueryNode.this.collectOutput();
                 output.forEach(other::acceptDocument);
             }
 
@@ -30,8 +28,8 @@ public interface QueryExecutor {
 
             @Override
             public void done() {
-                QueryExecutor.this.done();
-                List<Map<String, Object>> output = QueryExecutor.this.collectOutput();
+                TransformationQueryNode.this.done();
+                List<Map<String, Object>> output = TransformationQueryNode.this.collectOutput();
                 output.forEach(other::acceptDocument);
                 other.done();
             }

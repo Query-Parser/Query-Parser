@@ -2,7 +2,6 @@ package edu.gatech.parser;
 
 import com.codepoetics.protonpack.StreamUtils;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +14,6 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import com.mongodb.client.model.Sorts;
-
 public class ASTInterpreter extends MySQLQueryBaseListener {
     private final MongoDatabase db;
     private Map<String, List<Map<String, Object>>> output;
@@ -27,14 +24,14 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     private int limit = -1;
     private Map<ColumnRef, List<String>> columnToAlias = new HashMap<>();
     private Map<Func, Set<ColumnRef>> functionToColumn = new HashMap<>();
-    private Map<String, MongoCollection<Document>> tableToCollection = new HashMap<>(); // hashmap of tableName and collection of the same name in mongo
+    private List<String> tableToCollection = new ArrayList<>(); // hashmap of tableName and collection of the same name in mongo
     private Map<String, String> tableToAlias = new HashMap<>();
     private Map<String, String> aliasToTable = new HashMap<>();
     private Stack<Object> stack = new Stack<>();
     private Predicate<Map<String, Object>> queryFilter = null;
     private GroupingFunction groupByFunc = null;
     private List<String> groupByColumns = null;
-    private List<Pair<String, Pair<String, Integer>>> orderList = new ArrayList<>();
+    private Map<String, List<Pair<String, Integer>>> orderList = new HashMap<>();
 
 
     public ASTInterpreter(Map<String, List<Map<String, Object>>> output, MongoDatabase db) {
@@ -44,15 +41,15 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @Override
     public void exitQuery(MySQLQueryParser.QueryContext ctx) {
-        for (Map.Entry<String, MongoCollection<Document>> tableCollection : tableToCollection.entrySet()) {
-            Iterator<Document> documents = applyOrderBy(tableCollection);
+        for (String tableName : tableToCollection) {
             Set<String> selectedColumnTables = columnToAlias.keySet().stream()
-                    .filter((x) -> x.table == null || x.table.equals(tableCollection.getKey()))
+                    .filter((x) -> x.table == null || x.table.equals(tableName))
                     .map((x) -> x.columnName)
                     .collect(Collectors.toSet());
-            List<Map<String, Object>> docs = output.getOrDefault(tableCollection.getKey(), new ArrayList<>());
-            output.put(tableCollection.getKey(), docs);
-            QueryExecutor queryExecutor;
+            List<Map<String, Object>> outputList = output.getOrDefault(tableName, new ArrayList<>());
+            output.put(tableName, outputList);
+            SourceQueryNode querySource = new OrderByFetch(tableName, db, orderList.getOrDefault(tableName, Collections.emptyList()));
+            TransformationQueryNode queryExecutor;
             if (groupByFunc != null) {
                 queryExecutor = new AggregationQuery(groupByFunc, new Aggregators(functionToColumn));
             } else {
@@ -64,57 +61,17 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             if (limit != -1) {
                 queryExecutor = queryExecutor.compose(new LimitQuery(limit));
             }
-            while (documents.hasNext()) {
-                Map<String, Object> document = longToBigDecimal(documents.next());
-                queryExecutor.acceptDocument(document);
-                collectOutputWithAliases(tableCollection.getKey(), docs, queryExecutor);
-                if (queryExecutor.mustStopExecution()) break;
-            }
-            queryExecutor.done();
-            collectOutputWithAliases(tableCollection.getKey(), docs, queryExecutor);
-        }
-    }
-
-    private Map<String, Object> longToBigDecimal(Map<String, Object> document) {
-        return document.entrySet().stream()
-                .map((x) -> {
-                    String key = x.getKey();
-                    Object value = x.getValue();
-                    if (value instanceof Number) {
-                        return new Pair<>(key, new BigDecimal(value.toString()));
-                    } else if (value instanceof Map) {
-                        return new Pair<>(key, longToBigDecimal((Map<String, Object>) value));
-                    } else {
-                        return new Pair<>(key, value);
-                    }
-                })
-        .collect(Collectors.toMap(Pair::getValue0, Pair::getValue1));
-    }
-
-    private void collectOutputWithAliases(String tableName, List<Map<String, Object>> docs, QueryExecutor queryExecutor) {
-        docs.addAll(queryExecutor.collectOutput().stream().map(x -> applyColumnAlias(x, tableName)).collect(Collectors.toList()));
-    }
-
-    private Iterator<Document> applyOrderBy(Map.Entry<String, MongoCollection<Document>> entry ) {
-        List<Pair<String, Integer>> columnAndDirections = orderList.stream()
-                .filter((x) -> x.getValue0() == null || x.getValue0().equals(entry.getKey()))
-                .map(Pair::getValue1).collect(Collectors.toList());
-        MongoCursor<Document> cursor;
-        if (columnAndDirections.isEmpty()) {
-            cursor = entry.getValue().find().cursor();
-        } else {
-            List<String> ascendingColumns = columnAndDirections.stream().filter((x) -> x.getValue1() > 0).map(Pair::getValue0).collect(Collectors.toList());
-            List<String> descendingColumns = columnAndDirections.stream().filter((x) -> x.getValue1() < 0).map(Pair::getValue0).collect(Collectors.toList());
-
-            if (!ascendingColumns.isEmpty() && !descendingColumns.isEmpty()) {
-                cursor = entry.getValue().find().sort(Sorts.orderBy(Sorts.ascending(ascendingColumns), Sorts.descending(descendingColumns))).cursor();
-            } else if (descendingColumns.isEmpty()) {
-                cursor = entry.getValue().find().sort(Sorts.orderBy(Sorts.ascending(ascendingColumns))).cursor();
-            } else {
-                cursor = entry.getValue().find().sort(Sorts.orderBy(Sorts.descending(descendingColumns))).cursor();
+            querySource = querySource.compose(new LongToBigDecimal()).compose(queryExecutor);
+            List<Map<String, Object>> documents;
+            while (!(documents = querySource.collectOutput()).isEmpty()) {
+                collectOutputWithAliases(tableName, outputList, documents);
+                if (querySource.mustStopExecution()) break;
             }
         }
-        return cursor;
+    }
+
+    private void collectOutputWithAliases(String tableName, List<Map<String, Object>> outputList, List<Map<String, Object>> docs) {
+        outputList.addAll(docs.stream().map(x -> applyColumnAlias(x, tableName)).collect(Collectors.toList()));
     }
 
     private Map<String, Object> applyColumnAlias(Map<String, Object> document, String tableName) {
@@ -239,11 +196,10 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     @Override
     public void exitTableName(MySQLQueryParser.TableNameContext ctx) {
         String tableName = ctx.getText();
-        MongoCollection<Document> collection = db.getCollection(tableName);
         if (tableToAlias.containsKey(tableName)) {
             tableName = tableToAlias.get(tableName);
         }
-        tableToCollection.put(tableName, collection);
+        tableToCollection.add(tableName);
     }
 
     @Override
@@ -360,8 +316,10 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         }
         int direction = (ctx.direction() != null && ctx.direction().DESC_SYMBOL() != null)
                 ? Direction.DESC.value : Direction.ASC.value;
+        List<Pair<String, Integer>> columns = orderList.getOrDefault(tableName, new ArrayList<>());
+        orderList.put(tableName, columns);
         Pair<String, Integer> columnAndDirection = new Pair<>(columnName, direction);
-        orderList.add(new Pair<>(tableName, columnAndDirection));
+        columns.add(columnAndDirection);
     }
 
     @Override
@@ -375,7 +333,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     }
 
     @RequiredArgsConstructor
-    private class SimpleSelect implements QueryExecutor {
+    private class SimpleSelect implements TransformationQueryNode {
         @NonNull private Set<String> selectedColumnTables;
         private boolean limitReached = false;
         private Set<Map<String, Object>> distinctDocuments = new HashSet<>();
@@ -421,7 +379,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         }
     }
 
-    private class AggregationQuery implements QueryExecutor {
+    private class AggregationQuery implements TransformationQueryNode {
         private List<Map<String, Object>> output;
         private final GroupingFunction groupingFunc;
         private final AggregationFunction aggregationFunction;
