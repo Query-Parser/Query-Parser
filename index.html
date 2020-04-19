@@ -99,33 +99,24 @@
     }
 </script>
 
-<!-- Add Schema -->
+<!-- Add Buttons -->
 <script>
-    var xmlhttp, myObj, key, col, inx, txt, bar = "";
-    xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function () {
+var xhttp, myObj, key, bar = "";
+    xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
             myObj = JSON.parse(this.responseText);
             for (key in myObj) {
-                bar += "<button type='button' class='btn btn-nav btn-outline-primary' data-toggle='collapse' href='#" + key + "' onclick='setActive(event)'>" + key + "</button>"
-                txt += "<div id='" + key + "' class='collapse'><h2>" + key + "</h2>"
-                for (col in myObj[key]) {
-                    txt += "<h3>" + col + "</h3><div class='table-responsive'><table class='table table-bordered'><tr>"
-                    for (inx in myObj[key][col]) {
-                        txt += "<th>" + myObj[key][col][inx] + "</th>";
-                    }
-                    txt += "</tr></table></div>";
-                }
-                txt += "</div>"
+                bar += "<button type='button' class='btn btn-nav btn-outline-primary' data-toggle='collapse' href='#" + myObj[key] + "' onclick='setActive(event)'>" + myObj[key] + "</button>"
             }
-            document.getElementById("schma").innerHTML = txt; //issue here
-            document.getElementById("bar").innerHTML = bar;
         }
+        document.getElementById("bar").innerHTML = bar;
     };
-    xmlhttp.open("GET", "http://localhost:8080/schema", true);
-    xmlhttp.send();
+    xhttp.open("GET", "http://localhost:8080/dbNames", true);
+    xhttp.send();
 </script>
 
+<!-- Add Schema -->
 <!-- Add color to show which databases are active -->
 <script>
     function setActive(e) {
@@ -134,6 +125,29 @@
             target.classList.remove("btn-back");
         } else {
             target.classList.add("btn-back");
+            if (!document.getElementById(target.innerText)) {
+                var xmlhttp, myObj, key, col, inx, txt = "";
+                xmlhttp = new XMLHttpRequest();
+                xmlhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    myObj = JSON.parse(this.responseText);
+                    for (key in myObj) {
+                        txt += "<div id='" + key + "' class='collapse'><h2>" + key + "</h2>"
+                        for (col in myObj[key]) {
+                            txt += "<h3>" + col + "</h3><div class='table-responsive'><table class='table table-bordered'><tr>"
+                            for (inx in myObj[key][col]) {
+                                txt += "<th>" + myObj[key][col][inx] + "</th>";
+                            }
+                            txt += "</tr></table></div>";
+                        }
+                        txt += "</div>"
+                    }
+                    document.getElementById(target).innerHTML = txt;
+                }
+                };
+                xmlhttp.open("GET", "http://localhost:8080/schema", true);
+                xmlhttp.send(target.innerText);
+            }
         }
     }
 </script>
