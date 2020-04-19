@@ -101,16 +101,18 @@
 
 <!-- Add Buttons -->
 <script>
-var xhttp, myObj, key, bar = "";
+var xhttp, myObj, key, bar, txt = "";
     xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
             myObj = JSON.parse(this.responseText);
             for (key in myObj) {
-                bar += "<button type='button' class='btn btn-nav btn-outline-primary' data-toggle='collapse' href='#" + myObj[key] + "' onclick='setActive(event)'>" + myObj[key] + "</button>"
+                bar += "<button type='button' class='btn btn-nav btn-outline-primary' data-toggle='collapse' href='#" + myObj[key] + "' onclick='setActive(event)'>" + myObj[key] + "</button>";
+                txt += "<div id='" + myObj[key] + "' class='collapse'></div>";
             }
         }
         document.getElementById("bar").innerHTML = bar;
+        document.getElementById("schma").innerHTML = txt;
     };
     xhttp.open("GET", "http://localhost:8080/dbNames", true);
     xhttp.send();
@@ -121,35 +123,34 @@ var xhttp, myObj, key, bar = "";
 <script>
     function setActive(e) {
         var target = e.target;
+        var dbName = target.innerText;
         if (target.classList.contains("btn-back")) {
             target.classList.remove("btn-back");
         } else {
             target.classList.add("btn-back");
-            if (!document.getElementById(target.innerText)) {
+            if (document.getElementById(dbName).innerHTML == "") {
                 var xmlhttp, myObj, key, col, inx, txt = "";
                 xmlhttp = new XMLHttpRequest();
+                xmlhttp.open("POST", "http://localhost:8080/schema", true);
+                xmlhttp.setRequestHeader('Content-type', 'text/plain');
+                xmlhttp.send(dbName);
                 xmlhttp.onreadystatechange = function () {
                 if (this.readyState == 4 && this.status == 200) {
                     myObj = JSON.parse(this.responseText);
+                    txt += "<h2>" + dbName + "</h2>";
                     for (key in myObj) {
-                        txt += "<div id='" + key + "' class='collapse'><h2>" + key + "</h2>"
+                        txt += "<h3>" + key + "</h3><div class='table-responsive'><table class='table table-bordered'><tr>";
                         for (col in myObj[key]) {
-                            txt += "<h3>" + col + "</h3><div class='table-responsive'><table class='table table-bordered'><tr>"
-                            for (inx in myObj[key][col]) {
-                                txt += "<th>" + myObj[key][col][inx] + "</th>";
-                            }
-                            txt += "</tr></table></div>";
+                            txt += "<th>" + myObj[key][col] + "</th>";
                         }
-                        txt += "</div>"
+                        txt += "</tr></table></div>";
                     }
-                    document.getElementById(target).innerHTML = txt;
-                }
+                    document.getElementById(dbName).innerHTML = txt;
                 };
-                xmlhttp.open("GET", "http://localhost:8080/schema", true);
-                xmlhttp.send(target.innerText);
             }
         }
     }
+}
 </script>
 
 <!-- Configure textbox and send data to query endpoint -->
