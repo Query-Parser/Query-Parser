@@ -57,7 +57,7 @@ public class OrderByFetch implements SourceQueryNode {
         int n = BATCH_SIZE;
         ArrayList<Map<String, Object>> batch = new ArrayList<>();
         while (docs.hasNext() && n > 0) {
-            batch.add(docs.next());
+            batch.add(Map.of(tableName, docs.next()));
             n--;
         }
         return batch;

@@ -36,7 +36,7 @@ selectItemList:
 
 selectItem:
     columnItem
-    | ((sumClause | countClause | avgClause | minClause | maxClause) (selectAlias | alias)?)?
+    | ((sumClause | countClause | avgClause | minClause | maxClause) alias?)?
 ;
 
 sumClause:
@@ -63,12 +63,9 @@ maxClause:
 columnName:
     WORD
 ;
-selectAlias:
-    AS_SYMBOL alias
-;
 
 alias:
-    (SQ_TEXT | DQ_TEXT | WORD )
+    AS_SYMBOL? (SQ_TEXT | DQ_TEXT | WORD )
 ;
 
 intoClause:
@@ -91,7 +88,6 @@ tableList:
 tableItem:
     tableName
     | (tableName alias)
-    | (tableName selectAlias)
 ;
 
 tableName:
@@ -210,10 +206,12 @@ existingTable:
      columnItem (COMMA_SYMBOL columnItem)*
  ;
 
+ prefix:
+     WORD DOT_SYMBOL
+ ;
+
  columnItem:
-    columnName
-    | (columnName alias)
-    | (columnName selectAlias)
+    prefix? (columnName | (columnName alias))
  ;
 
  valueItem:
@@ -241,7 +239,7 @@ joinClause:
 ;
 
 innerJoin:
-    INNER_SYMBOL JOIN_SYMBOL
+    INNER_SYMBOL? JOIN_SYMBOL
 ;
 
 leftJoin:
@@ -253,11 +251,11 @@ rightJoin:
 ;
 
 onClause:
-    ON_SYMBOL onList (AND_SYMBOL onList)*
+    ON_SYMBOL onList
 ;
 
 onList:
-    columnItem compOp columnItem
+    columnItem compOp columnItem (AND_SYMBOL onList)?
 ;
 
 //UNION
@@ -398,7 +396,6 @@ NUMBER         : DIGIT+ ([.,] DIGIT+)? ;
 
 fragment LOWERCASE  : [a-z] ;
 fragment UPPERCASE  : [A-Z];
-TABLE_NAME          : (WORD DOT_SYMBOL);
-WORD                : (LOWERCASE | UPPERCASE | DIGIT | '_' | '.' | '@' | '/')+ ;
+WORD                : (LOWERCASE | UPPERCASE | DIGIT | '_' | '@' | '/')+ ;
 WHITESPACE          : (' ' | '\t') -> skip;
 NEWLINE             : ('\r'? '\n' | '\r')+ -> skip;

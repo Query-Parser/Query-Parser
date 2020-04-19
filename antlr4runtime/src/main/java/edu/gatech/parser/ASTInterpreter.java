@@ -1,7 +1,6 @@
 package edu.gatech.parser;
 
 import com.codepoetics.protonpack.StreamUtils;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +31,9 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     private GroupingFunction groupByFunc = null;
     private List<String> groupByColumns = null;
     private Map<String, List<Pair<String, Integer>>> orderList = new HashMap<>();
+    private List<Pair<ColumnRef, ColumnRef>> joinConditions = null;
+    private String joinedTable;
+    private List<String> fromTables = null;
 
 
     public ASTInterpreter(Map<String, List<Map<String, Object>>> output, MongoDatabase db) {
@@ -41,14 +43,24 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @Override
     public void exitQuery(MySQLQueryParser.QueryContext ctx) {
-        for (String tableName : tableToCollection) {
+        for (String tableNameOrAlias : fromTables) {
+            final String tableName = aliasToTable.getOrDefault(tableNameOrAlias, tableNameOrAlias);
             Set<String> selectedColumnTables = columnToAlias.keySet().stream()
                     .filter((x) -> x.table == null || x.table.equals(tableName))
                     .map((x) -> x.columnName)
                     .collect(Collectors.toSet());
             List<Map<String, Object>> outputList = output.getOrDefault(tableName, new ArrayList<>());
             output.put(tableName, outputList);
+
             SourceQueryNode querySource = new OrderByFetch(tableName, db, orderList.getOrDefault(tableName, Collections.emptyList()));
+            if (joinConditions != null) {
+                List<Pair<ColumnRef, ColumnRef>> cleanedJoinConditions = cleanJoinConditions(tableName);
+                //TODO support multiple joins
+                List<Pair<String, Integer>> orderingPairs = orderList.getOrDefault(joinedTable, Collections.emptyList());
+                OrderByFetch right = new OrderByFetch(joinedTable, db, orderingPairs);
+                querySource = new JoinNode(querySource, tableName, right, joinedTable, cleanedJoinConditions);
+            }
+
             TransformationQueryNode queryExecutor;
             if (groupByFunc != null) {
                 queryExecutor = new AggregationQuery(groupByFunc, new Aggregators(functionToColumn));
@@ -68,6 +80,22 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                 if (querySource.mustStopExecution()) break;
             }
         }
+    }
+
+    private List<Pair<ColumnRef, ColumnRef>> cleanJoinConditions(String tableName) {
+        return joinConditions.stream().map(colPair -> new Pair<>(
+                colPair.getValue0().resolveAlias(aliasToTable),
+                colPair.getValue1().resolveAlias(aliasToTable)
+        )).map(colPair -> {
+            if (colPair.getValue0().table.equals(tableName)) {
+                return colPair;
+            } else {
+                return new Pair<>(
+                        colPair.getValue1(),
+                        colPair.getValue0()
+                );
+            }
+        }).collect(Collectors.toList());
     }
 
     private void collectOutputWithAliases(String tableName, List<Map<String, Object>> outputList, List<Map<String, Object>> docs) {
@@ -145,15 +173,11 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
             List<String> mapTableAliasFunc = new ArrayList<>();
 
-            if (selectedColumn.contains(".")) {
-                int dot = selectedColumn.indexOf('.');
-                tableName = selectedColumn.substring(0, dot);
-                selectedColumn = selectedColumn.substring(dot + 1);
+            if (context.prefix() != null) {
+                tableName = context.prefix().WORD().getText();
             }
 
-            if (context.selectAlias() != null) {
-                alias = context.selectAlias().alias().getText();
-            } else if (context.alias() != null) {
+            if (context.alias() != null) {
                 alias = context.alias().getText();
             }
 
@@ -184,13 +208,15 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @Override
     public void enterTableItem(MySQLQueryParser.TableItemContext ctx) {
-        if (ctx.selectAlias() != null) {
-            tableToAlias.put(ctx.tableName().getText(), ctx.selectAlias().alias().getText());
-            aliasToTable.put(ctx.selectAlias().alias().getText(), ctx.tableName().getText());
-        } else if (ctx.alias() != null) {
+        if (ctx.alias() != null) {
             tableToAlias.put(ctx.tableName().getText(), ctx.alias().getText());
             aliasToTable.put(ctx.alias().getText(), ctx.tableName().getText());
         }
+    }
+
+    @Override
+    public void enterFromClause(MySQLQueryParser.FromClauseContext ctx) {
+        fromTables = ctx.tableList().tableItem().stream().map(x -> x.tableName().WORD().getSymbol().getText()).collect(Collectors.toList());
     }
 
     @Override
@@ -199,7 +225,6 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         if (tableToAlias.containsKey(tableName)) {
             tableName = tableToAlias.get(tableName);
         }
-        tableToCollection.add(tableName);
     }
 
     @Override
@@ -229,7 +254,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     }
 
     private boolean isTruthy(Object obj) {
-        return !obj.equals("") && !obj.equals(0);
+        return !obj.equals("") && !obj.equals(BigDecimal.ZERO) && !obj.equals(0);
     }
 
     @Override
@@ -323,6 +348,35 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     }
 
     @Override
+    public void exitJoinClause(MySQLQueryParser.JoinClauseContext ctx) {
+        String tableName = ctx.tableItem().tableName().WORD().getSymbol().getText();
+        if (ctx.tableItem().alias() != null) {
+            aliasToTable.put(ctx.tableItem().alias().WORD().getSymbol().getText(), tableName);
+        }
+        joinedTable = tableName;
+        joinConditions = (List<Pair<ColumnRef, ColumnRef>>) stack.pop();
+    }
+
+    @Override
+    public void exitOnList(MySQLQueryParser.OnListContext ctx) {
+        ColumnRef first = ColumnRef.of(ctx.columnItem().get(0));
+        ColumnRef second = ColumnRef.of(ctx.columnItem().get(1));
+        MySQLQueryParser.CompOpContext comparison = ctx.compOp();
+        if (comparison.EQUAL_OPERATOR() == null) {
+            throw new RuntimeException("Joins only support equality conditions, not " + comparison.getText());
+        }
+        Pair<ColumnRef, ColumnRef> eqPair = new Pair<>(first, second);
+        List<Pair<ColumnRef, ColumnRef>> columns;
+        if (ctx.AND_SYMBOL() != null) {
+            columns = (List<Pair<ColumnRef, ColumnRef>>) stack.pop();
+            columns.add(eqPair);
+        } else {
+            columns = Arrays.asList(eqPair);
+        }
+        stack.push(columns);
+    }
+
+    @Override
     public void enterEveryRule(ParserRuleContext ctx) {
         System.out.println("|  ".repeat(level++) + "Entering " + ctx.getClass().getSimpleName());
     }
@@ -334,7 +388,8 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @RequiredArgsConstructor
     private class SimpleSelect implements TransformationQueryNode {
-        @NonNull private Set<String> selectedColumnTables;
+        @NonNull
+        private Set<String> selectedColumnTables;
         private boolean limitReached = false;
         private Set<Map<String, Object>> distinctDocuments = new HashSet<>();
         private List<Map<String, Object>> output = new ArrayList<>();
