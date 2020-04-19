@@ -15,9 +15,9 @@
 
     <!-- CodeMirror instance -->
     <link rel="stylesheet" href="src/css/codemirror.css">
-
     <link rel="stylesheet" href="src/css/main.css">
 
+    <!-- Bootstrap Scripts -->
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
         integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
         crossorigin="anonymous"></script>
@@ -27,7 +27,10 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
         integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
         crossorigin="anonymous"></script>
+    
     <script src="src/js/codemirror.js"></script>
+    <script src="src/js/query.js"></script>
+    <script src="src/js/schema.js"></script>
 </head>
 
 <body>
@@ -84,77 +87,32 @@
     </div>
 </body>
 
-<!-- Get Result -->
+<!-- Add Code Mirror Functionality -->
 <script>
-    function loadResponse() {
-        var http = "";
-        http = new XMLHttpRequest();
-        http.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-                document.getElementById("result-box").innerHTML = JSON.stringify(JSON.parse(this.responseText), undefined, 2);
-            }
-        };
-        http.open("GET", "http://localhost:8080/query", true);
-        http.send();
-    }
+var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+    lineNumbers: true,
+    matchBrackets: true,
+    mode: "text/x-mysql"
+});
 </script>
 
-<!-- Add Schema -->
+<!-- Add Buttons -->
 <script>
-    var xmlhttp, myObj, key, col, inx, txt, bar = "";
-    xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function () {
+    var xhttp, myObj, key, bar, txt = "";
+    xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
+            bar = "";
             myObj = JSON.parse(this.responseText);
             for (key in myObj) {
-                bar += "<button type='button' class='btn btn-nav btn-outline-primary' data-toggle='collapse' href='#" + key + "' onclick='setActive(event)'>" + key + "</button>"
-                txt += "<div id='" + key + "' class='collapse'><h2>" + key + "</h2>"
-                for (col in myObj[key]) {
-                    txt += "<h3>" + col + "</h3><div class='table-responsive'><table class='table table-bordered'><tr>"
-                    for (inx in myObj[key][col]) {
-                        txt += "<th>" + myObj[key][col][inx] + "</th>";
-                    }
-                    txt += "</tr></table></div>";
-                }
-                txt += "</div>"
+                bar += "<button type='button' class='btn btn-nav btn-outline-primary' data-toggle='collapse' href='#" + myObj[key] + "' onclick='setActive(event)'>" + myObj[key] + "</button>";
+                txt += "<div id='" + myObj[key] + "' class='collapse'></div>";
             }
-            document.getElementById("schma").innerHTML = txt; //issue here
-            document.getElementById("bar").innerHTML = bar;
         }
+        document.getElementById("bar").innerHTML = bar;
+        document.getElementById("schma").innerHTML = txt;
     };
-    xmlhttp.open("GET", "http://localhost:8080/schema", true);
-    xmlhttp.send();
+    xhttp.open("GET", "http://localhost:8080/dbNames", true);
+    xhttp.send();
 </script>
-
-<!-- Add color to show which databases are active -->
-<script>
-    function setActive(e) {
-        var target = e.target;
-        if (target.classList.contains("btn-back")) {
-            target.classList.remove("btn-back");
-        } else {
-            target.classList.add("btn-back");
-        }
-    }
-</script>
-
-<!-- Configure textbox and send data to query endpoint -->
-<script>
-    var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
-        lineNumbers: true,
-        matchBrackets: true,
-        mode: "text/x-mysql"
-    });
-
-    function loadDoc() {
-        var query = "";
-        var xhttp = new XMLHttpRequest();
-        xhttp.open("POST", "http://localhost:8080/query", true);
-        xhttp.setRequestHeader('Content-type', 'text/plain');
-        query = editor.getDoc().getValue("\n");
-        xhttp.send(query);
-        loadResponse();
-    }
-</script>
-
 </html>
