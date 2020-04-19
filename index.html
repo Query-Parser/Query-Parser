@@ -135,6 +135,7 @@ var xhttp, myObj, key, bar, txt = "";
                 xmlhttp.open("POST", "http://localhost:8080/schema", true);
                 xmlhttp.setRequestHeader('Content-type', 'text/plain');
                 xmlhttp.send(dbName);
+                document.getElementById(dbName).innerHTML = dbName + " is loading...";
                 xmlhttp.onreadystatechange = function () {
                 if (this.readyState == 4 && this.status == 200) {
                     myObj = JSON.parse(this.responseText);
