@@ -232,7 +232,7 @@ assignmentList :
 
 //JOIN
 joinClause:
-    (innerJoin | rightJoin | leftJoin) tableItem
+    innerJoin tableItem
     (onClause | USING_SYMBOL OPEN_PAR_SYMBOL columnItem CLOSE_PAR_SYMBOL)
     (joinClause)*
 ;

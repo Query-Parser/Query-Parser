@@ -11,9 +11,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 class JoinNode implements SourceQueryNode {
     @NonNull final private SourceQueryNode left;
-    @NonNull final private String leftTable;
     @NonNull final private SourceQueryNode right;
-    @NonNull final private String rightTable;
     private List<Map<String, Map<String, Object>>> output = new ArrayList<>();
     /**
      * Pairs MUST be (LeftTableColumn, RightTableColumn). Never in the reverse order
@@ -29,7 +27,7 @@ class JoinNode implements SourceQueryNode {
     @Override
     public List<Map<String, Map<String, Object>>> collectOutput() {
         List<Map<String, Map<String, Object>>> docs;
-        while (!(docs = left.collectOutput()).isEmpty()) {
+        while ((docs = left.collectOutput()) != null) {
             docs.forEach((doc) -> {
                 Set<Pair<ColumnRef, Object>> joinValues = joinColumns.stream()
                         .filter(x -> {
@@ -49,7 +47,7 @@ class JoinNode implements SourceQueryNode {
             });
         }
 
-        while (!(docs = right.collectOutput()).isEmpty()) {
+        while ((docs = right.collectOutput()) != null) {
             docs.forEach((doc) -> {
                 Set<Pair<ColumnRef, Object>> joinValues = joinColumns.stream()
                         .filter(x -> {
@@ -72,6 +70,6 @@ class JoinNode implements SourceQueryNode {
 
         List<Map<String, Map<String, Object>>> tmp = output;
         output = new ArrayList<>();
-        return tmp;
+        return tmp.isEmpty() ? null : tmp;
     }
 }

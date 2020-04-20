@@ -5,12 +5,10 @@ import com.mongodb.client.MongoDatabase;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.bson.Document;
 import org.javatuples.Pair;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -26,7 +24,6 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     private int limit = -1;
     private Map<ColumnRef, List<String>> columnToAlias = new HashMap<>();
     private Map<Func, Set<ColumnRef>> functionToColumn = new HashMap<>();
-    private List<String> tableToCollection = new ArrayList<>(); // hashmap of tableName and collection of the same name in mongo
     private Map<String, String> tableToAlias = new HashMap<>();
     private Map<String, String> aliasToTable = new HashMap<>();
     private Stack<Object> stack = new Stack<>();
@@ -34,8 +31,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     private GroupingFunction groupByFunc = null;
     private List<ColumnRef> groupByColumns = null;
     private Map<String, List<Pair<String, Integer>>> orderList = new HashMap<>();
-    private List<Pair<ColumnRef, ColumnRef>> joinConditions = null;
-    private String joinedTable;
+    private Map<String, List<Pair<ColumnRef, ColumnRef>>> joinedTables = new HashMap<>();
     private List<String> fromTables = null;
     private String singleTable = null;
 
@@ -47,7 +43,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @Override
     public void exitQuery(MySQLQueryParser.QueryContext ctx) {
-        if (fromTables.size() == 1 && joinedTable == null) {
+        if (fromTables.size() + joinedTables.size() == 1) {
             singleTable = fromTables.get(0);
         } else {
             columnToAlias.keySet().forEach(x -> {
@@ -62,12 +58,14 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             Set<ColumnRef> selectedColumnTables = new HashSet<>(columnToAlias.keySet());
 
             SourceQueryNode querySource = new OrderByFetch(tableName, db, orderList.getOrDefault(tableName, Collections.emptyList()));
-            if (joinConditions != null) {
-                List<Pair<ColumnRef, ColumnRef>> cleanedJoinConditions = cleanJoinConditions(tableName);
-                //TODO support multiple joins
-                List<Pair<String, Integer>> orderingPairs = orderList.getOrDefault(joinedTable, Collections.emptyList());
-                OrderByFetch right = new OrderByFetch(joinedTable, db, orderingPairs);
-                querySource = new JoinNode(querySource, tableName, right, joinedTable, cleanedJoinConditions);
+
+            String currentName = tableName;
+            for (Map.Entry<String, List<Pair<ColumnRef, ColumnRef>>> joinedTable: joinedTables.entrySet()) {
+                List<Pair<ColumnRef, ColumnRef>> cleanedJoinConditions = cleanJoinConditions(currentName, joinedTable.getValue());
+                List<Pair<String, Integer>> orderingPairs = orderList.getOrDefault(joinedTable.getKey(), Collections.emptyList());
+                OrderByFetch right = new OrderByFetch(joinedTable.getKey(), db, orderingPairs);
+                querySource = new JoinNode(querySource, right, cleanedJoinConditions);
+                currentName = joinedTable.getKey();
             }
 
             TransformationQueryNode queryExecutor;
@@ -102,12 +100,12 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private List<Pair<ColumnRef, ColumnRef>> cleanJoinConditions(String tableName) {
+    private List<Pair<ColumnRef, ColumnRef>> cleanJoinConditions(String leftTableName, List<Pair<ColumnRef, ColumnRef>> joinConditions) {
         return joinConditions.stream().map(colPair -> new Pair<>(
                 colPair.getValue0().resolveAlias(aliasToTable),
                 colPair.getValue1().resolveAlias(aliasToTable)
         )).map(colPair -> {
-            if (colPair.getValue0().getTable().equals(tableName)) {
+            if (colPair.getValue0().getTable().equals(leftTableName)) {
                 return colPair;
             } else {
                 return new Pair<>(
@@ -373,7 +371,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @Override
     public void enterOrderExpression(MySQLQueryParser.OrderExpressionContext ctx) {
-        if (!(fromTables.size() == 1 && joinedTable == null)) {
+        if (fromTables.size() + joinedTables.size() > 1) {
             throw new RuntimeException("Cannot ORDER BY with multiple tables selected");
         }
         ColumnRef col = ColumnRef.of(ctx.columnItem(), aliasToTable).withTable(fromTables.get(0));
@@ -391,8 +389,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         if (ctx.tableItem().alias() != null) {
             aliasToTable.put(ctx.tableItem().alias().WORD().getSymbol().getText(), tableName);
         }
-        joinedTable = tableName;
-        joinConditions = (List<Pair<ColumnRef, ColumnRef>>) stack.pop();
+        joinedTables.put(tableName, (List<Pair<ColumnRef, ColumnRef>>) stack.pop());
     }
 
     @Override
