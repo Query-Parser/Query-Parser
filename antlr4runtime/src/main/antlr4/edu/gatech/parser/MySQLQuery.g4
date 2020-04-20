@@ -86,8 +86,7 @@ tableList:
 ;
 
 tableItem:
-    tableName
-    | (tableName alias)
+    tableName alias?
 ;
 
 tableName:
@@ -211,7 +210,7 @@ existingTable:
  ;
 
  columnItem:
-    prefix? (columnName | (columnName alias))
+    prefix? columnName alias?
  ;
 
  valueItem:
@@ -380,8 +379,8 @@ fragment X: [xX];
 fragment Y: [yY];
 fragment Z: [zZ];
 
-SQ_TEXT: '\'' WORD '\'';
-DQ_TEXT: '"' WORD '"';
+SQ_TEXT: '\'' ( ~'\'' | '\'\'' )* '\'';
+DQ_TEXT: '"' ( ~'"' | '""' )* '"';
 NAME: '\'' WORD WHITESPACE WORD '\'';
 SINGLE_QUOTE: '\'' -> skip;
 DOUBLE_QUOTE: '"' -> skip;

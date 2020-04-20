@@ -13,20 +13,27 @@ import java.util.Set;
 @AllArgsConstructor
 public class Aggregators implements AggregationFunction {
     @NonNull
-    private Map<Func, Set<ColumnRef>> functionToColumn;
+    final private Map<Func, Set<ColumnRef>> functionToColumn;
 
     @Override
-    public Map<String, Object> apply(Pair<List<Object>, Map<String, Object>> document, Map<String, Object> accumulator) {
-        if (accumulator == null) {
-            accumulator = new HashMap<>();
+    public Map<String, Map<String, Object>> apply(Pair<List<Object>, Map<String, Map<String, Object>>> tableWithDoc, Map<String, Map<String, Object>> acc) {
+        if (acc == null) {
+            acc = new HashMap<>();
         }
+        Map<String, Object> accumulator;
         for (Map.Entry<Func, Set<ColumnRef>> entry : functionToColumn.entrySet()) {
             for (ColumnRef columnRef : entry.getValue()) {
                 Pair<Func, ColumnRef> funcColumn = new Pair<>(entry.getKey(), columnRef);
                 Func function = funcColumn.getValue0();
                 ColumnRef column = funcColumn.getValue1();
-                Object documentValue = document.getValue1().get(column.columnName);
-                if (!(documentValue instanceof Number)) return accumulator;
+
+                Map<String, Object> document = tableWithDoc.getValue1().get(column.table);
+                Object documentValue = document.get(column.columnName);
+
+                accumulator = acc.getOrDefault(column.table, new HashMap<>());
+                acc.put(column.table, accumulator);
+
+                if (!(documentValue instanceof Number)) return acc;
                 BigDecimal documentValueBd;
                 if (documentValue instanceof BigDecimal) {
                     documentValueBd = (BigDecimal) documentValue;
@@ -104,6 +111,6 @@ public class Aggregators implements AggregationFunction {
                 }
             }
         }
-        return accumulator;
+        return acc;
     }
 }

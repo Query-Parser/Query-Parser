@@ -10,12 +10,14 @@ import org.javatuples.Pair;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ASTInterpreter extends MySQLQueryBaseListener {
     private final MongoDatabase db;
-    private Map<String, List<Map<String, Object>>> output;
+    private List<Map<String, Object>> output;
     private int level;
     private boolean isAll = false; // might be wrong when there's nested query
     private boolean isSelect = false;
@@ -27,16 +29,16 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     private Map<String, String> tableToAlias = new HashMap<>();
     private Map<String, String> aliasToTable = new HashMap<>();
     private Stack<Object> stack = new Stack<>();
-    private Predicate<Map<String, Object>> queryFilter = null;
+    private Predicate<Map<String, Map<String, Object>>> queryFilter = null;
     private GroupingFunction groupByFunc = null;
-    private List<String> groupByColumns = null;
+    private List<ColumnRef> groupByColumns = null;
     private Map<String, List<Pair<String, Integer>>> orderList = new HashMap<>();
     private List<Pair<ColumnRef, ColumnRef>> joinConditions = null;
     private String joinedTable;
     private List<String> fromTables = null;
 
 
-    public ASTInterpreter(Map<String, List<Map<String, Object>>> output, MongoDatabase db) {
+    public ASTInterpreter(List<Map<String, Object>> output, MongoDatabase db) {
         this.db = db;
         this.output = output;
     }
@@ -45,12 +47,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     public void exitQuery(MySQLQueryParser.QueryContext ctx) {
         for (String tableNameOrAlias : fromTables) {
             final String tableName = aliasToTable.getOrDefault(tableNameOrAlias, tableNameOrAlias);
-            Set<String> selectedColumnTables = columnToAlias.keySet().stream()
-                    .filter((x) -> x.table == null || x.table.equals(tableName))
-                    .map((x) -> x.columnName)
-                    .collect(Collectors.toSet());
-            List<Map<String, Object>> outputList = output.getOrDefault(tableName, new ArrayList<>());
-            output.put(tableName, outputList);
+            Set<ColumnRef> selectedColumnTables = new HashSet<>(columnToAlias.keySet());
 
             SourceQueryNode querySource = new OrderByFetch(tableName, db, orderList.getOrDefault(tableName, Collections.emptyList()));
             if (joinConditions != null) {
@@ -74,9 +71,9 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                 queryExecutor = queryExecutor.compose(new LimitQuery(limit));
             }
             querySource = querySource.compose(new LongToBigDecimal()).compose(queryExecutor);
-            List<Map<String, Object>> documents;
+            List<Map<String, Map<String, Object>>> documents;
             while (!(documents = querySource.collectOutput()).isEmpty()) {
-                collectOutputWithAliases(tableName, outputList, documents);
+                collectOutputWithAliases(output, documents);
                 if (querySource.mustStopExecution()) break;
             }
         }
@@ -98,8 +95,12 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         }).collect(Collectors.toList());
     }
 
-    private void collectOutputWithAliases(String tableName, List<Map<String, Object>> outputList, List<Map<String, Object>> docs) {
-        outputList.addAll(docs.stream().map(x -> applyColumnAlias(x, tableName)).collect(Collectors.toList()));
+    private void collectOutputWithAliases(List<Map<String, Object>> outputList, List<Map<String, Map<String, Object>>> docs) {
+        outputList.addAll(docs.stream()
+                .map(tableWithDocs -> tableWithDocs.entrySet().stream()
+                        .map(x -> Map.entry(x.getKey(), (Object) applyColumnAlias(x.getValue(), x.getKey())))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
+                .collect(Collectors.toList()));
     }
 
     private Map<String, Object> applyColumnAlias(Map<String, Object> document, String tableName) {
@@ -229,7 +230,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @Override
     public void exitWhereClause(MySQLQueryParser.WhereClauseContext ctx) {
-        Predicate<Map<String, Object>> filters = (Predicate<Map<String, Object>>) stack.pop();
+        Predicate<Map<String, Map<String, Object>>> filters = (Predicate<Map<String, Map<String, Object>>>) stack.pop();
         queryFilter = filters;
     }
 
@@ -259,9 +260,9 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @Override
     public void exitCondition(MySQLQueryParser.ConditionContext ctx) {
-        Predicate<Map<String, Object>> combined = (Predicate<Map<String, Object>>) stack.pop();
+        Predicate<Map<String, Map<String, Object>>> combined = (Predicate<Map<String, Map<String, Object>>>) stack.pop();
         if (ctx.OR_SYMBOL() != null) {
-            combined = combined.or((Predicate<Map<String, Object>>) stack.pop());
+            combined = combined.or((Predicate<Map<String, Map<String, Object>>>) stack.pop());
         }
 
         stack.push(combined);
@@ -270,36 +271,40 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     @Override
     public void exitConditionInner(MySQLQueryParser.ConditionInnerContext ctx) {
         if (ctx.columnItem().isEmpty()) return;
-        final String column = ctx.columnItem().get(0).columnName().WORD().getSymbol().getText();
-        Predicate<Map<String, Object>> andPredicate = null;
+        final ColumnRef col = ColumnRef.of(ctx.columnItem().get(0), aliasToTable);
+        Predicate<Map<String, Map<String, Object>>> andPredicate = null;
         if (ctx.AND_SYMBOL() != null) {
-            andPredicate = (Predicate<Map<String, Object>>) stack.pop();
+            andPredicate = (Predicate<Map<String, Map<String, Object>>>) stack.pop();
         }
-        final Predicate<Map<String, Object>> finalAnd = andPredicate;
+        final Predicate<Map<String, Map<String, Object>>> finalAnd = andPredicate;
+        Function<Predicate<Object>, Predicate<Map<String, Map<String, Object>>>> commonPredicates = (func -> doc -> doc.get(col.table) != null &&
+                doc.get(col.table).get(col.columnName) != null &&
+                func.test(doc.get(col.table).get(col.columnName)) &&
+                (finalAnd == null || finalAnd.test(doc)));
         if (ctx.compOp() == null) {
-            stack.push((Predicate<Map<String, Object>>) (Map<String, Object> doc) -> isTruthy(doc.get(column)) && (finalAnd == null || finalAnd.test(doc)));
+            stack.push(commonPredicates.apply(this::isTruthy));
         } else {
             final Object operand = toJavaObject(ctx.valueName());
-            Predicate<Map<String, Object>> predicate;
+            Predicate<Map<String, Map<String, Object>>> predicate;
             switch (ctx.compOp().getText()) {
                 case "=":
-                    predicate = (doc -> doc.get(column) != null && doc.get(column) instanceof BigDecimal && doc.get(column).equals(operand) && (finalAnd == null || finalAnd.test(doc)));
+                    predicate = commonPredicates.apply(operand::equals);
                     break;
                 case "<>":
                 case "!=":
-                    predicate = (doc -> doc.get(column) != null && doc.get(column) instanceof BigDecimal && !doc.get(column).equals(operand) && (finalAnd == null || finalAnd.test(doc)));
+                    predicate = commonPredicates.apply(value -> !operand.equals(value));
                     break;
                 case "<":
-                    predicate = (doc -> doc.get(column) != null && doc.get(column) instanceof BigDecimal && ((BigDecimal) doc.get(column)).compareTo((BigDecimal) operand) < 0);
+                    predicate = (value -> value instanceof BigDecimal && ((BigDecimal) value).compareTo((BigDecimal) operand) < 0);
                     break;
                 case "<=":
-                    predicate = (doc -> doc.get(column) != null && doc.get(column) instanceof BigDecimal && ((BigDecimal) doc.get(column)).compareTo((BigDecimal) operand) <= 0);
+                    predicate = (value -> value instanceof BigDecimal && ((BigDecimal) value).compareTo((BigDecimal) operand) <= 0);
                     break;
                 case ">":
-                    predicate = (doc -> doc.get(column) != null && doc.get(column) instanceof BigDecimal && ((BigDecimal) doc.get(column)).compareTo((BigDecimal) operand) > 0);
+                    predicate = (value -> value instanceof BigDecimal && ((BigDecimal) value).compareTo((BigDecimal) operand) > 0);
                     break;
                 case ">=":
-                    predicate = (doc -> doc.get(column) != null && doc.get(column) instanceof BigDecimal && ((BigDecimal) doc.get(column)).compareTo((BigDecimal) operand) >= 0);
+                    predicate = (value -> value instanceof BigDecimal && ((BigDecimal) value).compareTo((BigDecimal) operand) >= 0);
                     break;
                 default:
                     throw new RuntimeException("Unexpected operator " + ctx.compOp());
@@ -310,14 +315,14 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @Override
     public void exitGroupByClause(MySQLQueryParser.GroupByClauseContext ctx) {
-        List<String> columns = ctx.columnItem().stream().map((x) -> x.columnName().WORD().getSymbol().getText()).collect(Collectors.toList());
+        List<ColumnRef> columns = ctx.columnItem().stream().map(ColumnRef::of).collect(Collectors.toList());
 
         groupByColumns = columns;
         groupByFunc = (doc) -> {
-            if (columns.stream().anyMatch((col) -> !doc.containsKey(col))) {
+            if (columns.stream().allMatch((col) -> doc.containsKey(col.table) && doc.get(col.table).containsKey(col.columnName) )) {
                 return null;
             } else {
-                List<Object> group = columns.stream().map(doc::get).collect(Collectors.toList());
+                List<Object> group = columns.stream().map(x -> doc.get(x.table).get(x.columnName)).collect(Collectors.toList());
                 return new Pair<>(group, doc);
             }
         };
@@ -359,8 +364,8 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @Override
     public void exitOnList(MySQLQueryParser.OnListContext ctx) {
-        ColumnRef first = ColumnRef.of(ctx.columnItem().get(0));
-        ColumnRef second = ColumnRef.of(ctx.columnItem().get(1));
+        ColumnRef first = ColumnRef.of(ctx.columnItem().get(0), aliasToTable);
+        ColumnRef second = ColumnRef.of(ctx.columnItem().get(1), aliasToTable);
         MySQLQueryParser.CompOpContext comparison = ctx.compOp();
         if (comparison.EQUAL_OPERATOR() == null) {
             throw new RuntimeException("Joins only support equality conditions, not " + comparison.getText());
@@ -389,19 +394,18 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     @RequiredArgsConstructor
     private class SimpleSelect implements TransformationQueryNode {
         @NonNull
-        private Set<String> selectedColumnTables;
-        private boolean limitReached = false;
-        private Set<Map<String, Object>> distinctDocuments = new HashSet<>();
-        private List<Map<String, Object>> output = new ArrayList<>();
+        final private Set<ColumnRef> selectedColumnTables;
+        final private Set<Map<String, Map<String, Object>>> distinctDocuments = new HashSet<>();
+        private List<Map<String, Map<String, Object>>> output = new ArrayList<>();
 
         @Override
         public boolean mustStopExecution() {
-            return limitReached;
+            return false;
         }
 
         @Override
-        public List<Map<String, Object>> collectOutput() {
-            List<Map<String, Object>> tmp = output;
+        public List<Map<String, Map<String, Object>>> collectOutput() {
+            List<Map<String, Map<String, Object>>> tmp = output;
             output = new ArrayList<>();
             return tmp;
         }
@@ -411,11 +415,16 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         }
 
         @Override
-        public void acceptDocument(Map<String, Object> document) {
+        public void acceptDocument(Map<String, Map<String, Object>> document) {
             if (!isAll) {
-                document = new Document(document.entrySet().stream()
-                        .filter((x) -> selectedColumnTables.contains(x.getKey()))
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                document = document.entrySet().stream()
+                        .map((tableWithDoc) -> {
+                            String table = tableWithDoc.getKey();
+                            return Map.entry(table, tableWithDoc.getValue().entrySet().stream()
+                                    .filter(x -> selectedColumnTables.contains(new ColumnRef(table, x.getKey())))
+                                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                        })
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             }
             if (isDistinct) {
                 // apply distinct filter
@@ -435,10 +444,10 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     }
 
     private class AggregationQuery implements TransformationQueryNode {
-        private List<Map<String, Object>> output;
+        private List<Map<String, Map<String, Object>>> output;
         private final GroupingFunction groupingFunc;
         private final AggregationFunction aggregationFunction;
-        private final Map<List<Object>, Map<String, Object>> groups;
+        private final Map<List<Object>, Map<String, Map<String, Object>>> groups;
         private boolean limitReached;
 
         public AggregationQuery(
@@ -458,18 +467,18 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         }
 
         @Override
-        public void acceptDocument(Map<String, Object> document) {
-            Pair<List<Object>, Map<String, Object>> res = groupingFunc.apply(document);
+        public void acceptDocument(Map<String, Map<String, Object>> document) {
+            Pair<List<Object>, Map<String, Map<String, Object>>> res = groupingFunc.apply(document);
             if (res != null) {
-                Map<String, Object> currentAgg = groups.get(res.getValue0());
-                Map<String, Object> newAgg = aggregationFunction.apply(res, currentAgg);
+                Map<String, Map<String, Object>> currentAgg = groups.get(res.getValue0());
+                Map<String, Map<String, Object>> newAgg = aggregationFunction.apply(res, currentAgg);
                 groups.put(res.getValue0(), newAgg);
             }
         }
 
         @Override
-        public List<Map<String, Object>> collectOutput() {
-            List<Map<String, Object>> tmp = output;
+        public List<Map<String, Map<String, Object>>> collectOutput() {
+            List<Map<String, Map<String, Object>>> tmp = output;
             output = new ArrayList<>();
             return tmp;
         }
@@ -478,7 +487,17 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         public void done() {
             groups.forEach((groupedValues, aggregated) -> {
                 StreamUtils.zip(groupByColumns.stream(), groupedValues.stream(), Pair::new)
-                        .forEach(x -> aggregated.put(x.getValue0(), x.getValue1()));
+                        .forEach(x -> {
+                            String table = x.getValue0().table;
+                            String column = x.getValue0().columnName;
+                            if (aggregated.size() == 1 || table != null) {
+                                if (aggregated.containsKey(table)) {
+                                    aggregated.get(table).put(column, x.getValue1());
+                                }
+                            } else {
+                                throw new RuntimeException("If multiple tables are available, group by must be disambiguated.");
+                            }
+                        });
                 output.add(aggregated);
             });
         }

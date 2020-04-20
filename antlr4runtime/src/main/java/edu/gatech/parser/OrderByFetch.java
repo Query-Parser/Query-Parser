@@ -4,7 +4,6 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Sorts;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.bson.Document;
@@ -46,7 +45,7 @@ public class OrderByFetch implements SourceQueryNode {
     }
 
     @Override
-    public List<Map<String, Object>> collectOutput() {
+    public List<Map<String, Map<String, Object>>> collectOutput() {
         if (collection == null) {
             collection = db.getCollection(tableName);
         }
@@ -55,7 +54,7 @@ public class OrderByFetch implements SourceQueryNode {
         }
 
         int n = BATCH_SIZE;
-        ArrayList<Map<String, Object>> batch = new ArrayList<>();
+        List<Map<String, Map<String, Object>>> batch = new ArrayList<>();
         while (docs.hasNext() && n > 0) {
             batch.add(Map.of(tableName, docs.next()));
             n--;

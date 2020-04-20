@@ -24,4 +24,11 @@ public class ColumnRef {
                 columnName.columnName().WORD().getSymbol().getText()
         );
     }
+    public static ColumnRef of(MySQLQueryParser.ColumnItemContext columnName, Map<String, String> aliases) {
+        String tableName = columnName.prefix() != null ? columnName.prefix().WORD().getSymbol().getText() : null;
+        return new ColumnRef(
+                tableName != null ? aliases.getOrDefault(tableName, tableName) : null,
+                columnName.columnName().WORD().getSymbol().getText()
+        );
+    }
 }

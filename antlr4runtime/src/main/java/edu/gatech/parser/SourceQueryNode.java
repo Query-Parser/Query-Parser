@@ -5,7 +5,7 @@ import java.util.Map;
 
 public interface SourceQueryNode {
     boolean mustStopExecution();
-    List<Map<String, Object>> collectOutput();
+    List<Map<String, Map<String, Object>>> collectOutput();
 
     default SourceQueryNode compose(TransformationQueryNode other) {
         return new SourceQueryNode() {
@@ -15,8 +15,8 @@ public interface SourceQueryNode {
             }
 
             @Override
-            public List<Map<String, Object>> collectOutput() {
-                List<Map<String, Object>> output = SourceQueryNode.this.collectOutput();
+            public List<Map<String, Map<String, Object>>> collectOutput() {
+                List<Map<String, Map<String, Object>>> output = SourceQueryNode.this.collectOutput();
                 if (!output.isEmpty()) {
                     output.forEach(other::acceptDocument);
                 } else {

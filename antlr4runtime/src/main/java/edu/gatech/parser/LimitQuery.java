@@ -10,7 +10,7 @@ import java.util.Map;
 class LimitQuery implements TransformationQueryNode {
     private final int limit;
     private int count = 0;
-    private List<Map<String, Object>> buffer = new ArrayList<>();
+    private List<Map<String, Map<String, Object>>> buffer = new ArrayList<>();
 
     @Override
     public boolean mustStopExecution() {
@@ -18,7 +18,7 @@ class LimitQuery implements TransformationQueryNode {
     }
 
     @Override
-    public void acceptDocument(Map<String, Object> document) {
+    public void acceptDocument(Map<String, Map<String, Object>> document) {
         count++;
         buffer.add(document);
     }
@@ -27,8 +27,8 @@ class LimitQuery implements TransformationQueryNode {
     public void done() { }
 
     @Override
-    public List<Map<String, Object>> collectOutput() {
-        List<Map<String, Object>> tmp = buffer;
+    public List<Map<String, Map<String, Object>>> collectOutput() {
+        List<Map<String, Map<String, Object>>> tmp = buffer;
         buffer = new ArrayList<>();
         return tmp;
     }

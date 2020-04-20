@@ -10,8 +10,8 @@ import java.util.function.Predicate;
 
 @RequiredArgsConstructor
 class WhereQuery implements TransformationQueryNode {
-    @NonNull private final Predicate<Map<String, Object>> filter;
-    private List<Map<String, Object>> buffer = new ArrayList<>();
+    @NonNull private final Predicate<Map<String, Map<String, Object>>> filter;
+    private List<Map<String, Map<String, Object>>> buffer = new ArrayList<>();
 
     @Override
     public boolean mustStopExecution() {
@@ -19,7 +19,7 @@ class WhereQuery implements TransformationQueryNode {
     }
 
     @Override
-    public void acceptDocument(Map<String, Object> document) {
+    public void acceptDocument(Map<String, Map<String, Object>> document) {
         if (filter.test(document)) {
             buffer.add(document);
         }
@@ -29,8 +29,8 @@ class WhereQuery implements TransformationQueryNode {
     public void done() { }
 
     @Override
-    public List<Map<String, Object>> collectOutput() {
-        List<Map<String, Object>> tmp = buffer;
+    public List<Map<String, Map<String, Object>>> collectOutput() {
+        List<Map<String, Map<String, Object>>> tmp = buffer;
         buffer = new ArrayList<>();
         return tmp;
     }
