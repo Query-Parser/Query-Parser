@@ -317,16 +317,16 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                     predicate = commonPredicates.apply(value -> !operand.equals(value));
                     break;
                 case "<":
-                    predicate = (value -> value instanceof BigDecimal && ((BigDecimal) value).compareTo((BigDecimal) operand) < 0);
+                    predicate = commonPredicates.apply(value -> value instanceof BigDecimal && ((BigDecimal) value).compareTo((BigDecimal) operand) < 0);
                     break;
                 case "<=":
-                    predicate = (value -> value instanceof BigDecimal && ((BigDecimal) value).compareTo((BigDecimal) operand) <= 0);
+                    predicate = commonPredicates.apply(value -> value instanceof BigDecimal && ((BigDecimal) value).compareTo((BigDecimal) operand) <= 0);
                     break;
                 case ">":
-                    predicate = (value -> value instanceof BigDecimal && ((BigDecimal) value).compareTo((BigDecimal) operand) > 0);
+                    predicate = commonPredicates.apply(value -> value instanceof BigDecimal && ((BigDecimal) value).compareTo((BigDecimal) operand) > 0);
                     break;
                 case ">=":
-                    predicate = (value -> value instanceof BigDecimal && ((BigDecimal) value).compareTo((BigDecimal) operand) >= 0);
+                    predicate = commonPredicates.apply(value -> value instanceof BigDecimal && ((BigDecimal) value).compareTo((BigDecimal) operand) >= 0);
                     break;
                 default:
                     throw new RuntimeException("Unexpected operator " + ctx.compOp());
