@@ -193,7 +193,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             }
 
             if (context.alias() != null) {
-                alias = context.alias().getText();
+                alias = context.alias().WORD().getSymbol().getText();
             }
 
             mapTableAliasFunc.add(alias);
@@ -359,7 +359,10 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @Override
     public void enterOrderExpression(MySQLQueryParser.OrderExpressionContext ctx) {
-        ColumnRef col = ColumnRef.of(ctx.columnItem(), aliasToTable);
+        if (!(fromTables.size() == 1 && joinedTable == null)) {
+            throw new RuntimeException("Cannot ORDER BY with multiple tables selected");
+        }
+        ColumnRef col = ColumnRef.of(ctx.columnItem(), aliasToTable).withTable(fromTables.get(0));
         int direction = (ctx.direction() != null && ctx.direction().DESC_SYMBOL() != null)
                 ? Direction.DESC.value : Direction.ASC.value;
         List<Pair<String, Integer>> columns = orderList.getOrDefault(col.getTable(), new ArrayList<>());
