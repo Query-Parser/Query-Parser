@@ -45,6 +45,9 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @Override
     public void exitQuery(MySQLQueryParser.QueryContext ctx) {
+        columnToAlias = columnToAlias.entrySet().stream()
+                .map(x -> Map.entry(x.getKey().resolveAlias(aliasToTable), x.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         for (String tableNameOrAlias : fromTables) {
             final String tableName = aliasToTable.getOrDefault(tableNameOrAlias, tableNameOrAlias);
             Set<ColumnRef> selectedColumnTables = new HashSet<>(columnToAlias.keySet());
