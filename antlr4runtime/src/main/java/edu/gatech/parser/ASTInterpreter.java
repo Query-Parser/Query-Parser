@@ -359,18 +359,12 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @Override
     public void enterOrderExpression(MySQLQueryParser.OrderExpressionContext ctx) {
-        String columnName = ctx.columnItem().columnName().getText();
-        String tableName = null;
-        if (columnName != null && columnName.contains(".")) {
-            int dot = columnName.indexOf(".");
-            tableName = columnName.substring(0, dot);
-            columnName = columnName.substring(dot + 1);
-        }
+        ColumnRef col = ColumnRef.of(ctx.columnItem(), aliasToTable);
         int direction = (ctx.direction() != null && ctx.direction().DESC_SYMBOL() != null)
                 ? Direction.DESC.value : Direction.ASC.value;
-        List<Pair<String, Integer>> columns = orderList.getOrDefault(tableName, new ArrayList<>());
-        orderList.put(tableName, columns);
-        Pair<String, Integer> columnAndDirection = new Pair<>(columnName, direction);
+        List<Pair<String, Integer>> columns = orderList.getOrDefault(col.getTable(), new ArrayList<>());
+        orderList.put(col.getTable(), columns);
+        Pair<String, Integer> columnAndDirection = new Pair<>(col.getColumnName(), direction);
         columns.add(columnAndDirection);
     }
 
