@@ -13,6 +13,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class ASTInterpreter extends MySQLQueryBaseListener {
@@ -36,6 +37,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     private List<Pair<ColumnRef, ColumnRef>> joinConditions = null;
     private String joinedTable;
     private List<String> fromTables = null;
+    private String singleTable = null;
 
 
     public ASTInterpreter(List<Map<String, Object>> output, MongoDatabase db) {
@@ -45,8 +47,17 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @Override
     public void exitQuery(MySQLQueryParser.QueryContext ctx) {
+        if (fromTables.size() == 1 && joinedTable == null) {
+            singleTable = fromTables.get(0);
+        } else {
+            columnToAlias.keySet().forEach(x -> {
+                if (x.getTable() == null) {
+                    throw new RuntimeException("When selecting from multiple tables, all columns must be prefixed.");
+                }
+            });
+        }
         columnToAlias = columnToAlias.entrySet().stream()
-                .map(x -> Map.entry(x.getKey().resolveAlias(aliasToTable), x.getValue()))
+                .map(x -> Map.entry(singleTable == null ? x.getKey().resolveAlias(aliasToTable) : x.getKey().withTable(singleTable), x.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         for (String tableNameOrAlias : fromTables) {
             final String tableName = aliasToTable.getOrDefault(tableNameOrAlias, tableNameOrAlias);
@@ -87,7 +98,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                 colPair.getValue0().resolveAlias(aliasToTable),
                 colPair.getValue1().resolveAlias(aliasToTable)
         )).map(colPair -> {
-            if (colPair.getValue0().table.equals(tableName)) {
+            if (colPair.getValue0().getTable().equals(tableName)) {
                 return colPair;
             } else {
                 return new Pair<>(
@@ -274,16 +285,24 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     @Override
     public void exitConditionInner(MySQLQueryParser.ConditionInnerContext ctx) {
         if (ctx.columnItem().isEmpty()) return;
-        final ColumnRef col = ColumnRef.of(ctx.columnItem().get(0), aliasToTable);
+
+        final Supplier<ColumnRef> column = new LazySupplier<>(() -> singleTable == null
+                ? ColumnRef.of(ctx.columnItem().get(0), aliasToTable)
+                : ColumnRef.of(ctx.columnItem().get(0)).withTable(singleTable));
+
         Predicate<Map<String, Map<String, Object>>> andPredicate = null;
         if (ctx.AND_SYMBOL() != null) {
             andPredicate = (Predicate<Map<String, Map<String, Object>>>) stack.pop();
         }
         final Predicate<Map<String, Map<String, Object>>> finalAnd = andPredicate;
-        Function<Predicate<Object>, Predicate<Map<String, Map<String, Object>>>> commonPredicates = (func -> doc -> doc.get(col.table) != null &&
-                doc.get(col.table).get(col.columnName) != null &&
-                func.test(doc.get(col.table).get(col.columnName)) &&
-                (finalAnd == null || finalAnd.test(doc)));
+
+        Function<Predicate<Object>, Predicate<Map<String, Map<String, Object>>>> commonPredicates = (func -> doc -> {
+            ColumnRef col = column.get();
+            return doc.get(col.getTable()) != null &&
+                    doc.get(col.getTable()).get(col.getColumnName()) != null &&
+                    func.test(doc.get(col.getTable()).get(col.getColumnName())) &&
+                    (finalAnd == null || finalAnd.test(doc));
+        });
         if (ctx.compOp() == null) {
             stack.push(commonPredicates.apply(this::isTruthy));
         } else {
@@ -322,10 +341,10 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
         groupByColumns = columns;
         groupByFunc = (doc) -> {
-            if (columns.stream().allMatch((col) -> doc.containsKey(col.table) && doc.get(col.table).containsKey(col.columnName) )) {
+            if (columns.stream().allMatch((col) -> doc.containsKey(col.getTable()) && doc.get(col.getTable()).containsKey(col.getColumnName()) )) {
                 return null;
             } else {
-                List<Object> group = columns.stream().map(x -> doc.get(x.table).get(x.columnName)).collect(Collectors.toList());
+                List<Object> group = columns.stream().map(x -> doc.get(x.getTable()).get(x.getColumnName())).collect(Collectors.toList());
                 return new Pair<>(group, doc);
             }
         };
@@ -491,8 +510,8 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             groups.forEach((groupedValues, aggregated) -> {
                 StreamUtils.zip(groupByColumns.stream(), groupedValues.stream(), Pair::new)
                         .forEach(x -> {
-                            String table = x.getValue0().table;
-                            String column = x.getValue0().columnName;
+                            String table = x.getValue0().getTable();
+                            String column = x.getValue0().getColumnName();
                             if (aggregated.size() == 1 || table != null) {
                                 if (aggregated.containsKey(table)) {
                                     aggregated.get(table).put(column, x.getValue1());

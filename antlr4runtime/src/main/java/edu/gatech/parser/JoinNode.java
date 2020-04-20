@@ -34,12 +34,12 @@ class JoinNode implements SourceQueryNode {
                 Set<Pair<ColumnRef, Object>> joinValues = joinColumns.stream()
                         .filter(x -> {
                             ColumnRef col = x.getValue0();
-                            return doc.containsKey(col.table) && doc.get(col.table).containsKey(col.columnName);
+                            return doc.containsKey(col.getTable()) && doc.get(col.getTable()).containsKey(col.getColumnName());
                         })
                         .map(x -> {
                             ColumnRef left = x.getValue0();
                             ColumnRef right = x.getValue1();
-                            return new Pair<>(right, doc.get(left.table).get(left.columnName));
+                            return new Pair<>(right, doc.get(left.getTable()).get(left.getColumnName()));
                         }).collect(Collectors.toSet());
                 if (joinColumns.size() == joinValues.size()) {
                     List<Map<String, Map<String, Object>>> leftDocs = hashJoinMap.getOrDefault(joinValues, new ArrayList<>());
@@ -54,11 +54,11 @@ class JoinNode implements SourceQueryNode {
                 Set<Pair<ColumnRef, Object>> joinValues = joinColumns.stream()
                         .filter(x -> {
                             ColumnRef col = x.getValue1();
-                            return doc.containsKey(col.table) && doc.get(col.table).containsKey(col.columnName);
+                            return doc.containsKey(col.getTable()) && doc.get(col.getTable()).containsKey(col.getColumnName());
                         })
                         .map(x -> {
                             ColumnRef right = x.getValue1();
-                            return new Pair<>(right, doc.get(right.table).get(right.columnName));
+                            return new Pair<>(right, doc.get(right.getTable()).get(right.getColumnName()));
                         }).collect(Collectors.toSet());
                 if (joinValues.size() == joinColumns.size()) {
                     List<Map<String, Map<String, Object>>> leftDocs = hashJoinMap.getOrDefault(joinValues, Collections.emptyList());

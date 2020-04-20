@@ -2,13 +2,14 @@ package edu.gatech.parser;
 
 import lombok.NonNull;
 import lombok.Value;
+import lombok.With;
 
 import javax.swing.*;
 import java.util.Map;
 
 @Value
 public class ColumnRef {
-    public String table;
+     @With String table;
     @NonNull public String columnName;
 
     public ColumnRef resolveAlias(Map<String, String> aliasToTableName) {

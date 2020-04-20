@@ -27,11 +27,11 @@ public class Aggregators implements AggregationFunction {
                 Func function = funcColumn.getValue0();
                 ColumnRef column = funcColumn.getValue1();
 
-                Map<String, Object> document = tableWithDoc.getValue1().get(column.table);
-                Object documentValue = document.get(column.columnName);
+                Map<String, Object> document = tableWithDoc.getValue1().get(column.getTable());
+                Object documentValue = document.get(column.getColumnName());
 
-                accumulator = acc.getOrDefault(column.table, new HashMap<>());
-                acc.put(column.table, accumulator);
+                accumulator = acc.getOrDefault(column.getTable(), new HashMap<>());
+                acc.put(column.getTable(), accumulator);
 
                 if (!(documentValue instanceof Number)) return acc;
                 BigDecimal documentValueBd;
@@ -42,7 +42,7 @@ public class Aggregators implements AggregationFunction {
                 }
                 switch (function) {
                     case MAX: {
-                        String columnWithFunc = "MAX(" + column.columnName + ")";
+                        String columnWithFunc = "MAX(" + column.getColumnName() + ")";
                         if (!accumulator.containsKey(columnWithFunc)) {
                             accumulator.put(columnWithFunc, BigDecimal.ZERO);
                         }
@@ -56,7 +56,7 @@ public class Aggregators implements AggregationFunction {
                         break;
                     }
                     case MIN: {
-                        String columnWithFunc = "MIN(" + column.columnName + ")";
+                        String columnWithFunc = "MIN(" + column.getColumnName() + ")";
                         if (!accumulator.containsKey(columnWithFunc)) {
                             accumulator.put(columnWithFunc, BigDecimal.ZERO);
                         }
@@ -69,7 +69,7 @@ public class Aggregators implements AggregationFunction {
                         break;
                     }
                     case SUM: {
-                        String columnWithFunc = "SUM(" + column.columnName + ")";
+                        String columnWithFunc = "SUM(" + column.getColumnName() + ")";
                         if (!accumulator.containsKey(columnWithFunc)) {
                             accumulator.put(columnWithFunc, BigDecimal.ZERO);
                         }
@@ -80,7 +80,7 @@ public class Aggregators implements AggregationFunction {
                         break;
                     }
                     case COUNT: {
-                        String columnWithFunc = "COUNT(" + column.columnName + ")";
+                        String columnWithFunc = "COUNT(" + column.getColumnName() + ")";
                         if (!accumulator.containsKey(columnWithFunc)) {
                             accumulator.put(columnWithFunc, BigDecimal.ZERO);
                         }
@@ -91,7 +91,7 @@ public class Aggregators implements AggregationFunction {
                         break;
                     }
                     case AVERAGE:
-                        String columnWithFunc = "AVERAGE(" + column.columnName + ")";
+                        String columnWithFunc = "AVERAGE(" + column.getColumnName() + ")";
                         if (!accumulator.containsKey(columnWithFunc)) {
                             accumulator.put(columnWithFunc, new Pair<>(BigDecimal.ZERO, BigDecimal.ZERO));
                         }
