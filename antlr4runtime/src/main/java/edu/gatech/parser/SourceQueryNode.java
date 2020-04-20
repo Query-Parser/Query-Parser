@@ -17,12 +17,14 @@ public interface SourceQueryNode {
             @Override
             public List<Map<String, Map<String, Object>>> collectOutput() {
                 List<Map<String, Map<String, Object>>> output = SourceQueryNode.this.collectOutput();
-                if (!output.isEmpty()) {
+                if (output != null) {
                     output.forEach(other::acceptDocument);
+                    return other.collectOutput();
                 } else {
                     other.done();
                 }
-                return other.collectOutput();
+                List<Map<String, Map<String, Object>>> out = other.collectOutput();
+                return out.isEmpty() ? null : out;
             }
         };
     }

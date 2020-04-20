@@ -56,9 +56,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                 }
             });
         }
-        columnToAlias = columnToAlias.entrySet().stream()
-                .map(x -> Map.entry(singleTable == null ? x.getKey().resolveAlias(aliasToTable) : x.getKey().withTable(singleTable), x.getValue()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        cleanupColumnRefs();
         for (String tableNameOrAlias : fromTables) {
             final String tableName = aliasToTable.getOrDefault(tableNameOrAlias, tableNameOrAlias);
             Set<ColumnRef> selectedColumnTables = new HashSet<>(columnToAlias.keySet());
@@ -86,11 +84,22 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             }
             querySource = querySource.compose(new LongToBigDecimal()).compose(queryExecutor);
             List<Map<String, Map<String, Object>>> documents;
-            while (!(documents = querySource.collectOutput()).isEmpty()) {
+            while ((documents = querySource.collectOutput()) != null) {
                 collectOutputWithAliases(output, documents);
                 if (querySource.mustStopExecution()) break;
             }
         }
+    }
+
+    private void cleanupColumnRefs() {
+        columnToAlias = columnToAlias.entrySet().stream()
+                .map(x -> Map.entry(singleTable == null ? x.getKey().resolveAlias(aliasToTable) : x.getKey().withTable(singleTable), x.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        functionToColumn = functionToColumn.entrySet().stream()
+                .map(x -> Map.entry(x.getKey(), singleTable == null
+                        ? x.getValue().stream().map(y -> y.resolveAlias(aliasToTable)).collect(Collectors.toSet())
+                        : x.getValue().stream().map(y -> y.withTable(singleTable)).collect(Collectors.toSet())))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private List<Pair<ColumnRef, ColumnRef>> cleanJoinConditions(String tableName) {
@@ -337,14 +346,19 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @Override
     public void exitGroupByClause(MySQLQueryParser.GroupByClauseContext ctx) {
-        List<ColumnRef> columns = ctx.columnItem().stream().map(ColumnRef::of).collect(Collectors.toList());
+        List<ColumnRef> columns = ctx.columnItem().stream().map(x -> ColumnRef.of(x, aliasToTable)).collect(Collectors.toList());
+
+        final Supplier<List<ColumnRef>> lazyColumns = new LazySupplier<>(() -> singleTable == null
+                ? ctx.columnItem().stream().map(x -> ColumnRef.of(x, aliasToTable)).collect(Collectors.toList())
+                : ctx.columnItem().stream().map(x -> ColumnRef.of(x).withTable(singleTable)).collect(Collectors.toList()));
 
         groupByColumns = columns;
         groupByFunc = (doc) -> {
-            if (columns.stream().allMatch((col) -> doc.containsKey(col.getTable()) && doc.get(col.getTable()).containsKey(col.getColumnName()) )) {
+            List<ColumnRef> cols = lazyColumns.get();
+            if (!cols.stream().allMatch((col) -> doc.containsKey(col.getTable()) && doc.get(col.getTable()).containsKey(col.getColumnName()) )) {
                 return null;
             } else {
-                List<Object> group = columns.stream().map(x -> doc.get(x.getTable()).get(x.getColumnName())).collect(Collectors.toList());
+                List<Object> group = cols.stream().map(x -> doc.get(x.getTable()).get(x.getColumnName())).collect(Collectors.toList());
                 return new Pair<>(group, doc);
             }
         };
@@ -507,7 +521,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             groups.forEach((groupedValues, aggregated) -> {
                 StreamUtils.zip(groupByColumns.stream(), groupedValues.stream(), Pair::new)
                         .forEach(x -> {
-                            String table = x.getValue0().getTable();
+                            String table = x.getValue0().getTable() == null ? singleTable : x.getValue0().getTable();
                             String column = x.getValue0().getColumnName();
                             if (aggregated.size() == 1 || table != null) {
                                 if (aggregated.containsKey(table)) {
@@ -519,6 +533,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                         });
                 output.add(aggregated);
             });
+            groups.clear();
         }
     }
 }

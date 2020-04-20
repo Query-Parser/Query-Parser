@@ -52,6 +52,9 @@ public class OrderByFetch implements SourceQueryNode {
         if (docs == null) {
             docs = applyOrderBy(collection);
         }
+        if (!docs.hasNext()) {
+            return null;
+        }
 
         int n = BATCH_SIZE;
         List<Map<String, Map<String, Object>>> batch = new ArrayList<>();
