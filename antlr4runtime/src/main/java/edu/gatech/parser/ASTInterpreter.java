@@ -284,6 +284,8 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         Predicate<Map<String, Map<String, Object>>> combined = (Predicate<Map<String, Map<String, Object>>>) stack.pop();
         if (ctx.OR_SYMBOL() != null) {
             combined = combined.or((Predicate<Map<String, Map<String, Object>>>) stack.pop());
+        } else if (ctx.AND_SYMBOL() != null) {
+            combined = combined.and((Predicate<Map<String, Map<String, Object>>>) stack.pop());
         }
 
         stack.push(combined);
@@ -297,18 +299,11 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                 ? ColumnRef.of(ctx.columnItem().get(0), aliasToTable)
                 : ColumnRef.of(ctx.columnItem().get(0)).withTable(singleTable));
 
-        Predicate<Map<String, Map<String, Object>>> andPredicate = null;
-        if (ctx.AND_SYMBOL() != null) {
-            andPredicate = (Predicate<Map<String, Map<String, Object>>>) stack.pop();
-        }
-        final Predicate<Map<String, Map<String, Object>>> finalAnd = andPredicate;
-
         Function<Predicate<Object>, Predicate<Map<String, Map<String, Object>>>> commonPredicates = (func -> doc -> {
             ColumnRef col = column.get();
             return doc.get(col.getTable()) != null &&
                     doc.get(col.getTable()).get(col.getColumnName()) != null &&
-                    func.test(doc.get(col.getTable()).get(col.getColumnName())) &&
-                    (finalAnd == null || finalAnd.test(doc));
+                    func.test(doc.get(col.getTable()).get(col.getColumnName()));
         });
         if (ctx.compOp() == null) {
             stack.push(commonPredicates.apply(this::isTruthy));

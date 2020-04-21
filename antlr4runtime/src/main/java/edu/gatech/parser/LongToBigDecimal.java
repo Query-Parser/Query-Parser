@@ -4,6 +4,7 @@ import org.javatuples.Pair;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -50,7 +51,7 @@ class LongToBigDecimal implements TransformationQueryNode {
                         return new Pair<>(key, value);
                     }
                 })
-                .collect(Collectors.toMap(Pair::getValue0, Pair::getValue1));
+                .collect(HashMap::new, (map, pair) -> map.put(pair.getValue0(), pair.getValue1()), HashMap::putAll);
     }
 
 }
