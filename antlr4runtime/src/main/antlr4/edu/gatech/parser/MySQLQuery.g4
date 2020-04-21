@@ -122,12 +122,14 @@ valueName:
 ;
 
 condition:
-    conditionInner (OR_SYMBOL condition)?
+    conditionInner
+    | condition AND_SYMBOL condition
+    | condition OR_SYMBOL condition
 ;
 
 conditionInner:
-    OPEN_PAR_SYMBOL condition CLOSE_PAR_SYMBOL ( (OR_SYMBOL condition)? | (AND_SYMBOL condition)? )
-    | columnItem (compOp (valueName | columnItem | (ANY_SYMBOL query)))? (AND_SYMBOL condition)?
+    OPEN_PAR_SYMBOL condition CLOSE_PAR_SYMBOL
+    | columnItem (compOp (valueName | columnItem ))?
 ;
 
 groupByClause:
