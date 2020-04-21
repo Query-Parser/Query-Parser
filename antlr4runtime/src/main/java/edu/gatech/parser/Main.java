@@ -16,7 +16,7 @@ public class Main {
         }
         DatabaseConfiguration dbConfig = new DatabaseConfiguration();
         SQLEngine sqlEngine = new SQLEngine(dbConfig);
-        List<Map<String, Object>> output = sqlEngine.execute(query);
+        List<Map<String, Object>> output = sqlEngine.execute(query, "test");
         try {
             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(output));
         } catch (JsonProcessingException e) {

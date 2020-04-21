@@ -59,13 +59,11 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
             SourceQueryNode querySource = new OrderByFetch(tableName, db, orderList.getOrDefault(tableName, Collections.emptyList()));
 
-            String currentName = tableName;
             for (Map.Entry<String, List<Pair<ColumnRef, ColumnRef>>> joinedTable: joinedTables.entrySet()) {
-                List<Pair<ColumnRef, ColumnRef>> cleanedJoinConditions = cleanJoinConditions(currentName, joinedTable.getValue());
+                List<Pair<ColumnRef, ColumnRef>> cleanedJoinConditions = cleanJoinConditions(joinedTable.getKey(), joinedTable.getValue());
                 List<Pair<String, Integer>> orderingPairs = orderList.getOrDefault(joinedTable.getKey(), Collections.emptyList());
                 OrderByFetch right = new OrderByFetch(joinedTable.getKey(), db, orderingPairs);
                 querySource = new JoinNode(querySource, right, cleanedJoinConditions);
-                currentName = joinedTable.getKey();
             }
 
             TransformationQueryNode queryExecutor;
@@ -100,12 +98,12 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private List<Pair<ColumnRef, ColumnRef>> cleanJoinConditions(String leftTableName, List<Pair<ColumnRef, ColumnRef>> joinConditions) {
+    private List<Pair<ColumnRef, ColumnRef>> cleanJoinConditions(String rightTableName, List<Pair<ColumnRef, ColumnRef>> joinConditions) {
         return joinConditions.stream().map(colPair -> new Pair<>(
                 colPair.getValue0().resolveAlias(aliasToTable),
                 colPair.getValue1().resolveAlias(aliasToTable)
         )).map(colPair -> {
-            if (colPair.getValue0().getTable().equals(leftTableName)) {
+            if (colPair.getValue1().getTable().equals(rightTableName)) {
                 return colPair;
             } else {
                 return new Pair<>(
@@ -284,6 +282,8 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         Predicate<Map<String, Map<String, Object>>> combined = (Predicate<Map<String, Map<String, Object>>>) stack.pop();
         if (ctx.OR_SYMBOL() != null) {
             combined = combined.or((Predicate<Map<String, Map<String, Object>>>) stack.pop());
+        } else if (ctx.AND_SYMBOL() != null) {
+            combined = combined.and((Predicate<Map<String, Map<String, Object>>>) stack.pop());
         }
 
         stack.push(combined);
@@ -297,18 +297,11 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                 ? ColumnRef.of(ctx.columnItem().get(0), aliasToTable)
                 : ColumnRef.of(ctx.columnItem().get(0)).withTable(singleTable));
 
-        Predicate<Map<String, Map<String, Object>>> andPredicate = null;
-        if (ctx.AND_SYMBOL() != null) {
-            andPredicate = (Predicate<Map<String, Map<String, Object>>>) stack.pop();
-        }
-        final Predicate<Map<String, Map<String, Object>>> finalAnd = andPredicate;
-
         Function<Predicate<Object>, Predicate<Map<String, Map<String, Object>>>> commonPredicates = (func -> doc -> {
             ColumnRef col = column.get();
             return doc.get(col.getTable()) != null &&
                     doc.get(col.getTable()).get(col.getColumnName()) != null &&
-                    func.test(doc.get(col.getTable()).get(col.getColumnName())) &&
-                    (finalAnd == null || finalAnd.test(doc));
+                    func.test(doc.get(col.getTable()).get(col.getColumnName()));
         });
         if (ctx.compOp() == null) {
             stack.push(commonPredicates.apply(this::isTruthy));

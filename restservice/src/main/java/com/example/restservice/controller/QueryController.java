@@ -1,12 +1,23 @@
 package com.example.restservice.controller;
 
-//import edu.gatech.parser.Main;
+import com.example.restservice.service.SchemaService;
 
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.mongodb.MongoClient;
+
+import edu.gatech.db.DatabaseConfiguration;
+import edu.gatech.parser.SQLEngine;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
@@ -14,37 +25,39 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 public class QueryController {
 
-    private String template = "Null";
+    @Autowired
+    private SchemaService schemaService;
 
-    @ResponseBody
-    @PostMapping(value = "/query")
-    public String setQuery(@RequestBody String resultQuery) {
-        setTemplate(resultQuery);
-        return getTemplate();
-    }
+    @Autowired
+    private MongoClient mongoClient;
 
-    @ResponseBody
-    @GetMapping(value = "/query")
-    public String getQuery() {
-        return template;
-    }
+    private String currentDbName;
 
-//    @ResponseBody
-//    @GetMapping(value = "/query")
-//    public String getQuery(@RequestBody String query) {
-//        // TODO: change to pass in query to main method instead of test dummy variable
-//        System.out.println("query");
-//        String[] test = new String[1];
-//        Main.main(test);
-//        // TODO: return data from main method
-//        return query;
-//    }
+   @ResponseBody
+   @PostMapping(value = "/query")
+   public Map<String, List<Map<String, Object>>> getQuery(@RequestBody String query) {
+       if (currentDbName == null) {
+            Set<String> dbNames = schemaService.getDbNames(mongoClient);
+            currentDbName = dbNames.iterator().next();
+       }
 
-    public void setTemplate(String template) {
-        this.template = template;
-    }
+       if (query.startsWith("use")) {
+           int index = query.indexOf(" ");
+           currentDbName = query.substring(index + 1, query.length() - 1);
+       }
 
-    public String getTemplate() {
-        return template;
-    }
+       DatabaseConfiguration dbConfig = new DatabaseConfiguration();
+       SQLEngine sqlEngine = new SQLEngine(dbConfig);
+       return sqlEngine.execute(query, currentDbName);
+   }
+
+   @GetMapping(value = "/currentDb")
+    public String getCurrentDbName() {
+       if (currentDbName == null) {
+           Set<String> dbNames = schemaService.getDbNames(mongoClient);
+           currentDbName = dbNames.iterator().next();
+       }
+       return currentDbName;
+   }
+
 }
