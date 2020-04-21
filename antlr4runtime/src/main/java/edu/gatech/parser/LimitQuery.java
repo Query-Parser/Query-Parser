@@ -20,7 +20,9 @@ class LimitQuery implements TransformationQueryNode {
     @Override
     public void acceptDocument(Map<String, Map<String, Object>> document) {
         count++;
-        buffer.add(document);
+        if (count <= limit) {
+            buffer.add(document);
+        }
     }
 
     @Override
