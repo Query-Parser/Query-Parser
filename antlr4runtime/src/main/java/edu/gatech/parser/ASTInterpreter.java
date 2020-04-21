@@ -1,98 +1,141 @@
 package edu.gatech.parser;
 
-import com.mongodb.client.MongoCollection;
+import com.codepoetics.protonpack.StreamUtils;
 import com.mongodb.client.MongoDatabase;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.bson.Document;
 import org.javatuples.Pair;
 
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class ASTInterpreter extends MySQLQueryBaseListener {
     private final MongoDatabase db;
-    private Map<String, List<Map<String, Object>>> output;
+    private List<Map<String, Object>> output;
     private int level;
     private boolean isAll = false; // might be wrong when there's nested query
     private boolean isSelect = false;
     private boolean isDistinct = false;
-    private int limit = Integer.MAX_VALUE;
-    private Map<List<String>, List<String>> columnToAlias = new HashMap<>();
-    private Map<Func, List<List<String>>> functionToColumn = new HashMap<>();
-    private Map<String, MongoCollection<Document>> tableToCollection = new HashMap<>(); // hashmap of tableName and collection of the same name in mongo
+    private int limit = -1;
+    private Map<ColumnRef, List<String>> columnToAlias = new HashMap<>();
+    private Map<Func, Set<ColumnRef>> functionToColumn = new HashMap<>();
     private Map<String, String> tableToAlias = new HashMap<>();
     private Map<String, String> aliasToTable = new HashMap<>();
     private Stack<Object> stack = new Stack<>();
-    private Predicate<Map<String, Object>> queryFilter = null;
-    private Function<Map<String, Object>, Pair<List<Object>, Map<String, Object>>> groupByFunc = null;
-    private List<String> orderList = null;
-    private Direction direction = null;
+    private Predicate<Map<String, Map<String, Object>>> queryFilter = null;
+    private GroupingFunction groupByFunc = null;
+    private List<ColumnRef> groupByColumns = null;
+    private Map<String, List<Pair<String, Integer>>> orderList = new HashMap<>();
+    private Map<String, List<Pair<ColumnRef, ColumnRef>>> joinedTables = new HashMap<>();
+    private List<String> fromTables = null;
+    private String singleTable = null;
 
-    public ASTInterpreter(Map<String, List<Map<String, Object>>> output, MongoDatabase db) {
+
+    public ASTInterpreter(List<Map<String, Object>> output, MongoDatabase db) {
         this.db = db;
         this.output = output;
     }
 
     @Override
     public void exitQuery(MySQLQueryParser.QueryContext ctx) {
-        for (Map.Entry<String, MongoCollection<Document>> entry: tableToCollection.entrySet()) {
-            Set<String> distinctDocuments = new HashSet<>();
-            int count = 0;
-            Set<String> selectedColumnTables = columnToAlias.keySet().stream()
-                    .filter((x) -> x.get(1) == null || x.get(1).equals(entry.getKey()))
-                    .map((x) -> x.get(0))
-                    .collect(Collectors.toSet());
-            List<Map<String, Object>> docs = output.getOrDefault(entry.getKey(), new ArrayList<>());
-            output.put(entry.getKey(), docs);
-            for (Document document : entry.getValue().find()) {
-                if (count >= limit) {
-                    break;
+        if (fromTables.size() + joinedTables.size() == 1) {
+            singleTable = fromTables.get(0);
+        } else {
+            columnToAlias.keySet().forEach(x -> {
+                if (x.getTable() == null) {
+                    throw new RuntimeException("When selecting from multiple tables, all columns must be prefixed.");
                 }
-                count++;
-                if (queryFilter == null || queryFilter.test(document)) {
-                    if (!isAll) {
-                        document = new Document(document.entrySet().stream()
-                                .filter((x) -> selectedColumnTables.contains(x.getKey()))
-                                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-                    }
-                    applyColumnAlias(document, entry.getKey());
-                    if (isDistinct) {
-                        // apply distinct filter
-                        if (!distinctDocuments.contains(document.toJson())) {
-                            distinctDocuments.add(document.toJson());
-                            // update result
-                            if (!document.keySet().isEmpty()) {
-                                docs.add(document);
-                            }
-                        }
-                    } else {
-                        if (!document.keySet().isEmpty()) {
-                            docs.add(document);
-                        }
-                    }
-                }
+            });
+        }
+        cleanupColumnRefs();
+        for (String tableNameOrAlias : fromTables) {
+            final String tableName = aliasToTable.getOrDefault(tableNameOrAlias, tableNameOrAlias);
+            Set<ColumnRef> selectedColumnTables = new HashSet<>(columnToAlias.keySet());
+
+            SourceQueryNode querySource = new OrderByFetch(tableName, db, orderList.getOrDefault(tableName, Collections.emptyList()));
+
+            String currentName = tableName;
+            for (Map.Entry<String, List<Pair<ColumnRef, ColumnRef>>> joinedTable: joinedTables.entrySet()) {
+                List<Pair<ColumnRef, ColumnRef>> cleanedJoinConditions = cleanJoinConditions(currentName, joinedTable.getValue());
+                List<Pair<String, Integer>> orderingPairs = orderList.getOrDefault(joinedTable.getKey(), Collections.emptyList());
+                OrderByFetch right = new OrderByFetch(joinedTable.getKey(), db, orderingPairs);
+                querySource = new JoinNode(querySource, right, cleanedJoinConditions);
+                currentName = joinedTable.getKey();
+            }
+
+            TransformationQueryNode queryExecutor;
+            if (groupByFunc != null) {
+                queryExecutor = new AggregationQuery(groupByFunc, new Aggregators(functionToColumn));
+            } else {
+                queryExecutor = new SimpleSelect(selectedColumnTables);
+            }
+            if (queryFilter != null) {
+                queryExecutor = new WhereQuery(queryFilter).compose(queryExecutor);
+            }
+            if (limit != -1) {
+                queryExecutor = queryExecutor.compose(new LimitQuery(limit));
+            }
+            querySource = querySource.compose(new LongToBigDecimal()).compose(queryExecutor);
+            List<Map<String, Map<String, Object>>> documents;
+            while ((documents = querySource.collectOutput()) != null) {
+                collectOutputWithAliases(output, documents);
+                if (querySource.mustStopExecution()) break;
             }
         }
     }
 
-    private void applyColumnAlias(Document document, String tableName) {
-        Map<String, String> updatedKeys = new HashMap<>();
-        for (String property: document.keySet()) {
-            List<String> columnTable = new ArrayList<>();
-            columnTable.add(property);
-            columnTable.add(null);
-            List<String> tuple = null;
-            if (columnToAlias.containsKey(List.of(property, tableName))) {
-                tuple = List.of(property, tableName);
-            } else if (columnToAlias.containsKey(columnTable)) {
-                tuple = columnTable;
+    private void cleanupColumnRefs() {
+        columnToAlias = columnToAlias.entrySet().stream()
+                .map(x -> Map.entry(singleTable == null ? x.getKey().resolveAlias(aliasToTable) : x.getKey().withTable(singleTable), x.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        functionToColumn = functionToColumn.entrySet().stream()
+                .map(x -> Map.entry(x.getKey(), singleTable == null
+                        ? x.getValue().stream().map(y -> y.resolveAlias(aliasToTable)).collect(Collectors.toSet())
+                        : x.getValue().stream().map(y -> y.withTable(singleTable)).collect(Collectors.toSet())))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private List<Pair<ColumnRef, ColumnRef>> cleanJoinConditions(String leftTableName, List<Pair<ColumnRef, ColumnRef>> joinConditions) {
+        return joinConditions.stream().map(colPair -> new Pair<>(
+                colPair.getValue0().resolveAlias(aliasToTable),
+                colPair.getValue1().resolveAlias(aliasToTable)
+        )).map(colPair -> {
+            if (colPair.getValue0().getTable().equals(leftTableName)) {
+                return colPair;
+            } else {
+                return new Pair<>(
+                        colPair.getValue1(),
+                        colPair.getValue0()
+                );
             }
-            if (tuple != null) {
-                String alias = columnToAlias.get(tuple).get(0);
-                String func = columnToAlias.get(tuple).get(1);
+        }).collect(Collectors.toList());
+    }
+
+    private void collectOutputWithAliases(List<Map<String, Object>> outputList, List<Map<String, Map<String, Object>>> docs) {
+        outputList.addAll(docs.stream()
+                .map(tableWithDocs -> tableWithDocs.entrySet().stream()
+                        .map(x -> Map.entry(x.getKey(), (Object) applyColumnAlias(x.getValue(), x.getKey())))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
+                .collect(Collectors.toList()));
+    }
+
+    private Map<String, Object> applyColumnAlias(Map<String, Object> document, String tableName) {
+        Map<String, String> updatedKeys = new HashMap<>();
+        for (String property : document.keySet()) {
+            ColumnRef columnRef = null;
+            if (columnToAlias.containsKey(new ColumnRef(tableName, property))) {
+                columnRef = new ColumnRef(tableName, property);
+            } else if (columnToAlias.containsKey(new ColumnRef(null, property))) {
+                columnRef = new ColumnRef(null, property);
+            }
+            if (columnRef != null) {
+                String alias = columnToAlias.get(columnRef).get(0);
+                String func = columnToAlias.get(columnRef).get(1);
                 if (func == null && alias != null) {
                     updatedKeys.put(property, alias);
                 }
@@ -102,6 +145,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             document.put(updatedKeys.get(key), document.get(key));
             document.remove(key);
         });
+        return document;
     }
 
     @Override
@@ -123,19 +167,19 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         Func func = null;
         if (ctx.columnItem() != null) {
             context = ctx.columnItem();
-        } else if(ctx.countClause() != null) {
+        } else if (ctx.countClause() != null) {
             context = ctx.countClause().columnItem();
             func = Func.COUNT;
-        } else if(ctx.sumClause() != null) {
+        } else if (ctx.sumClause() != null) {
             context = ctx.sumClause().columnItem();
             func = Func.SUM;
-        } else if(ctx.avgClause() != null) {
+        } else if (ctx.avgClause() != null) {
             context = ctx.avgClause().columnItem();
             func = Func.AVERAGE;
-        } else if(ctx.minClause() != null) {
+        } else if (ctx.minClause() != null) {
             context = ctx.minClause().columnItem();
             func = Func.MIN;
-        } else if(ctx.maxClause() != null) {
+        } else if (ctx.maxClause() != null) {
             context = ctx.maxClause().columnItem();
             func = Func.MAX;
         } else {
@@ -148,32 +192,25 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
             String tableName = null;
             String alias = null;
             String function = func != null ? func.name() : null;
-            List<String> columnTable = new ArrayList<>();
 
             List<String> mapTableAliasFunc = new ArrayList<>();
 
-            if (selectedColumn.contains(".")) {
-                int dot = selectedColumn.indexOf('.');
-                tableName = selectedColumn.substring(0, dot);
-                selectedColumn = selectedColumn.substring(dot+1);
+            if (context.prefix() != null) {
+                tableName = context.prefix().WORD().getText();
             }
 
-            if (context.selectAlias() != null) {
-                alias = context.selectAlias().alias().getText();
-            } else if (context.alias() != null) {
-                alias = context.alias().getText();
+            if (context.alias() != null) {
+                alias = context.alias().WORD().getSymbol().getText();
             }
 
-            columnTable.add(selectedColumn);
-            columnTable.add(tableName);
             mapTableAliasFunc.add(alias);
             mapTableAliasFunc.add(function);
 
-            columnToAlias.put(columnTable, mapTableAliasFunc);
+            columnToAlias.put(new ColumnRef(tableName, selectedColumn), mapTableAliasFunc);
 
             if (func != null) {
-                List<List<String>> mapFuncToCol = functionToColumn.getOrDefault(func, new ArrayList<>());
-                mapFuncToCol.add(columnTable);
+                Set<ColumnRef> mapFuncToCol = functionToColumn.getOrDefault(func, new HashSet<>());
+                mapFuncToCol.add(new ColumnRef(tableName, selectedColumn));
                 functionToColumn.put(func, mapFuncToCol);
             }
         }
@@ -193,28 +230,28 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @Override
     public void enterTableItem(MySQLQueryParser.TableItemContext ctx) {
-        if (ctx.selectAlias() != null) {
-            tableToAlias.put(ctx.tableName().getText(), ctx.selectAlias().alias().getText());
-            aliasToTable.put(ctx.selectAlias().alias().getText(), ctx.tableName().getText());
-        } else if (ctx.alias() != null) {
+        if (ctx.alias() != null) {
             tableToAlias.put(ctx.tableName().getText(), ctx.alias().getText());
             aliasToTable.put(ctx.alias().getText(), ctx.tableName().getText());
         }
     }
 
     @Override
+    public void enterFromClause(MySQLQueryParser.FromClauseContext ctx) {
+        fromTables = ctx.tableList().tableItem().stream().map(x -> x.tableName().WORD().getSymbol().getText()).collect(Collectors.toList());
+    }
+
+    @Override
     public void exitTableName(MySQLQueryParser.TableNameContext ctx) {
         String tableName = ctx.getText();
-        MongoCollection<Document> collection = db.getCollection(tableName);
         if (tableToAlias.containsKey(tableName)) {
             tableName = tableToAlias.get(tableName);
         }
-        tableToCollection.put(tableName, collection);
     }
 
     @Override
     public void exitWhereClause(MySQLQueryParser.WhereClauseContext ctx) {
-        Predicate<Map<String, Object>> filters = (Predicate<Map<String, Object>>) stack.pop();
+        Predicate<Map<String, Map<String, Object>>> filters = (Predicate<Map<String, Map<String, Object>>>) stack.pop();
         queryFilter = filters;
     }
 
@@ -239,14 +276,14 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     }
 
     private boolean isTruthy(Object obj) {
-        return !obj.equals("") && !obj.equals(0);
+        return !obj.equals("") && !obj.equals(BigDecimal.ZERO) && !obj.equals(0);
     }
 
     @Override
     public void exitCondition(MySQLQueryParser.ConditionContext ctx) {
-        Predicate<Map<String, Object>> combined = (Predicate<Map<String, Object>>) stack.pop();
+        Predicate<Map<String, Map<String, Object>>> combined = (Predicate<Map<String, Map<String, Object>>>) stack.pop();
         if (ctx.OR_SYMBOL() != null) {
-            combined = combined.or((Predicate<Map<String, Object>>) stack.pop());
+            combined = combined.or((Predicate<Map<String, Map<String, Object>>>) stack.pop());
         }
 
         stack.push(combined);
@@ -255,36 +292,48 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     @Override
     public void exitConditionInner(MySQLQueryParser.ConditionInnerContext ctx) {
         if (ctx.columnItem().isEmpty()) return;
-        final String column = ctx.columnItem().get(0).columnName().WORD().getSymbol().getText();
-        Predicate<Map<String, Object>> andPredicate = null;
+
+        final Supplier<ColumnRef> column = new LazySupplier<>(() -> singleTable == null
+                ? ColumnRef.of(ctx.columnItem().get(0), aliasToTable)
+                : ColumnRef.of(ctx.columnItem().get(0)).withTable(singleTable));
+
+        Predicate<Map<String, Map<String, Object>>> andPredicate = null;
         if (ctx.AND_SYMBOL() != null) {
-            andPredicate = (Predicate<Map<String, Object>>) stack.pop();
+            andPredicate = (Predicate<Map<String, Map<String, Object>>>) stack.pop();
         }
-        final Predicate<Map<String, Object>> finalAnd = andPredicate;
+        final Predicate<Map<String, Map<String, Object>>> finalAnd = andPredicate;
+
+        Function<Predicate<Object>, Predicate<Map<String, Map<String, Object>>>> commonPredicates = (func -> doc -> {
+            ColumnRef col = column.get();
+            return doc.get(col.getTable()) != null &&
+                    doc.get(col.getTable()).get(col.getColumnName()) != null &&
+                    func.test(doc.get(col.getTable()).get(col.getColumnName())) &&
+                    (finalAnd == null || finalAnd.test(doc));
+        });
         if (ctx.compOp() == null) {
-            stack.push((Predicate<Map<String, Object>>) (Map<String, Object> doc) -> isTruthy(doc.get(column)) && (finalAnd == null || finalAnd.test(doc)));
+            stack.push(commonPredicates.apply(this::isTruthy));
         } else {
             final Object operand = toJavaObject(ctx.valueName());
-            Predicate<Map<String, Object>> predicate;
+            Predicate<Map<String, Map<String, Object>>> predicate;
             switch (ctx.compOp().getText()) {
                 case "=":
-                    predicate = (doc -> doc.get(column) != null && doc.get(column).equals(operand) && (finalAnd == null || finalAnd.test(doc)));
+                    predicate = commonPredicates.apply(operand::equals);
                     break;
                 case "<>":
                 case "!=":
-                    predicate = (doc -> doc.get(column) != null && !doc.get(column).equals(operand) && (finalAnd == null || finalAnd.test(doc)));
+                    predicate = commonPredicates.apply(value -> !operand.equals(value));
                     break;
                 case "<":
-                    predicate = (doc -> doc.get(column) != null && ((BigDecimal)doc.get(column)).compareTo((BigDecimal)operand) < 0);
+                    predicate = commonPredicates.apply(value -> value instanceof BigDecimal && ((BigDecimal) value).compareTo((BigDecimal) operand) < 0);
                     break;
                 case "<=":
-                    predicate = (doc -> doc.get(column) != null && ((BigDecimal)doc.get(column)).compareTo((BigDecimal)operand) <= 0);
+                    predicate = commonPredicates.apply(value -> value instanceof BigDecimal && ((BigDecimal) value).compareTo((BigDecimal) operand) <= 0);
                     break;
                 case ">":
-                    predicate = (doc -> doc.get(column) != null && ((BigDecimal)doc.get(column)).compareTo((BigDecimal)operand) > 0);
+                    predicate = commonPredicates.apply(value -> value instanceof BigDecimal && ((BigDecimal) value).compareTo((BigDecimal) operand) > 0);
                     break;
                 case ">=":
-                    predicate = (doc -> doc.get(column) != null && ((BigDecimal)doc.get(column)).compareTo((BigDecimal)operand) >= 0);
+                    predicate = commonPredicates.apply(value -> value instanceof BigDecimal && ((BigDecimal) value).compareTo((BigDecimal) operand) >= 0);
                     break;
                 default:
                     throw new RuntimeException("Unexpected operator " + ctx.compOp());
@@ -295,13 +344,19 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
     @Override
     public void exitGroupByClause(MySQLQueryParser.GroupByClauseContext ctx) {
-        List<String> columns = ctx.columnItem().stream().map((x) -> x.columnName().WORD().getSymbol().getText()).collect(Collectors.toList());
+        List<ColumnRef> columns = ctx.columnItem().stream().map(x -> ColumnRef.of(x, aliasToTable)).collect(Collectors.toList());
 
+        final Supplier<List<ColumnRef>> lazyColumns = new LazySupplier<>(() -> singleTable == null
+                ? ctx.columnItem().stream().map(x -> ColumnRef.of(x, aliasToTable)).collect(Collectors.toList())
+                : ctx.columnItem().stream().map(x -> ColumnRef.of(x).withTable(singleTable)).collect(Collectors.toList()));
+
+        groupByColumns = columns;
         groupByFunc = (doc) -> {
-            if (columns.stream().anyMatch((col) -> !doc.containsKey(col))) {
+            List<ColumnRef> cols = lazyColumns.get();
+            if (!cols.stream().allMatch((col) -> doc.containsKey(col.getTable()) && doc.get(col.getTable()).containsKey(col.getColumnName()) )) {
                 return null;
             } else {
-                List<Object> group = columns.stream().map(doc::get).collect(Collectors.toList());
+                List<Object> group = cols.stream().map(x -> doc.get(x.getTable()).get(x.getColumnName())).collect(Collectors.toList());
                 return new Pair<>(group, doc);
             }
         };
@@ -315,18 +370,45 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     }
 
     @Override
-    public void enterOrderList(MySQLQueryParser.OrderListContext ctx) {
-        orderList = new ArrayList<>();
+    public void enterOrderExpression(MySQLQueryParser.OrderExpressionContext ctx) {
+        if (fromTables.size() + joinedTables.size() > 1) {
+            throw new RuntimeException("Cannot ORDER BY with multiple tables selected");
+        }
+        ColumnRef col = ColumnRef.of(ctx.columnItem(), aliasToTable).withTable(fromTables.get(0));
+        int direction = (ctx.direction() != null && ctx.direction().DESC_SYMBOL() != null)
+                ? Direction.DESC.value : Direction.ASC.value;
+        List<Pair<String, Integer>> columns = orderList.getOrDefault(col.getTable(), new ArrayList<>());
+        orderList.put(col.getTable(), columns);
+        Pair<String, Integer> columnAndDirection = new Pair<>(col.getColumnName(), direction);
+        columns.add(columnAndDirection);
     }
 
     @Override
-    public void exitOrderList(MySQLQueryParser.OrderListContext ctx) {
-        ctx.columnItem().forEach(columnItem -> orderList.add(columnItem.columnName().WORD().getSymbol().getText()));
+    public void exitJoinClause(MySQLQueryParser.JoinClauseContext ctx) {
+        String tableName = ctx.tableItem().tableName().WORD().getSymbol().getText();
+        if (ctx.tableItem().alias() != null) {
+            aliasToTable.put(ctx.tableItem().alias().WORD().getSymbol().getText(), tableName);
+        }
+        joinedTables.put(tableName, (List<Pair<ColumnRef, ColumnRef>>) stack.pop());
     }
 
     @Override
-    public void enterDirection(MySQLQueryParser.DirectionContext ctx) {
-        direction = ctx.DESC_SYMBOL() != null ? Direction.DESC : Direction.ASC;
+    public void exitOnList(MySQLQueryParser.OnListContext ctx) {
+        ColumnRef first = ColumnRef.of(ctx.columnItem().get(0), aliasToTable);
+        ColumnRef second = ColumnRef.of(ctx.columnItem().get(1), aliasToTable);
+        MySQLQueryParser.CompOpContext comparison = ctx.compOp();
+        if (comparison.EQUAL_OPERATOR() == null) {
+            throw new RuntimeException("Joins only support equality conditions, not " + comparison.getText());
+        }
+        Pair<ColumnRef, ColumnRef> eqPair = new Pair<>(first, second);
+        List<Pair<ColumnRef, ColumnRef>> columns;
+        if (ctx.AND_SYMBOL() != null) {
+            columns = (List<Pair<ColumnRef, ColumnRef>>) stack.pop();
+            columns.add(eqPair);
+        } else {
+            columns = Arrays.asList(eqPair);
+        }
+        stack.push(columns);
     }
 
     @Override
@@ -337,5 +419,118 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
     @Override
     public void exitEveryRule(ParserRuleContext ctx) {
         System.out.println("|  ".repeat(--level) + "Exiting " + ctx.getClass().getSimpleName());
+    }
+
+    @RequiredArgsConstructor
+    private class SimpleSelect implements TransformationQueryNode {
+        @NonNull
+        final private Set<ColumnRef> selectedColumnTables;
+        final private Set<Map<String, Map<String, Object>>> distinctDocuments = new HashSet<>();
+        private List<Map<String, Map<String, Object>>> output = new ArrayList<>();
+
+        @Override
+        public boolean mustStopExecution() {
+            return false;
+        }
+
+        @Override
+        public List<Map<String, Map<String, Object>>> collectOutput() {
+            List<Map<String, Map<String, Object>>> tmp = output;
+            output = new ArrayList<>();
+            return tmp;
+        }
+
+        @Override
+        public void done() {
+        }
+
+        @Override
+        public void acceptDocument(Map<String, Map<String, Object>> document) {
+            if (!isAll) {
+                document = document.entrySet().stream()
+                        .map((tableWithDoc) -> {
+                            String table = tableWithDoc.getKey();
+                            return Map.entry(table, tableWithDoc.getValue().entrySet().stream()
+                                    .filter(x -> selectedColumnTables.contains(new ColumnRef(table, x.getKey())))
+                                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                        })
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            }
+            if (isDistinct) {
+                // apply distinct filter
+                if (!distinctDocuments.contains(document)) {
+                    distinctDocuments.add(document);
+                    // update result
+                    if (!document.keySet().isEmpty()) {
+                        output.add(document);
+                    }
+                }
+            } else {
+                if (!document.keySet().isEmpty()) {
+                    output.add(document);
+                }
+            }
+        }
+    }
+
+    private class AggregationQuery implements TransformationQueryNode {
+        private List<Map<String, Map<String, Object>>> output;
+        private final GroupingFunction groupingFunc;
+        private final AggregationFunction aggregationFunction;
+        private final Map<List<Object>, Map<String, Map<String, Object>>> groups;
+        private boolean limitReached;
+
+        public AggregationQuery(
+                GroupingFunction groupingFunc,
+                AggregationFunction aggregationFunction
+        ) {
+            this.output = new ArrayList<>();
+            this.groupingFunc = groupingFunc;
+            this.aggregationFunction = aggregationFunction;
+            this.groups = new HashMap<>();
+            this.limitReached = false;
+        }
+
+        @Override
+        public boolean mustStopExecution() {
+            return limitReached;
+        }
+
+        @Override
+        public void acceptDocument(Map<String, Map<String, Object>> document) {
+            Pair<List<Object>, Map<String, Map<String, Object>>> res = groupingFunc.apply(document);
+            if (res != null) {
+                Map<String, Map<String, Object>> currentAgg = groups.get(res.getValue0());
+                Map<String, Map<String, Object>> newAgg = aggregationFunction.apply(res, currentAgg);
+                groups.put(res.getValue0(), newAgg);
+            }
+        }
+
+        @Override
+        public List<Map<String, Map<String, Object>>> collectOutput() {
+            List<Map<String, Map<String, Object>>> tmp = output;
+            output = new ArrayList<>();
+            return tmp;
+        }
+
+        @Override
+        public void done() {
+            groups.forEach((groupedValues, aggregated) -> {
+                StreamUtils.zip(groupByColumns.stream(), groupedValues.stream(), Pair::new)
+                        .forEach(x -> {
+                            String table = x.getValue0().getTable() == null ? singleTable : x.getValue0().getTable();
+                            String column = x.getValue0().getColumnName();
+                            if (aggregated.size() == 1 || table != null) {
+                                if (aggregated.containsKey(table)) {
+                                    aggregated.get(table).put(column, x.getValue1());
+                                }
+                            } else {
+                                throw new RuntimeException("If multiple tables are available, group by must be disambiguated.");
+                            }
+                        });
+                output.add(aggregated);
+            });
+            groups.clear();
+        }
     }
 }
