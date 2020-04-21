@@ -59,13 +59,11 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
 
             SourceQueryNode querySource = new OrderByFetch(tableName, db, orderList.getOrDefault(tableName, Collections.emptyList()));
 
-            String currentName = tableName;
             for (Map.Entry<String, List<Pair<ColumnRef, ColumnRef>>> joinedTable: joinedTables.entrySet()) {
-                List<Pair<ColumnRef, ColumnRef>> cleanedJoinConditions = cleanJoinConditions(currentName, joinedTable.getValue());
+                List<Pair<ColumnRef, ColumnRef>> cleanedJoinConditions = cleanJoinConditions(joinedTable.getKey(), joinedTable.getValue());
                 List<Pair<String, Integer>> orderingPairs = orderList.getOrDefault(joinedTable.getKey(), Collections.emptyList());
                 OrderByFetch right = new OrderByFetch(joinedTable.getKey(), db, orderingPairs);
                 querySource = new JoinNode(querySource, right, cleanedJoinConditions);
-                currentName = joinedTable.getKey();
             }
 
             TransformationQueryNode queryExecutor;
@@ -100,12 +98,12 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private List<Pair<ColumnRef, ColumnRef>> cleanJoinConditions(String leftTableName, List<Pair<ColumnRef, ColumnRef>> joinConditions) {
+    private List<Pair<ColumnRef, ColumnRef>> cleanJoinConditions(String rightTableName, List<Pair<ColumnRef, ColumnRef>> joinConditions) {
         return joinConditions.stream().map(colPair -> new Pair<>(
                 colPair.getValue0().resolveAlias(aliasToTable),
                 colPair.getValue1().resolveAlias(aliasToTable)
         )).map(colPair -> {
-            if (colPair.getValue0().getTable().equals(leftTableName)) {
+            if (colPair.getValue1().getTable().equals(rightTableName)) {
                 return colPair;
             } else {
                 return new Pair<>(
