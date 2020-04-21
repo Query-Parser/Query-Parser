@@ -11,7 +11,9 @@ import edu.gatech.db.DatabaseConfiguration;
 import edu.gatech.parser.SQLEngine;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,31 +35,42 @@ public class QueryController {
 
     private String currentDbName;
 
-   @ResponseBody
-   @PostMapping(value = "/query")
-   public Map<String, List<Map<String, Object>>> getQuery(@RequestBody String query) {
-       if (currentDbName == null) {
+    @ResponseBody
+    @PostMapping(value = "/query")
+    public List<Map<String, Object>> getQuery(@RequestBody String query) {
+        if (currentDbName == null) {
             Set<String> dbNames = schemaService.getDbNames(mongoClient);
             currentDbName = dbNames.iterator().next();
-       }
+        }
 
-       if (query.startsWith("use")) {
-           int index = query.indexOf(" ");
-           currentDbName = query.substring(index + 1, query.length() - 1);
-       }
+        if (query.startsWith("use")) {
+            int index = query.indexOf(" ");
+            Set<String> dbNames = schemaService.getDbNames(mongoClient);
+            String newDbName = query.substring(index + 1, query.length() - 1);
+            List<Map<String, Object>> returnList = new ArrayList<Map<String, Object>>();
+            Map<String, Object> returnValue = new HashMap();
+            if (dbNames.contains(newDbName)) {
+                currentDbName = newDbName;
+                returnValue.put(query, "Successfully change database.");
+            } else {
+                returnValue.put(query, "Database name not found. Current database is " + currentDbName);
+            }
+            returnList.add(returnValue);
+            return returnList;
+        }
 
-       DatabaseConfiguration dbConfig = new DatabaseConfiguration();
-       SQLEngine sqlEngine = new SQLEngine(dbConfig);
-       return sqlEngine.execute(query, currentDbName);
-   }
+        DatabaseConfiguration dbConfig = new DatabaseConfiguration();
+        SQLEngine sqlEngine = new SQLEngine(dbConfig);
+        return sqlEngine.execute(query, currentDbName);
+    }
 
-   @GetMapping(value = "/currentDb")
+    @GetMapping(value = "/currentDb")
     public String getCurrentDbName() {
-       if (currentDbName == null) {
-           Set<String> dbNames = schemaService.getDbNames(mongoClient);
-           currentDbName = dbNames.iterator().next();
-       }
-       return currentDbName;
-   }
+        if (currentDbName == null) {
+            Set<String> dbNames = schemaService.getDbNames(mongoClient);
+            currentDbName = dbNames.iterator().next();
+        }
+        return currentDbName;
+    }
 
 }
