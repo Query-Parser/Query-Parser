@@ -234,7 +234,7 @@ assignmentList :
 
 //JOIN
 joinClause:
-    innerJoin tableItem
+    (innerJoin | leftJoin | rightJoin) tableItem
     (onClause | USING_SYMBOL OPEN_PAR_SYMBOL columnItem CLOSE_PAR_SYMBOL)
     (joinClause)*
 ;
