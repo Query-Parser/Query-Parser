@@ -2,10 +2,13 @@ package com.example.restservice.service;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.MongoClient;
 
 import org.bson.Document;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,6 +16,16 @@ import java.util.ArrayList;
 
 @Service
 public class SchemaServiceImpl implements SchemaService {
+
+    public Set<String> getDbNames(MongoClient mongoClient) {
+        MongoCursor<String> dbsCursor = mongoClient.listDatabaseNames().iterator();
+        Set<String> dbNames = new HashSet();
+        while(dbsCursor.hasNext()) {
+            dbNames.add(dbsCursor.next());
+        }
+        return dbNames;
+    }
+
     public void getTables(FindIterable<Document> documents,  Map<String, HashSet<String>> tables, String collectionName) {
         for (Document doc: documents) {
             for (String key: doc.keySet()) {

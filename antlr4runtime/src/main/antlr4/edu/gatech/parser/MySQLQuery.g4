@@ -36,7 +36,7 @@ selectItemList:
 
 selectItem:
     columnItem
-    | ((sumClause | countClause | avgClause | minClause | maxClause) (selectAlias | alias)?)?
+    | ((sumClause | countClause | avgClause | minClause | maxClause) alias?)?
 ;
 
 sumClause:
@@ -63,12 +63,9 @@ maxClause:
 columnName:
     WORD
 ;
-selectAlias:
-    AS_SYMBOL alias
-;
 
 alias:
-    (SQ_TEXT | DQ_TEXT | WORD )
+    AS_SYMBOL? WORD
 ;
 
 intoClause:
@@ -89,9 +86,7 @@ tableList:
 ;
 
 tableItem:
-    tableName
-    | (tableName alias)
-    | (tableName selectAlias)
+    tableName alias?
 ;
 
 tableName:
@@ -127,12 +122,14 @@ valueName:
 ;
 
 condition:
-    conditionInner (OR_SYMBOL condition)?
+    conditionInner
+    | condition AND_SYMBOL condition
+    | condition OR_SYMBOL condition
 ;
 
 conditionInner:
-    OPEN_PAR_SYMBOL condition CLOSE_PAR_SYMBOL ( (OR_SYMBOL condition)? | (AND_SYMBOL condition)? )
-    | columnItem (compOp (valueName | columnItem | (ANY_SYMBOL query)))? (AND_SYMBOL condition)?
+    OPEN_PAR_SYMBOL condition CLOSE_PAR_SYMBOL
+    | columnItem (compOp (valueName | columnItem ))?
 ;
 
 groupByClause:
@@ -140,11 +137,15 @@ groupByClause:
 ;
 
 orderClause:
-    ORDER_SYMBOL BY_SYMBOL orderList direction?
+    ORDER_SYMBOL BY_SYMBOL orderList
 ;
 
 orderList:
-    columnItem (COMMA_SYMBOL columnItem)*
+    orderExpression (COMMA_SYMBOL orderExpression)*
+;
+
+orderExpression:
+    columnItem direction?
 ;
 
 direction:
@@ -206,10 +207,12 @@ existingTable:
      columnItem (COMMA_SYMBOL columnItem)*
  ;
 
+ prefix:
+     WORD DOT_SYMBOL
+ ;
+
  columnItem:
-    columnName
-    | (columnName alias)
-    | (columnName selectAlias)
+    prefix? columnName alias?
  ;
 
  valueItem:
@@ -231,13 +234,13 @@ assignmentList :
 
 //JOIN
 joinClause:
-    (innerJoin | rightJoin | leftJoin) tableItem
+    innerJoin tableItem
     (onClause | USING_SYMBOL OPEN_PAR_SYMBOL columnItem CLOSE_PAR_SYMBOL)
     (joinClause)*
 ;
 
 innerJoin:
-    INNER_SYMBOL JOIN_SYMBOL
+    INNER_SYMBOL? JOIN_SYMBOL
 ;
 
 leftJoin:
@@ -249,11 +252,11 @@ rightJoin:
 ;
 
 onClause:
-    ON_SYMBOL onList (AND_SYMBOL onList)*
+    ON_SYMBOL onList
 ;
 
 onList:
-    columnItem compOp columnItem
+    columnItem compOp columnItem (AND_SYMBOL onList)?
 ;
 
 //UNION
@@ -378,8 +381,8 @@ fragment X: [xX];
 fragment Y: [yY];
 fragment Z: [zZ];
 
-SQ_TEXT: '\'' WORD '\'';
-DQ_TEXT: '"' WORD '"';
+SQ_TEXT: '\'' ( ~'\'' | '\'\'' )* '\'';
+DQ_TEXT: '"' ( ~'"' | '""' )* '"';
 NAME: '\'' WORD WHITESPACE WORD '\'';
 SINGLE_QUOTE: '\'' -> skip;
 DOUBLE_QUOTE: '"' -> skip;
@@ -394,7 +397,6 @@ NUMBER         : DIGIT+ ([.,] DIGIT+)? ;
 
 fragment LOWERCASE  : [a-z] ;
 fragment UPPERCASE  : [A-Z];
-TABLE_NAME          : (WORD DOT_SYMBOL);
-WORD                : (LOWERCASE | UPPERCASE | DIGIT | '_' | '.' | '@' | '/')+ ;
+WORD                : (LOWERCASE | UPPERCASE | DIGIT | '_' | '@' | '/')+ ;
 WHITESPACE          : (' ' | '\t') -> skip;
 NEWLINE             : ('\r'? '\n' | '\r')+ -> skip;
