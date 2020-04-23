@@ -36,11 +36,20 @@ public class SchemaController {
     @Autowired
     private MongoClient mongoClient;
 
+    /**
+     * Gets the database names from the mongo client and returns to the front end
+     * @return Set of database names
+     */
     @GetMapping("/dbNames")
     public Set<String> getDbNames() {
         return schemaService.getDbNames(mongoClient);
     }
 
+    /**
+     * Gets the base schema (only names of columns and databases) and returns it to front end
+     * @param dbName name of db
+     * @return JSON format of schema
+     */
     @PostMapping("/schema")
     public Map<String, HashSet<String>> getSchema(@RequestBody String dbName) {
         MongoDbFactory mongo = new SimpleMongoDbFactory(mongoClient, dbName);

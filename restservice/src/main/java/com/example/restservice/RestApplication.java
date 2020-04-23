@@ -22,6 +22,10 @@ import java.util.HashMap;
 @EnableAutoConfiguration(exclude={MongoAutoConfiguration.class})
 public class RestApplication {
 
+	/**
+	 * main method that runs the rest application
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		SpringApplication.run(RestApplication.class, args);
 	}
@@ -29,6 +33,11 @@ public class RestApplication {
 	@Autowired
 	private MongoClient mongoClient;
 
+	/**
+	 * ensures that there will no be CORS restrictions
+	 * view more https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
+	 * @return
+	 */
 	@Bean
 	public WebMvcConfigurer corsConfigurer() {
 		return new WebMvcConfigurer() {
@@ -40,6 +49,10 @@ public class RestApplication {
 		};
 	}
 
+	/**
+	 * Creates mongo templates
+	 * @return map of templates
+	 */
 	public Map<String, MongoTemplate> getMongoTemplates() throws Exception {
 		MongoCursor<String> dbsCursor = mongoClient.listDatabaseNames().iterator();
 		Map<String, MongoTemplate> mongoTemplates = new HashMap<String, MongoTemplate>();
