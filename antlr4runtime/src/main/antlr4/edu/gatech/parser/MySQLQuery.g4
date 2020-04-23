@@ -234,7 +234,7 @@ assignmentList :
 
 //JOIN
 joinClause:
-    innerJoin tableItem
+    (innerJoin | leftJoin | rightJoin) tableItem
     (onClause | USING_SYMBOL OPEN_PAR_SYMBOL columnItem CLOSE_PAR_SYMBOL)
     (joinClause)*
 ;
@@ -269,7 +269,7 @@ unionClause:
  */
 ALL_SYMBOL:                      A L L;
 AND_SYMBOL:                      A N D;
-AVERAGE_SYMBOL:                  A V E R A G E;
+AVERAGE_SYMBOL:                  A V G;
 AS_SYMBOL:                       A S;
 ANY_SYMBOL:                      A N Y;
 BETWEEN_SYMBOL:                  B E T W E E N;

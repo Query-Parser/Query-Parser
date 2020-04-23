@@ -52,7 +52,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
                 }
             });
         }
-        cleanupColumnRefs();
+        resolveTableNameFromAlias();
         for (String tableNameOrAlias : fromTables) {
             final String tableName = aliasToTable.getOrDefault(tableNameOrAlias, tableNameOrAlias);
             Set<ColumnRef> selectedColumnTables = new HashSet<>(columnToAlias.keySet());
@@ -87,7 +87,7 @@ public class ASTInterpreter extends MySQLQueryBaseListener {
         }
     }
 
-    private void cleanupColumnRefs() {
+    private void resolveTableNameFromAlias() {
         columnToAlias = columnToAlias.entrySet().stream()
                 .map(x -> Map.entry(singleTable == null ? x.getKey().resolveAlias(aliasToTable) : x.getKey().withTable(singleTable), x.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
