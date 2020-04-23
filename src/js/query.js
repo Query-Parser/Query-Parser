@@ -1,5 +1,5 @@
 /* 
-* loads the query from the textbox to the result box
+* loads the query from the textbox to the result box through requests to Spring restservice
 */
 function loadDoc() {
     var query = "";
