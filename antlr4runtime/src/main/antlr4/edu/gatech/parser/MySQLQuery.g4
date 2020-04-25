@@ -387,10 +387,6 @@ NAME: '\'' WORD WHITESPACE WORD '\'';
 SINGLE_QUOTE: '\'' -> skip;
 DOUBLE_QUOTE: '"' -> skip;
 
-fragment LETTER_WHEN_UNQUOTED: DIGIT | LETTER_WHEN_UNQUOTED_NO_DIGIT;
-fragment LETTER_WHEN_UNQUOTED_NO_DIGIT: [a-zA-Z_$\u0080-\uffff];
-fragment LETTER_WITHOUT_FLOAT_PART: [a-df-zA-DF-Z_$\u0080-\uffff];
-
 fragment DIGIT:    [0-9];
 fragment DIGITS:   DIGIT+;
 NUMBER         : DIGIT+ ([.,] DIGIT+)? ;
